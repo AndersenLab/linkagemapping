@@ -6,14 +6,18 @@ require(ggplot2)
 #--------------------Functions---------------------#
 
 map <- function(x, set){
-    data <- scanone(N2xCB4856.cross, pheno.col=x, model="np")
-    data$marker <- rownames(data)
-    data <- as.data.frame(data)
-    colName <- colnames(N2xCB4856.cross$pheno)[x]
-    condition <- str_split(colName, "\\.", 2)[[1]][1]
-    trait <- str_split(colName, "\\.", 2)[[1]][2]
-    df <- as.data.frame(cbind(condition, trait, data))
-    return(df)
+    print(x)
+    newCross <- subset(N2xCB4856.cross, ind=N2xCB4856.cross$pheno$set==set)
+    if (!all(is.na(newCross$pheno[,x]))) {
+        data <- scanone(newCross, pheno.col=x, model="np")
+        data$marker <- rownames(data)
+        data <- as.data.frame(data)
+        colName <- colnames(N2xCB4856.cross$pheno)[x]
+        condition <- str_split(colName, "\\.", 2)[[1]][1]
+        trait <- str_split(colName, "\\.", 2)[[1]][2]
+        df <- as.data.frame(cbind(condition, trait, data))
+        return(df)
+    }
 }
 
 mergePheno2 <- function(cross, phenotype, set=NULL){
@@ -63,10 +67,7 @@ set1Time = system.time(set1Map <- do.call(rbind, lapply(5:ncol(N2xCB4856.cross$p
 
 set2Time = system.time(set2Map <- do.call(rbind, lapply(5:ncol(N2xCB4856.cross$pheno), function(x){map(x, 2)})))
 
-
-
-
-
+test = left_join(set1Map, set2Map, by=c("condition", "trait", "chr", "pos", "marker"))
 
 system.time(masterMap <- do.call(rbind, lapply(5:ncol(N2xCB4856.cross$pheno), map)))
 
