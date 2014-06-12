@@ -6,7 +6,6 @@ require(ggplot2)
 #--------------------Functions---------------------#
 
 map <- function(x, set){
-    print(x)
     newCross <- subset(N2xCB4856.cross, ind=N2xCB4856.cross$pheno$set==set)
     if (!all(is.na(newCross$pheno[,x]))) {
         data <- scanone(newCross, pheno.col=x, model="np")
@@ -67,13 +66,12 @@ set1Time = system.time(set1Map <- do.call(rbind, lapply(5:ncol(N2xCB4856.cross$p
 
 set2Time = system.time(set2Map <- do.call(rbind, lapply(5:ncol(N2xCB4856.cross$pheno), function(x){map(x, 2)})))
 
-test = left_join(set1Map, set2Map, by=c("condition", "trait", "chr", "pos", "marker"))
+test = left_join(set2Map,set1Map, by=c("condition", "trait", "chr", "pos", "marker"))
 
-system.time(masterMap <- do.call(rbind, lapply(5:ncol(N2xCB4856.cross$pheno), map)))
+masterMap= test %>% group_by(condition, trait, chr, pos, marker) %>% summarise(lod=lod.x+lod.y)
 
-masterMap %>% filter(condition=="topotecan", trait=="resid.col") %>% ggplot(., aes(x=pos, y=lod)) + geom_point() + facet_grid(.~chr)
+masterMap %>% filter(condition=="topotecan", trait=="n") %>% ggplot(., aes(x=pos, y=lod)) + geom_point() + facet_grid(.~chr)
 
-unique(masterMap$condition)
 
-write.csv(masterMap, file.path("~/Dropbox/HTA/Results/ProcessedData", "RIAILs1_MasterMap.csv"), row.names=FALSE)
+write.csv(masterMap, file.path("~/Dropbox/HTA/Results/ProcessedData", "RIAILs0_MasterMap.csv"), row.names=FALSE)
 
