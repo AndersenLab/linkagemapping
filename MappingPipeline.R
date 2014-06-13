@@ -39,6 +39,8 @@ renameCols <- function(x){
 
 pheno <- read.csv("~/Dropbox/HTA/Results/ProcessedData/RIAILs0_complete.csv")
 
+pheno <- read.csv("~/Downloads/RIAILs0_complete.csv")
+
 pheno <- read.csv("~/Dropbox/HTA/Results/ProcessedData/RIAILs1_complete.csv")
 
 #------------------Process----------------------#
@@ -59,6 +61,10 @@ trait3 = trait3[,-which(unlist(lapply(trait3, function(x){all(is.na(x))})))]
 
 load(url("http://groups.molbiosci.northwestern.edu/andersen/Data/N2xCB4856_RIAILs_Rqtlfiles.RData"))
 
+load("~/Downloads/N2xCB4856_RIAILs_Rqtlfiles.RData")
+
+N2xCB4856.cross <- calc.genoprob(N2xCB4856.cross, step=0)
+
 N2xCB4856.cross$pheno <- mergePheno2(N2xCB4856.cross, trait3)
 
 
@@ -66,11 +72,23 @@ set1Time = system.time(set1Map <- do.call(rbind, lapply(5:ncol(N2xCB4856.cross$p
 
 set2Time = system.time(set2Map <- do.call(rbind, lapply(5:ncol(N2xCB4856.cross$pheno), function(x){map(x, 2)})))
 
-test = left_join(set2Map,set1Map, by=c("condition", "trait", "chr", "pos", "marker"))
+joinedData = left_join(set2Map,set1Map, by=c("condition", "trait", "chr", "pos", "marker"))
 
-masterMap= test %>% group_by(condition, trait, chr, pos, marker) %>% summarise(lod=lod.x+lod.y)
+masterMap= joinedData %>% group_by(condition, trait, chr, pos, marker) %>% summarise(lod=lod.x+lod.y)
 
-masterMap %>% filter(condition=="topotecan", trait=="n") %>% ggplot(., aes(x=pos, y=lod)) + geom_point() + facet_grid(.~chr)
+traits = unique(masterMap[,1:2])
+
+for(row in 1:nrow(traits)){
+    title = paste0("Condition: ", traits[row,1], ", Trait: ", traits[row,2])
+    condition = traits[row,1]
+    trait = traits[row,2]
+    fileName = paste0("~/LinkagePlots/", condition, "_", gsub("\\.", "-", trait), ".pdf")
+    traitMap = masterMap[masterMap$condition==condition & masterMap$trait==trait,]
+    plot = ggplot(traitMap, aes(x=pos, y=lod)) + geom_line(size=1) + facet_grid(.~chr) + ggtitle(title)
+    ggsave(plot, fileName, width = 11, height = 8.5)
+}
+
+masterMap %>% filter(condition=="control", trait=="n") %>% ggplot(., aes(x=pos, y=lod)) + geom_point() + facet_grid(.~chr) + ggtitle(title)
 
 
 write.csv(masterMap, file.path("~/Dropbox/HTA/Results/ProcessedData", "RIAILs0_MasterMap.csv"), row.names=FALSE)
