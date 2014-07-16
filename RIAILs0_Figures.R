@@ -57,7 +57,7 @@ getPeaks <- function(rawData, mapData, threshold){
     colnames(inPeak) <- colnames(mapData)
     peaks <- data.frame(matrix(ncol=ncol(mapData), nrow=0))
     colnames(peaks) <- colnames(mapData)
-    for(i in 1:nrow(fig2DataBControl)){
+    for(i in 1:nrow(mapData)){
         if(mapData[i,]$lod > threshold){
             inPeak <- rbind(inPeak, mapData[i,])
         } else {
@@ -69,6 +69,12 @@ getPeaks <- function(rawData, mapData, threshold){
         }
     }
     
+    pass <- tryCatch({peaks <- peaks %>% group_by(chr) %>% filter(lod==max(lod))}, error = function(err){return(FALSE)})
+    
+    if(pass==FALSE){
+        return(NA)
+    }
+    
     VE <- data.frame(matrix(nrow=0, ncol=(ncol(peaks)+1)))
     colnames(VE) <- c(colnames(peaks), "VE")
     for(i in 1:nrow(peaks)){
@@ -76,7 +82,7 @@ getPeaks <- function(rawData, mapData, threshold){
         genos <- strXSNPs[,c("strain", marker)]
         total <- merge(genos, rawData, by="strain")
         variance <- cor(total[,2], total[,3])^2
-        VE <- rbind(VE, data.frame(peaks[i,], VE=variance, leftMarker, rightMarker))
+        VE <- rbind(VE, data.frame(peaks[i,], VE=variance))
     }
     return(VE)
 }
@@ -84,7 +90,15 @@ getPeaks <- function(rawData, mapData, threshold){
 
 VE <- getPeaks(fig2DataBControlRaw, fig2DataBControlMap, thresholdControl)
 
-ggplot(fig2DataBControlMap, aes(x=pos, y=lod)) + geom_line(size=1) + geom_hline(yintercept=thresholdControl, colour = "gray", linetype="dashed") + facet_grid(.~chr) + ggtitle(paste0("Lifetime fecundity under control conditions\nn=", nrow(fig2DataBControlRaw), " RIAILs")) + xlab("Position") + ylab("LOD") + geom_point(data=VE, aes(x=pos, y=1.05*max(fig2DataBControlMap$lod)), shape=25, size = 3, fill="red", colour="red") + geom_text(data=VE, aes(x=pos, y=1.09*max(fig2DataBControlMap$lod), label=paste0(round(100*VE, 0), "%")), size = 3) + geom_segment()
+confint <- function(map){
+    class(map) <- c("scanone", "data.frame")
+    map <- map[,c("chr", "condition", "trait", "lod", "pos","marker")]
+    conf <- lodint(map, chr="IV", lodcolumn=2)
+    return(conf)
+}
+
+
+ggplot(fig2DataBControlMap, aes(x=pos, y=lod)) + geom_line(size=1) + geom_hline(yintercept=thresholdControl, colour = "gray", linetype="dashed") + facet_grid(.~chr) + ggtitle(paste0("Lifetime fecundity under control conditions\nn=", nrow(fig2DataBControlRaw), " RIAILs")) + xlab("Position") + ylab("LOD") + geom_point(data=VE, aes(x=pos, y=1.05*max(fig2DataBControlMap$lod)), shape=25, size = 3, fill="red", colour="red") + geom_text(data=VE, aes(x=pos, y=1.09*max(fig2DataBControlMap$lod), label=paste0(round(100*VE, 0), "%")), size = 4) + geom_segment(data=conf, aes(x=min(pos), xend=max(pos), y=0, yend=0), colour="red", size=1.5)
 
 ggplot(fig2DataBPQ, aes(x=pos, y=lod)) + geom_line(size=1) + geom_hline(yintercept=thresholdPQ, colour = "gray", linetype="dashed") + facet_grid(.~chr) + ggtitle("Paraquat N") + xlab("Position") + ylab("LOD")
 
@@ -155,7 +169,7 @@ getPeaks <- function(rawData, mapData, threshold){
     colnames(inPeak) <- colnames(mapData)
     peaks <- data.frame(matrix(ncol=ncol(mapData), nrow=0))
     colnames(peaks) <- colnames(mapData)
-    for(i in 1:nrow(fig2DataBControl)){
+    for(i in 1:nrow(mapData)){
         if(mapData[i,]$lod > threshold){
             inPeak <- rbind(inPeak, mapData[i,])
         } else {
@@ -167,25 +181,55 @@ getPeaks <- function(rawData, mapData, threshold){
         }
     }
     
+    tryCatch({peaks <- peaks %>% group_by(chr) %>% filter(lod==max(lod))}, error = function(err){return(NA)})
+    
     VE <- data.frame(matrix(nrow=0, ncol=(ncol(peaks)+1)))
     colnames(VE) <- c(colnames(peaks), "VE")
     for(i in 1:nrow(peaks)){
         marker <- gsub("-", "\\.", as.character(peaks[i, "marker"]))
         genos <- strXSNPs[,c("strain", marker)]
         total <- merge(genos, rawData, by="strain")
-        variance <- abs(cor(total[,2], total[,3]))
+        variance <- cor(total[,2], total[,3])^2
         VE <- rbind(VE, data.frame(peaks[i,], VE=variance))
     }
     return(VE)
 }
 
+confint <- function(map, VE){
+    class(map) <- c("scanone", "data.frame")
+    map <- map[,c("chr", "condition", "trait", "lod", "pos","marker")]
+    conf <- do.call(rbind, lapply(unique(VE$chr), function(x){lodint(map, chr=x, lodcolumn=2)}))
+    conf <- melt(conf[,c("chr", "pos")], id="chr") %>% group_by(chr) %>% summarise(min=min(value), max=(max(value)))
+    colnames(conf)[1] <- "chr"
+    return(conf)
+}
+
+VE <- getPeaks(fig3DataBControlRaw10, fig3DataBControlMap10, thresholdControl10)
+
+conf <- confint(fig3DataBControlMap10, VE)
+
+plot1 <- ggplot(fig3DataBControlMap10, aes(x=pos, y=lod)) + geom_line(size=1) + geom_hline(yintercept=thresholdControl10, colour = "gray", linetype="dashed") + facet_grid(.~chr) + ggtitle(paste0("10th quantile of time of flight under control conditions\nn=", nrow(fig3DataBControlMap10), " RIAILs")) + xlab("Position") + ylab("LOD")
+
+plot1 + geom_point(data=VE, aes(x=pos, y=1.05*max(fig3DataBControlMap10$lod)), shape=25, size = 3, fill="red", colour="red") + geom_text(VE, aes(x=pos, y=1.09*max(fig3DataBControlMap10$lod), label=paste0(round(100*VE, 0), "%")), size = 3) + geom_segment(data=conf, aes(x=min(pos), xend=max(pos), y=0, yend=0), colour="red", size=1.5)
 
 
-ggplot(fig3DataBControlMap10, aes(x=pos, y=lod)) + geom_line(size=1) + geom_hline(yintercept=thresholdControl10, colour = "gray", linetype="dashed") + facet_grid(.~chr) + ggtitle(paste0("10th quantile of time of flight under control conditions\nn=", nrow(fig3DataBControlMap10), " RIAILs")) + xlab("Position") + ylab("LOD") + geom_point(data=VE, aes(x=pos, y=1.05*max(fig3DataBControlMap10$lod)), shape=25, size = 3, fill="red", colour="red") #+ geom_text(data=getPeaks(fig3DataBControlRaw10, fig3DataBControlMap10, thresholdControl10), aes(x=pos, y=1.09*max(fig3DataBControlMap10$lod), label=paste0(round(100*VE, 0), "%")), size = 3)
+VE <- getPeaks(fig3DataBControlRaw25, fig3DataBControlMap25, thresholdControl25)
 
-ggplot(fig3DataBControlMap25, aes(x=pos, y=lod)) + geom_line(size=1) + geom_hline(yintercept=thresholdControl25, colour = "gray", linetype="dashed") + facet_grid(.~chr) + ggtitle(paste0("25th quantile of time of flight under control conditions\nn=", nrow(fig3DataBControlMap25), " RIAILs")) + xlab("Position") + ylab("LOD") + geom_point(data=VE, aes(x=pos, y=1.05*max(fig3DataBControlMap25$lod)), shape=25, size = 3, fill="red", colour="red") + geom_text(data=getPeaks(fig3DataBControlRaw25, fig3DataBControlMap25, thresholdControl25), aes(x=pos, y=1.09*max(fig3DataBControlMap25$lod), label=paste0(round(100*VE, 0), "%")), size = 3)
+conf <- confint(fig3DataBControlMap25, VE)
 
-ggplot(fig3DataBControlMap50, aes(x=pos, y=lod)) + geom_line(size=1) + geom_hline(yintercept=thresholdControl50, colour = "gray", linetype="dashed") + facet_grid(.~chr) + ggtitle(paste0("50th quantile of time of flight under control conditions\nn=", nrow(fig3DataBControlMap50), " RIAILs")) + xlab("Position") + ylab("LOD") + geom_point(data=VE, aes(x=pos, y=1.05*max(fig3DataBControlMap50$lod)), shape=25, size = 3, fill="red", colour="red") + geom_text(data=getPeaks(fig3DataBControlRaw50, fig3DataBControlMap50, thresholdControl50), aes(x=pos, y=1.09*max(fig3DataBControlMap50$lod), label=paste0(round(100*VE, 0), "%")), size = 3)
+plot2 <- ggplot(fig3DataBControlMap25, aes(x=pos, y=lod)) + geom_line(size=1) + geom_hline(yintercept=thresholdControl25, colour = "gray", linetype="dashed") + facet_grid(.~chr) + ggtitle(paste0("25th quantile of time of flight under control conditions\nn=", nrow(fig3DataBControlMap25), " RIAILs")) + xlab("Position") + ylab("LOD")
+
+plot2 + geom_point(data=VE, aes(x=pos, y=1.05*max(fig3DataBControlMap25$lod)), shape=25, size = 3, fill="red", colour="red") + geom_text(data=getPeaks(fig3DataBControlRaw25, fig3DataBControlMap25, thresholdControl25), aes(x=pos, y=1.09*max(fig3DataBControlMap25$lod), label=paste0(round(100*VE, 0), "%")), size = 3) + geom_segment(data=conf, aes(x=min, xend=max, y=0, yend=0), colour="red", size=1.5)
+
+
+
+VE <- getPeaks(fig3DataBControlRaw50, fig3DataBControlMap50, thresholdControl50)
+
+conf <- confint(fig3DataBControlMap50, VE)
+
+plot3 <- ggplot(fig3DataBControlMap50, aes(x=pos, y=lod)) + geom_line(size=1) + geom_hline(yintercept=thresholdControl50, colour = "gray", linetype="dashed") + facet_grid(.~chr) + ggtitle(paste0("50th quantile of time of flight under control conditions\nn=", nrow(fig3DataBControlMap50), " RIAILs")) + xlab("Position") + ylab("LOD")
+
+plot3 + geom_point(data=VE, aes(x=pos, y=1.05*max(fig3DataBControlMap50$lod)), shape=25, size = 3, fill="red", colour="red") + geom_text(data=getPeaks(fig3DataBControlRaw50, fig3DataBControlMap50, thresholdControl50), aes(x=pos, y=1.09*max(fig3DataBControlMap50$lod), label=paste0(round(100*VE, 0), "%")), size = 3)
 
 ggplot(fig3DataBControlMap75, aes(x=pos, y=lod)) + geom_line(size=1) + geom_hline(yintercept=thresholdControl75, colour = "gray", linetype="dashed") + facet_grid(.~chr) + ggtitle(paste0("75th quantile of time of flight under control conditions\nn=", nrow(fig3DataBControlMap75), " RIAILs")) + xlab("Position") + ylab("LOD") + geom_point(data=VE, aes(x=pos, y=1.05*max(fig3DataBControlMap75$lod)), shape=25, size = 3, fill="red", colour="red") + geom_text(data=getPeaks(fig3DataBControlRaw75, fig3DataBControlMap75, thresholdControl75), aes(x=pos, y=1.09*max(fig3DataBControlMap75$lod), label=paste0(round(100*VE, 0), "%")), size = 3)
 
