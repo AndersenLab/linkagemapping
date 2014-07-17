@@ -1,29 +1,50 @@
-map <- function(x, set){
-    if(set==1){
-        newCross <- subset(N2xCB4856.cross, ind=as.character(N2xCB4856.cross$pheno$rep)=="A")
-    } else if(set == 2){
-        newCross <- subset(N2xCB4856.cross, ind=as.character(N2xCB4856.cross$pheno$rep) %in% c("B", "C", "D"))
-    } else if(set==3){
-        newCross <- subset(N2xCB4856.cross, ind=as.numeric(N2xCB4856.cross$pheno$set)==2)
-    } else if(set==4){
-        newCross <- subset(N2xCB4856.cross, ind=as.numeric(N2xCB4856.cross$pheno$set)==1)
-    } else if(set==5){
-        newCross <- subset(N2xCB4856.cross, ind=as.numeric(N2xCB4856.cross$pheno$set)==2)
-    } else if(set==6){
-        newCross <- N2xCB4856.cross
+map <- function(cross){
+    traitMaps <- list()
+    print(paste0("Phenotype Column: ", phenoCol))
+    maps <- list()
+    residCross <- cross
+    iter <- 1
+    repeat{
+        mapIter <- list()
+        for(set in 1:3){
+            if(set==1){
+                newCross <- subset(residCross, ind=as.character(residCross$pheno$rep)=="A")
+            } else if(set == 2){
+                newCross <- subset(residCross, ind=as.character(residCross$pheno$rep) %in% c("B", "C", "D"))
+            } else if(set==3){
+                newCross <- subset(residCross, ind=as.numeric(residCross$pheno$set)==2)
+            }
+            if (!all(is.na(newCross$pheno[,phenoCol]))) {
+                newCross$pheno[,phenoCol] <- as.numeric(as.character(newCross$pheno[,phenoCol]))
+                mapData <- scanone(newCross, pheno.col=phenoCol, model="np")
+                mapData$marker <- rownames(mapData)
+                interation <- 1
+                colName <- colnames(cross$pheno)[phenoCol]
+                condition <- str_split(colName, "\\.", 2)[[1]][1]
+                trait <- str_split(colName, "\\.", 2)[[1]][2]
+                df <- as.data.frame(cbind(condition, trait, as.data.frame(mapData)))
+                mapIter <- append(mapIter, list(df))
+            }
+        }
+        data <- data.frame(do.call(rbind, mapIter)) %>% group_by(condition, trait, chr, pos, marker) %>% summarise(lod=sum(lod))
+        if(max(data$lod, na.rm=TRUE)<4 | iter==15){ #Set the threshold cutoff here
+            if(iter==1){
+                maps <- append(maps, list(data))
+            }
+            break
+        }
+        maps <- append(maps, list(data))
+        marker <- data$marker[which(data$lod==max(data$lod, na.rm=TRUE))]
+        residCross$pheno[,phenoCol] <- residuals(lm(residCross$pheno[,phenoCol]~extractGenotype(residCross)[,marker], na.action=na.exclude))
+        iter <- iter+1
     }
-    if (!all(is.na(newCross$pheno[,x]))) {
-        newCross$pheno[,x] <- as.numeric(as.character(newCross$pheno[,x]))
-        data <- scanone(newCross, pheno.col=x, model="np")
-        data$marker <- rownames(data)
-        data <- as.data.frame(data)
-        colName <- colnames(N2xCB4856.cross$pheno)[x]
-        condition <- str_split(colName, "\\.", 2)[[1]][1]
-        trait <- str_split(colName, "\\.", 2)[[1]][2]
-        df <- as.data.frame(cbind(condition, trait, data))
-        return(df)
-    }
+    regressedMap <- do.call(rbind, maps) %>% group_by(condition, trait, chr, pos, marker) %>% summarise(lod=max(lod, na.rm=TRUE))
+    traitMaps <- append(traitMaps, list(regressedMap))
+    masterMap <- data.frame(do.call(rbind, traitMaps))
+    return(masterMap)
 }
+
+extractGenotype=function(impcross){(do.call(cbind, sapply(impcross$geno, function(x) { x$data }))*2)-3}
 
 mergePheno2 <- function(cross, phenotype, set=NULL){
     if(!is.null(set)){
