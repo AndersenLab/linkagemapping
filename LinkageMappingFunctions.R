@@ -1,6 +1,4 @@
-map <- function(cross){
-    traitMaps <- list()
-    print(paste0("Phenotype Column: ", phenoCol))
+map <- function(cross, phenoCol){
     maps <- list()
     residCross <- cross
     iter <- 1
@@ -38,8 +36,54 @@ map <- function(cross){
         residCross$pheno[,phenoCol] <- residuals(lm(residCross$pheno[,phenoCol]~extractGenotype(residCross)[,marker], na.action=na.exclude))
         iter <- iter+1
     }
-    regressedMap <- do.call(rbind, maps) %>% group_by(condition, trait, chr, pos, marker) %>% summarise(lod=max(lod, na.rm=TRUE))
-    traitMaps <- append(traitMaps, list(regressedMap))
+    masterMap <- do.call(rbind, maps) %>% group_by(condition, trait, chr, pos, marker) %>% summarise(lod=max(lod, na.rm=TRUE))
+    return(masterMap)
+}
+
+map2 <- function(cross){
+    traitMaps <- list()
+    for(phenoCol in 6:30){
+        print(paste0("Phenotype Column: ", phenoCol))
+        maps <- list()
+        residCross <- cross
+        iter <- 1
+        repeat{
+            mapIter <- list()
+            for(set in 1:3){
+                if(set==1){
+                    newCross <- subset(residCross, ind=as.character(residCross$pheno$rep)=="A")
+                } else if(set == 2){
+                    newCross <- subset(residCross, ind=as.character(residCross$pheno$rep) %in% c("B", "C", "D"))
+                } else if(set==3){
+                    newCross <- subset(residCross, ind=as.numeric(residCross$pheno$set)==2)
+                }
+                if (!all(is.na(newCross$pheno[,phenoCol]))) {
+                    newCross$pheno[,phenoCol] <- as.numeric(as.character(newCross$pheno[,phenoCol]))
+                    mapData <- scanone(newCross, pheno.col=phenoCol, model="np")
+                    mapData$marker <- rownames(mapData)
+                    interation <- 1
+                    colName <- colnames(cross$pheno)[phenoCol]
+                    condition <- str_split(colName, "\\.", 2)[[1]][1]
+                    trait <- str_split(colName, "\\.", 2)[[1]][2]
+                    df <- as.data.frame(cbind(condition, trait, as.data.frame(mapData)))
+                    mapIter <- append(mapIter, list(df))
+                }
+            }
+            data <- data.frame(do.call(rbind, mapIter)) %>% group_by(condition, trait, chr, pos, marker) %>% summarise(lod=sum(lod))
+            if(max(data$lod, na.rm=TRUE)<4 | iter==15){ #Set the threshold cutoff here
+                if(iter==1){
+                    maps <- append(maps, list(data))
+                }
+                break
+            }
+            maps <- append(maps, list(data))
+            marker <- data$marker[which(data$lod==max(data$lod, na.rm=TRUE))]
+            residCross$pheno[,phenoCol] <- residuals(lm(residCross$pheno[,phenoCol]~extractGenotype(residCross)[,marker], na.action=na.exclude))
+            iter <- iter+1
+        }
+        regressedMap <- do.call(rbind, maps) %>% group_by(condition, trait, chr, pos, marker) %>% summarise(lod=max(lod, na.rm=TRUE))
+        traitMaps <- append(traitMaps, list(regressedMap))
+    }
     masterMap <- data.frame(do.call(rbind, traitMaps))
     return(masterMap)
 }
