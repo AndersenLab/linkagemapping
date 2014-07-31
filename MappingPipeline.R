@@ -11,38 +11,47 @@ source("~/LinkageMapping/LinkageMappingFunctions.R")
 #---------------Pick your poison-----------------#
 # Set your phenotype data file here
 
-pheno <- read.csv("~/Dropbox/HTA/Results/ProcessedData/RIAILs0_complete_simple.csv")
+# pheno <- read.csv("~/Dropbox/HTA/Results/ProcessedData/RIAILs0_complete_simple.csv")
 
-# pheno <- read.csv("~/Downloads/RIAILs0_complete.csv")
+# pheno <- read.csv("~/Dropbox/HTA/Results/ProcessedData/RIAILs0_complete.csv")
 
-# pheno <- read.csv("~/Dropbox/HTA/Results/ProcessedData/RIAILs1_ForMapping.csv")
+pheno <- read.csv("~/Dropbox/HTA/Results/ProcessedData/RIAILs1_ForMapping.csv")
 
 #------------------Process----------------------#
 
 reduced.pheno <- pheno[!is.na(pheno$strain),]
 reduced.pheno$id <- str_split_fixed(reduced.pheno$strain, "QX", 2)[,2]
 
-trait <- reduced.pheno %>% group_by(id, drug) %>% summarise_each(funs(mean)) %>% select(-X) %>% filter(id!="")
+trait <- reduced.pheno %>% group_by(id, drug, assay) %>% summarise_each(funs(mean)) %>% select(-X) %>% filter(id!="")
 
-trait2 <- trait %>% group_by(id, drug) %>% do(renameCols(.))
+trait2 <- trait %>% group_by(id, drug, assay) %>% do(renameCols(.))
 
-trait3 <- trait2 %>% group_by(id) %>% summarise_each(funs(mean(., na.rm=TRUE))) %>%
-    filter(id != "") %>% select(id, contains("\\."), -contains("sorted"))
+trait3 <- trait2 %>% group_by(id, assay) %>% summarise_each(funs(mean(., na.rm=TRUE))) %>%
+    filter(id != "") %>% select(id, assay, contains("\\."), -contains("sorted"))
 
 trait3 = trait3[,-which(unlist(lapply(trait3, function(x){all(is.na(x))})))]
+trait3$id <- as.integer(as.numeric(as.character(trait3$id)))
 
 #-------------------------End processing, start mapping-------------------------------#
 
 load("~/LinkageMapping/N2xCB4856_RIAILs_Rqtlfiles.RData")
 
 N2xCB4856.cross <- calc.genoprob(N2xCB4856.cross, step=0)
+N2xCB4856.cross$pheno$id <- as.integer(as.numeric(as.character(N2xCB4856.cross$pheno$id)))
+
+trait3 <- trait3[order(trait3$id),] 
 
 N2xCB4856.cross$pheno <- data.frame(cbind(rep = sapply(mergePheno2(N2xCB4856.cross, trait3)$RILname, function(x){x = as.character(x); tryCatch({substr(as.character(x), nchar(x), nchar(x))}, error = function(err){return(NA)})}), mergePheno2(N2xCB4856.cross, trait3)))
 
 
 
+###For Josh Bloom
+df=N2xCB4856.cross$pheno
+df$set=ifelse(as.character(df$rep)=="A", 1, ifelse(as.character(df$rep) %in% c("B", "C", "D"), 2, 3))
+df$set[is.na(df$set)]=3
+N2xCB4856.cross$pheno=df
 
-
+save(N2xCB4856.cross, file="~/Dropbox/Coding/joshbloom/RIAILs0_CrossObject_Old.RData")
 
 
 
