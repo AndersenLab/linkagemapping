@@ -49,6 +49,54 @@ fig2DataBPQRaw <- read.csv("~/Dropbox/HTA/Results/ProcessedData/RIAILs0_complete
 thresholdControl <- read.csv("~/Dropbox/HTA/Results/ProcessedData/RIAILs0_thresholds.csv") %>% filter(condition=="control", trait=="n") %>% select(threshold) %>% as.numeric(.)
 thresholdPQ <- read.csv("~/Dropbox/HTA/Results/ProcessedData/RIAILs0_thresholds.csv") %>% filter(condition=="paraquat", trait=="n") %>% select(threshold) %>% as.numeric(.)
 
+getChrPeaks = function(yourScanOne) {
+    ###getting the max LOD values per chromosome
+    chr.peaks.lod = tapply(yourScanOne$lod, yourScanOne$chr, max)
+    ###finding the number of markers on each chromosome
+    chr.mindex.offset = tapply(yourScanOne$lod, yourScanOne$chr, length)
+    ###uses the number of markers per chromosome to find the offset for the max LOD marker index.
+    ###when finding the max LOD marker index, which.max will start at 1 for each chromosome,
+    ###but we need it to match up to gdata later, and the offset will allow that.
+    chr.mindex.offset = c(0, cumsum(chr.mindex.offset)[1:5])
+    ### get marker index of LOD peaks per chromosomes                             
+    chr.peaks.index = tapply(yourScanOne$lod, yourScanOne$chr, which.max)
+    ### add offset to LOD peak marker index                             
+    chr.peaks.index = chr.peaks.index + chr.mindex.offset
+    #combines the peak LOD numbers and their marker indices
+    return(list(chr.peaks.lod = chr.peaks.lod, chr.peaks.index=chr.peaks.index))
+}
+
+getPeakArray = function(peaklist, threshold, multiTraits=FALSE) {
+    tryCatch( {
+        keepPeaks   = which(peaklist$chr.peaks.lod>threshold, arr.ind=T)
+        if(multiTraits){
+            kP = data.frame(rownames(keepPeaks), peaklist$chr.peaks.index[keepPeaks])
+            names(kP)=c('trait', 'markerIndex') 
+            kP = kP[order(kP$trait, kP$markerIndex),]
+            return(kP)} 
+        else{
+            kP = data.frame(peaklist$chr.peaks.index[keepPeaks])
+            names(kP)="markerIndex"
+            return(kP)}
+    }, error=function(e) {return(NULL) })		
+}
+
+getPhenoResids = function(cross.phenotypes,gdata, peakArray, intercept=FALSE) {
+    presids = cross.phenotypes
+    spA = peakArray
+    if(length(spA)>0){
+        if(intercept) {
+            rr = residuals(lm(cross.phenotypes[,yourTransformation]~gdata    [,spA$markerIndex]))
+        }else{
+            rr = residuals(lm(cross.phenotypes[,yourTransformation]~gdata[,spA$markerIndex]-1))
+        }
+        presids[as.numeric(names(rr)),yourTransformation]=rr
+    }
+    return(presids)
+}
+
+extractScaledGenotype=function(impcross){ (do.call('cbind', sapply(impcross$geno, function(x) { x$data }))*2)-3 }
+
 getPeaks <- function(rawData, mapData, threshold){
     strXSNPs <- read.csv("~/LinkageMapping/StrainsBySNPs.csv")
     colnames(strXSNPs)[1] <- "strain" 
@@ -88,6 +136,18 @@ getPeaks <- function(rawData, mapData, threshold){
 }
 
 
+
+
+
+g <- extractScaledGenotype(N2xCB4856.cross)
+
+
+tester <- getChrPeaks(fig2DataBControlMap)
+
+tester2 <- getPeakArray(tester, thresholdControl)
+
+getPhenoResids <- 
+
 VE <- getPeaks(fig2DataBControlRaw, fig2DataBControlMap, thresholdControl)
 
 confint <- function(map){
@@ -97,6 +157,7 @@ confint <- function(map){
     return(conf)
 }
 
+conf <- confint(fig2DataBControlMap)
 
 ggplot(fig2DataBControlMap, aes(x=pos, y=lod)) + geom_line(size=1) + geom_hline(yintercept=thresholdControl, colour = "gray", linetype="dashed") + facet_grid(.~chr) + ggtitle(paste0("Lifetime fecundity under control conditions\nn=", nrow(fig2DataBControlRaw), " RIAILs")) + xlab("Position") + ylab("LOD") + geom_point(data=VE, aes(x=pos, y=1.05*max(fig2DataBControlMap$lod)), shape=25, size = 3, fill="red", colour="red") + geom_text(data=VE, aes(x=pos, y=1.09*max(fig2DataBControlMap$lod), label=paste0(round(100*VE, 0), "%")), size = 4) + geom_segment(data=conf, aes(x=min(pos), xend=max(pos), y=0, yend=0), colour="red", size=1.5)
 
@@ -253,3 +314,5 @@ fig4DataAPQ <- as.matrix(fig4DataAPQ[apply(fig4DataAPQ, 1, function(x){sum(is.na
 fig4DataAPQ <- as.matrix(cor(fig4DataAPQ)[apply(cor(fig4DataAPQ), 1, function(x){sum(is.na(x)) < (ncol(cor(fig4DataAPQ))-1)}), apply(cor(fig4DataAPQ), 2, function(x){sum(is.na(x)) < (nrow(cor(fig4DataAPQ))-1)})])
 heatmap.2(fig4DataAControl)
 heatmap.2(fig4DataAPQ)
+
+

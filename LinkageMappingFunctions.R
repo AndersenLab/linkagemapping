@@ -1,3 +1,188 @@
+#Begin Josh Bloom mapping functions
+
+library(qtl)
+library(rrBLUP)
+library(foreach)
+library(doMC)
+registerDoMC(cores=4)
+library(abind)
+
+# Lynch and Walsh p. 454 ##################################################################################
+get.LOD.by.COR = function(n.pheno, pheno, gdata, doGPU=FALSE) {
+    if(doGPU) {
+        return( (-n.pheno*log(1-gpuCor(pheno, gdata, use='pairwise.complete.obs')$coefficients^2))/(2*log(10)) )
+    } else{
+        return( (-n.pheno*log(1-cor(pheno, gdata, use='pairwise.complete.obs')^2))/(2*log(10) ) )  
+    }
+}
+
+###########################################################################################################
+
+
+##### Extract genotype matrix from cross structure and recode as -1,1 #####################################
+extractGenotype=function(impcross){ (do.call('cbind', sapply(impcross$geno, function(x) { x$argmax }))*2)-3 }
+###########################################################################################################
+
+
+##### Count number of strains with data for each phenotype from cross structure ###########################
+countStrainsPerTrait = function(pheno) {apply(pheno, 2, function(x){sum(!is.na(x))})}
+###########################################################################################################
+
+##### Extract phenotype matrix from cross structure and mean center ... optional standardize Variance######
+# NOTE!!!!!!!!!!!!! removing first five columns !!!! specific to this data set !!!!!
+# badtraits = misbehaving phenos
+# set = vector of set ids
+# setCorrect = are you doing set correction or not?
+# scaleVar = scale variance or not
+extractScaledPhenotype=function(impcross, set=NULL, setCorrect=FALSE, scaleVar=TRUE){
+    p = impcross$pheno[,7:ncol(impcross$pheno)]
+    if(setCorrect==FALSE) { apply(p, 2, scale, scale=scaleVar) } else {
+        s=apply(p, 2, function(x) { 
+            xs = split(x,set)
+            ms = lapply(xs, mean,na.rm=T)
+            unlist(mapply(function(x,y) {x-y}, xs, ms))
+        })
+        apply(s, 2,scale, scale=scaleVar)
+        
+    }
+}
+###########################################################################################################
+
+############ Convert jb LODmatrix to scanone object #######################################################
+LODmatrix.2.scanone= function(LODS, cross, LL=NULL) {
+    if(is.null(LL)){
+        LODSm = t(as.matrix(LODS))
+        LODSs = scanone(cross, pheno.col=10, method='mr')
+        LODSso = data.frame(LODSs, LODSm)
+        LODSso= LODSso[,-3]
+        class(LODSso)=class(LODSs)
+        return(LODSso)
+    } else { 
+        LODSso =  data.frame(LL[,c(1,2)],t(as.matrix(LODS)))
+        class(LODSso)  = class(LL)
+        return(LODSso)
+    }
+}
+############################################################################################################
+
+
+getChrPeaks = function(mindex.split, chr.mindex.offset, LODS) {
+    chr.peaks.lod    = sapply(mindex.split, function(markers) { apply(LODS[,markers], 1, max) })
+    # get marker index of LOD peaks per chromosomes                             
+    chr.peaks.index = sapply(mindex.split, function(markers)  { apply(LODS[,markers], 1, which.max) })
+    # convert chromosome marker index to genome maker index                             
+    chr.peaks.index = t(apply(chr.peaks.index, 1, function(x){x+chr.mindex.offset}))
+    return(list(chr.peaks.lod = chr.peaks.lod, chr.peaks.index=chr.peaks.index))
+}
+
+
+getPeakFDR = function(chromosome.peaks.lod, pdata, gdata, perms=100 ,doGPU=F) { 
+    n.pheno = countStrainsPerTrait(pdata) 
+    # change dopar for multithreaded
+    permpeakLODs = foreach( i = 1:perms ) %do% {
+        print(i)
+        time <- system.time({pLODS = get.LOD.by.COR(n.pheno, pdata[sample(1:nrow(pdata)),], gdata, doGPU)
+                     sapply(mindex.split, function(markers) { apply(pLODS[,markers], 1, max) })})
+        print(time)
+        
+    }
+    permpeakLODs= abind(permpeakLODs, along=c(3))
+    ###### CHROMOSOME and PEAK BASED FDR #################################################################
+    obsPcnt = sapply(seq(2, 5, .01), function(thresh) { sum(chromosome.peaks.lod>thresh) }   )
+    names(obsPcnt) = seq(2,5, .01)
+    # expected number of QTL peaks with LOD greater than threshold
+    expPcnt = sapply(seq(2, 5, .01),  
+                     function(thresh) { 
+                         print(thresh); 
+                         mean(apply(permpeakLODs, 3, function(ll) {sum(ll>thresh) }) )
+                     } )
+    names(expPcnt) = seq(2, 5, .01)
+    pFDR = expPcnt/obsPcnt
+    return(pFDR)
+}
+
+
+getPeakArray = function(peaklist, threshold) {
+    tryCatch( {
+        # trait number and marker number
+        keepPeaks   = which(peaklist$chr.peaks.lod>threshold, arr.ind=T)
+        #kP = data.frame(rownames(keepPeaks), peaklist$chr.peaks.index[keepPeaks])
+        #names(kP)=c('trait', 'markerIndex') 
+        kP = data.frame(trait=keepPeaks[,1], markerIndex=peaklist$chr.peaks.index[keepPeaks])
+        kP = kP[order(kP$trait, kP$markerIndex),]
+        return(kP)} ,error=function(e) {return(NULL) })
+}
+
+
+###### fix QTLs and get residual phenotypes ###########################################################
+getPhenoResids = function(pdata,gdata, peakArray, intercept=FALSE) {
+    presids = pdata
+    si=c()
+    for( i in 1:ncol(pdata) ) {
+        spA = peakArray[peakArray$trait==i,]
+        if(nrow(spA)>0){
+            si =c(si,i)
+            if(intercept) {
+                rr = residuals(lm(pdata[,i]~gdata[,spA$markerIndex]))
+            }else{
+                rr = residuals(lm(pdata[,i]~gdata[,spA$markerIndex]-1))
+            }
+            presids[as.numeric(names(rr)),i]=rr
+        }
+    }
+    print(length(si))
+    #return(presids[,si])
+    return(presids)
+} 
+#######################################################################################################
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 map <- function(cross, phenoCol){
     maps <- list()
     residCross <- cross

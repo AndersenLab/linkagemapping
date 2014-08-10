@@ -39,3 +39,12 @@ data5 <- data4 %>% filter(drug!="missing")
 
 write.csv(data5, "~/Dropbox/HTA/Results/ProcessedData/RIAILs1_ForMapping.csv")
 
+
+
+
+
+
+
+
+
+
