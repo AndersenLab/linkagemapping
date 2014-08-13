@@ -1,5 +1,4 @@
 #Begin Josh Bloom mapping functions
-
 library(qtl)
 library(rrBLUP)
 library(foreach)
@@ -81,19 +80,17 @@ getPeakFDR = function(chromosome.peaks.lod, pdata, gdata, perms=100 ,doGPU=F) {
     # change dopar for multithreaded
     permpeakLODs = foreach( i = 1:perms ) %do% {
         print(i)
-        time <- system.time({pLODS = get.LOD.by.COR(n.pheno, pdata[sample(1:nrow(pdata)),], gdata, doGPU)
-                     sapply(mindex.split, function(markers) { apply(pLODS[,markers], 1, max) })})
-        print(time)
-        
+        pLODS <- get.LOD.by.COR(n.pheno, pdata[sample(1:nrow(pdata)),], gdata, doGPU)
+        sapply(mindex.split, function(markers) { apply(pLODS[,markers], 1, max) })        
     }
     permpeakLODs= abind(permpeakLODs, along=c(3))
+    
     ###### CHROMOSOME and PEAK BASED FDR #################################################################
     obsPcnt = sapply(seq(2, 5, .01), function(thresh) { sum(chromosome.peaks.lod>thresh) }   )
     names(obsPcnt) = seq(2,5, .01)
     # expected number of QTL peaks with LOD greater than threshold
     expPcnt = sapply(seq(2, 5, .01),  
-                     function(thresh) { 
-                         print(thresh); 
+                     function(thresh) {
                          mean(apply(permpeakLODs, 3, function(ll) {sum(ll>thresh) }) )
                      } )
     names(expPcnt) = seq(2, 5, .01)
