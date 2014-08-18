@@ -326,3 +326,21 @@ structperm <- function(cross, chr, pheno.col=1, model=c("normal","binary","2part
     return(data.frame(cbind(rownames=NULL, condition, trait, threshold=quantile(res, probs=.95)[1])))
     
 }
+
+cint <- function(lodsData, chr, lodcolumn=3, drop=1.5){
+    data <- lodsData[lodsData$chr==chr,]
+    peak <- which.max(data[,lodcolumn])
+    peakLOD <- data[peak, 3]
+    left <- peak - 1
+    while(left >= 1 & peakLOD-data[left, 3] < drop){
+        left <- left-1
+    }
+    right <- peak + 1
+    while(right <= nrow(data) & peakLOD-data[right, 3] < drop){
+        right <- right+1
+    }
+    bounds <- rbind(data[left,], data[right,])
+    bounds$SNP <- rownames(bounds)
+    colnames(bounds) <- c("chr", "pos", "LOD", "SNP")
+    return(bounds)
+}
