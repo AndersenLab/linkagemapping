@@ -12,7 +12,7 @@ source("~/HTA_Linkage/Mapping/LinkageMappingFunctions.R")
 
 # Set your phenotype data file here
 
-pheno <- read.csv("~/Dropbox/HTA/Results/ProcessedData/RIAILs2_ForMapping.csv")
+pheno <- read.csv("~/Dropbox/HTA/Results/ProcessedData/RIAILs1_ForMapping.csv")
 
 # Remove wash wells (wells where the strain is NA)
 reduced.pheno <- pheno[!is.na(pheno$strain),]
@@ -86,7 +86,7 @@ chr.mindex.offset = sapply(mindex.split, min)-1
 LODS.01       = get.LOD.by.COR(n.pheno, pdata.01s, gdata, doGPU=F)
 LODS.01s      = LODmatrix.2.scanone(LODS.01, N2xCB4856.cross)
 
-load("~/markers.Rda")
+load("~/LinkageMappingSummer2014/markers.Rda")
 LODS.01s$pos <- sapply(rownames(LODS.01s), function(x){markers[markers$SNP==x, "WS185.pos"]})
 
 
@@ -123,6 +123,7 @@ peaks <- do.call(rbind, lapply(3:ncol(LODS.01s), function(x){
 # trait chr pos LOD VE scaled_effect_size CI.L CI.R
 peakFit=list()
 for(i in 1:nrow(peaks)) {
+    print(i)
     trait=as.character(peaks$trait[i])
     peak.markers=as.character(peaks$SNP[i])
     chr.vec = as.numeric(as.character(peaks$chr[i]))
@@ -130,7 +131,7 @@ for(i in 1:nrow(peaks)) {
     SNP.name = as.character(peaks$SNP[i]) 
     ax = paste('gdata[,', which(colnames(gdata)==peak.markers),']', sep='')
     aq = paste(ax, collapse= ' + ')
-    am = lm(paste('pdata.01s[,' , which(colnames(pdata.01s)==trait), ']', '~', (aq), '-1'))
+    am = lm(paste('pdata.01s[,' , which(gsub("-", "\\.", colnames(pdata.01s))==trait), ']', '~', (aq), '-1'))
     aov.a=anova(am)
     tssq = sum(aov.a[,2])
     a.var.exp = aov.a[1:(nrow(aov.a)-1),2]/tssq  
@@ -158,10 +159,12 @@ peakFit.df = do.call('rbind', peakFit)
 lods <- data.frame(cbind(SNP=rownames(LODS.01s), data.frame(LODS.01s)))
 lods[,c(1,2)] <- lapply(lods[,c(1,2)], as.character)
 lods[,3] <- as.numeric(lods[,3])
-meltLods <- melt(lods, id=.(SNP, chr, pos), value="LOD")
+meltLods <- melt(lods, id=c("SNP", "chr", "pos"), value="LOD")
 colnames(meltLods) <- c("SNP", "chr", "pos", "trait", "LOD")
 
 finalLods <- merge(meltLods, peakFit.df, by=c("trait", "SNP"), all.x=TRUE)
+
+write.csv(finalLods, file="~/RIAILs1Map.csv", row.names=FALSE)
 
 h2.set=list()
 for(i in 1:ncol(pdata.01s)){

@@ -331,13 +331,21 @@ cint <- function(lodsData, chr, lodcolumn=3, drop=1.5){
     data <- lodsData[lodsData$chr==chr,]
     peak <- which.max(data[,lodcolumn])
     peakLOD <- data[peak, 3]
-    left <- peak - 1
-    while(left >= 1 & peakLOD-data[left, 3] < drop){
-        left <- left-1
+    if(peak > 1){
+        left <- peak - 1
+        while(left > 1 & peakLOD-data[left, 3] < drop){
+            left <- left-1
+        }
+    } else {
+        left <- 1
     }
-    right <- peak + 1
-    while(right <= nrow(data) & peakLOD-data[right, 3] < drop){
-        right <- right+1
+    if(peak < nrow(data)){
+        right <- peak + 1
+        while(right < nrow(data) & peakLOD-data[right, 3] < drop){
+            right <- right+1
+        }
+    } else {
+        right <- nrow(data)
     }
     bounds <- rbind(data[left,], data[right,])
     bounds$SNP <- rownames(bounds)
