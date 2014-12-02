@@ -1,14 +1,17 @@
 # Load required packages
 library(regress)
-require(dplyr)
-require(qtl)
-require(stringr)
-require(ggplot2)
+library(dplyr)
+library(qtl)
+library(stringr)
+library(ggplot2)
 library(cluster)
-
+library(rrBLUP)
+library(foreach)
+library(doMC)
+library(abind)
 
 # Source the functions
-source("~/HTA_Linkage/Mapping/LinkageMappingFunctions.R")
+source("~/LinkageMapping/LinkageMappingFunctions.R")
 
 # Set your phenotype data file here
 

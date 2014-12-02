@@ -70,7 +70,7 @@ getChrPeaks = function(mindex.split, chr.mindex.offset, LODS) {
     # get marker index of LOD peaks per chromosomes                             
     chr.peaks.index = sapply(mindex.split, function(markers)  { apply(LODS[,markers], 1, which.max) })
     # convert chromosome marker index to genome maker index                             
-    chr.peaks.index = t(apply(chr.peaks.index, 1, function(x){x+chr.mindex.offset}))
+    chr.peaks.index = t(apply(chr.peaks.index, 1, function(x){as.numeric(x)+chr.mindex.offset}))
     return(list(chr.peaks.lod = chr.peaks.lod, chr.peaks.index=chr.peaks.index))
 }
 
