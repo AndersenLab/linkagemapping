@@ -5,11 +5,12 @@ library(foreach)
 library(doMC)
 registerDoMC(cores=4)
 library(abind)
+# library(gputools)
 
 # Lynch and Walsh p. 454 ##################################################################################
 get.LOD.by.COR = function(n.pheno, pheno, gdata, doGPU=FALSE) {
     if(doGPU) {
-        return( (-n.pheno*log(1-gpuCor(pheno, gdata, use='pairwise.complete.obs')$coefficients^2))/(2*log(10)) )
+        return( (-n.pheno*log(1-gputools::gpuCor(pheno, gdata, use='pairwise.complete.obs')$coefficients^2))/(2*log(10)) )
     } else{
         return( (-n.pheno*log(1-cor(pheno, gdata, use='pairwise.complete.obs')^2))/(2*log(10) ) )  
     }
@@ -284,7 +285,7 @@ mergePheno2 <- function(cross, phenotype, set=NULL){
 }
 
 renameCols <- function(x){
-    colnames(x)[which(colnames(x) == "n"):ncol(x)] <- paste0(x$drug[1], ".", colnames(x)[which(colnames(x) == "n"):ncol(x)])
+    colnames(x)[which(colnames(x) == "n"):ncol(x)] <- paste0(x$condition[1], ".", colnames(x)[which(colnames(x) == "n"):ncol(x)])
     return(x)
 }
 
