@@ -4,61 +4,19 @@ library(stringr)
 
 source("~/LinkageMapping/LinkageMappingFunctions.R")
 
-pheno <- readRDS("~/Dropbox/AndersenLab/LabFolders/PastMembers/Tyler/ProcessedRIAILs1.rds") %>% select(-controlphenotype)
-pheno$residphenotype <- paste0("resid.", pheno$trait)
-pheno <- tidyr::spread(pheno, trait, phenotype) %>%
-    tidyr::spread(., residphenotype, resid)
-pheno <- test %>% group_by(date, experiment, round, assay, condition, 
-                          control, plate, row, col, strain) %>%
-    summarise_each(funs = funs(mean(., na.rm = TRUE)))
-
-# Remove wash wells (wells where the strain is NA)
-reduced.pheno <- pheno[!is.na(pheno$strain),]
-
-# Get the id number for mergePheno2 function, done by simple string split
-reduced.pheno$id <- str_split_fixed(reduced.pheno$strain, "QX", 2)[,2]
-
-# Summarize all traits by strain id, drug (really only necessary for RIAILs0, but doesn't hurt other RIAILs experiments)
-trait <- reduced.pheno %>% group_by(id, condition) %>% summarise_each(funs(mean)) %>% filter(id!="")
-
-# Rename all of the columns in the format "drug.trait"
-trait2 <- trait %>% group_by(id, condition) %>% do(renameCols(.))
-
-# Collapse down to one row per strain
-trait3 <- trait2 %>% group_by(id) %>% summarise_each(funs(mean(., na.rm=TRUE))) %>%
-    filter(id != "") %>% select(id, contains("."))
-
-# Remove columns that are all NA 
-trait3 <- trait3[,-which(unlist(lapply(trait3, function(x){all(is.na(x))})))]
-trait3$id <- as.integer(as.numeric(as.character(trait3$id)))
-
-# Collapse down to one row per strain
-trait3 <- trait2 %>% group_by(id) %>% summarise_each(funs(mean(., na.rm=TRUE))) %>%
-    filter(id != "") %>% select(id, contains("."), -contains("sorted"))
-
-# Remove columns that are all NA 
-trait3 <- trait3[,!(vapply(trait3, function(x){all(is.na(x))}, logical(1)))]
-trait3$id <- as.integer(as.numeric(as.character(trait3$id)))
+pheno <- readRDS("~/Dropbox/AndersenLab/LabFolders/PastMembers/Tyler/ForTrip/RIAILs1_processed.rds")
+pheno <- mapformat(pheno, set)
 
 #-----------------------End processing, start mapping--------------------------#
 
 # Load in the rqtl files 
-load("~/HTA_Linkage/Mapping/N2xCB4856_RIAILs_Rqtlfiles.RData")
+load("~/Dropbox/AndersenLab/RCode/Linkage mapping/N2xCB4856_RIAILs_Rqtlfiles.RData")
 
 # Remove interpolated SNPs
 N2xCB4856.cross <- calc.genoprob(N2xCB4856.cross, step=0)
 
-# Make the "id" column numeric
-N2xCB4856.cross$pheno$id <- as.numeric(sapply(as.character(N2xCB4856.cross$pheno$id), function(x){strsplit(x, "X")[[1]][2]}))
-
-# Reorder by trait id
-trait3 <- trait3[order(trait3$id),]
-
-# Remove phenotype data from Matt Rockman's strains
-trait3 <- trait3[trait3$id>239,]
-
 # Set the phenotype information for the cross object
-N2xCB4856.cross$pheno <- mergePheno2(N2xCB4856.cross, trait3)
+N2xCB4856.cross$pheno <- mergepheno(N2xCB4856.cross, reduced.pheno)
 
 # Extract the scaled and centered phenotype data
 pdata.01s = extractScaledPhenotype(N2xCB4856.cross)
@@ -102,7 +60,12 @@ peaklist.01   = getChrPeaks(mindex.split, chr.mindex.offset, LODS.01)
 
 # Get the false discovery rate (FDR) for all traits and save immediately (this step can take several hours)
 set.seed(0)
-LODS.01.FDR   = getPeakFDR(peaklist.01$chr.peaks.lod, pdata.01s, gdata, 1000, doGPU=F)
+LODS.01.FDR   = getPeakFDR(peaklist.01$chr.peaks.lod, pdata.01s, gdata, 100, doGPU=F)
+#LODS.01.FDR   = getPeakFDR(peaklist.01$chr.peaks.lod, pdata.01s, gdata, 1000, doGPU=F)
+
+threshold = 3.0 # FAKE THRESHOLD TO GET AROUND FDR CALCULATION
+
+
 # save(LODS.01.FDR, file="RIAILs2FDR.Rda")
 # 
 # load("~/RIAILs2FDR.Rda")

@@ -1,28 +1,40 @@
 #' Get the LOD value for each marker based on the correlation between genotype
 #' 
-#' @param x A number.
-#' @param y A number.
-#' @return The LOD scores for all markers
+#' @param pheno A phenotype data frame output from the easysorter pipeline
+#' @return A fully formatted phenotype data frame ready to be joined to the
+#' cross object
+#' @importFrom dplyr %>%
+#' @export
 
-renamecols <- function(x){
-    colnames(x)[which(colnames(x) == "n"):ncol(x)] <- paste0(x$condition[1], ".", colnames(x)[which(colnames(x) == "n"):ncol(x)])
-    return(x)
+mapformat <- function(pheno){
+    pheno$conpheno <- paste0(pheno$condition, ".", pheno$trait)
+    pheno <- tidyr::spread(pheno, conpheno, phenotype)
+    pheno <- pheno %>% dplyr::group_by(strain) %>%
+        dplyr::summarise_each(funs = funs(mean(., na.rm = TRUE))) %>%
+        dplyr::select(-date, -experiment, -round, -assay, -condition, -control,
+                      -plate, -row, -col, -trait)
+    pheno$id <- stringr::str_split_fixed(pheno$strain, "QX", 2)[,2]
 }
 
 #' Merge the cross object and the phenotype data frame using a dplyr left_join
 #' 
 #' @param cross A cross object
 #' @param phenotype The phenotype data frame with the id numbers for each strain
+#' @param set Filter the phenotype data to one specific set (Rockman=1 or 2,
+#' Andersen=3) before joining to the data frame
 #' @return The phenotype element of the cross object
 #' @importFrom dplyr %>%
+#' @export
 
 mergepheno <- function(cross, phenotype, set=NULL){
-    if(!is.null(set)){
-        phenotype = phenotype %>% dplyr::filter(set == set)
-    }
     cross$pheno$id <- as.numeric(cross$pheno$id)
     phenotype$id <- as.numeric(phenotype$id)
-    cross$pheno <- dplyr::left_join(cross$pheno, phenotype, by="id")
+    if(!is.null(set)){
+        cross$pheno <- dplyr::left_join(cross$pheno, phenotype, by="id") %>%
+            dplyr::filter(set == set)
+    } else {
+        cross$pheno <- dplyr::left_join(cross$pheno, phenotype, by="id")
+    }
     cross$pheno <- cross$pheno[order(cross$pheno$id),]
     return(cross$pheno)
 }
@@ -71,6 +83,13 @@ extractScaledPhenotype=function(cross, set=NULL, setCorrect=FALSE, scaleVar=TRUE
         
     }
 }
+
+
+
+
+
+
+
 
 
 

@@ -49,7 +49,7 @@ extractScaledPhenotype=function(impcross, set=NULL, setCorrect=FALSE, scaleVar=T
 ###########################################################################################################
 
 ############ Convert jb LODmatrix to scanone object #######################################################
-LODmatrix.2.scanone= function(LODS, cross, LL=NULL) {
+LODmatrix.2.scanone = function(LODS, cross, LL=NULL) {
     if(is.null(LL)){
         LODSm = t(as.matrix(LODS))
         LODSs = scanone(cross, pheno.col=10, method='mr')
