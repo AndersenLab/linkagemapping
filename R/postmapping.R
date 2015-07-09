@@ -4,9 +4,8 @@
 #' \code{scanone} object
 #' @param cross An example cross object from which to extract scanone skeleton
 #' @return The genotype matrix, encoded as -1 or 1 for genotype
-#' @export
 
-LODmatrix.2.scanone= function(LODS, cross) {
+lodmatrix2scanone= function(LODS, cross) {
     LODSm = t(as.matrix(LODS))
     LODSs = scanone(cross, pheno.col=10, method='mr')
     LODSso = data.frame(LODSs, LODSm)
@@ -22,7 +21,7 @@ LODmatrix.2.scanone= function(LODS, cross) {
 #' @return The genotype matrix, encoded as -1 or 1 for genotype
 #' @export
 
-getChrPeaks = function(mindex.split, chr.mindex.offset, LODS) {
+get_chr_peaks = function(mindex.split, chr.mindex.offset, LODS) {
     chr.peaks.lod    = sapply(mindex.split, function(markers) { apply(LODS[,markers], 1, max) })
     # get marker index of LOD peaks per chromosomes                             
     chr.peaks.index = sapply(mindex.split, function(markers)  { apply(LODS[,markers], 1, which.max) })
@@ -40,7 +39,7 @@ getChrPeaks = function(mindex.split, chr.mindex.offset, LODS) {
 #' @return The genotype matrix, encoded as -1 or 1 for genotype
 #' @export
 
-getPeakFDR = function(chromosome.peaks.lod, pdata, gdata, perms=100 ,doGPU=F) { 
+get_peak_fdr = function(chromosome.peaks.lod, pdata, gdata, perms=100 ,doGPU=F) { 
     n.pheno = countStrainsPerTrait(pdata) 
     # change dopar for multithreaded
     permpeakLODs = foreach( i = 1:perms ) %do% {
@@ -72,7 +71,7 @@ getPeakFDR = function(chromosome.peaks.lod, pdata, gdata, perms=100 ,doGPU=F) {
 #' @return The genotype matrix, encoded as -1 or 1 for genotype
 #' @export
 
-getPeakArray = function(peaklist, threshold) {
+get_peak_array = function(peaklist, threshold) {
     tryCatch( {
         # trait number and marker number
         keepPeaks   = which(peaklist$chr.peaks.lod>threshold, arr.ind=T)
@@ -93,7 +92,7 @@ getPeakArray = function(peaklist, threshold) {
 #' @export
 
 ###### fix QTLs and get residual phenotypes ###########################################################
-getPhenoResids = function(pdata,gdata, peakArray, intercept=FALSE) {
+get_pheno_resids = function(pdata, gdata, peakArray, intercept=FALSE) {
     presids = pdata
     si=c()
     for( i in 1:ncol(pdata) ) {

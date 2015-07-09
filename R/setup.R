@@ -45,16 +45,16 @@ mergepheno <- function(cross, phenotype, set=NULL){
 #' @param cross A cross object
 #' @return The genotype matrix, encoded as -1 or 1 for genotype
 
-extractGenotype=function(cross){
+extract_genotype=function(cross){
     (do.call('cbind', sapply(cross$geno, function(x) { x$argmax }))*2)-3
 }
 
 #' Count number of strains with data for each phenotype from cross structure
 #' 
 #' @param pheno The phenotype elemnt of the cross object
-#' @return The genotype matrix, encoded as -1 or 1 for genotype
+#' @return A named vector of the number of strains present for each phenotype measurement
 
-countStrainsPerTrait = function(pheno) {
+count_strains_per_trait = function(pheno) {
     apply(pheno, 2, function(x){sum(!is.na(x))})
 }
 
@@ -62,38 +62,22 @@ countStrainsPerTrait = function(pheno) {
 #' standardize variance
 #' 
 #' @param cross A cross object
-#' @return The genotype matrix, encoded as -1 or 1 for genotype
-#' 
+#' @param set A vector of set IDs for all RIAILs
+#' @param setcorrect Boolean, whether or not to correct for sets by scaling phenotype values based on the set ID
+#' @param scalevar Boolean, whether or not to standarize the variance
+#' @return A matrix of scaled phenotype values
 
-# NOTE!!!!!!!!!!!!! removing first five columns !!!! specific to this data set !!!!!
-# badtraits = misbehaving phenos
-# set = vector of set ids
-# setCorrect = are you doing set correction or not?
-# scaleVar = scale variance or not
-
-extractScaledPhenotype=function(cross, set=NULL, setCorrect=FALSE, scaleVar=TRUE){
+extract_scaled_phenotype=function(cross, set=NULL, setcorrect=FALSE,
+                                  scalevar=TRUE){
     p = cross$pheno[,7:ncol(cross$pheno)]
-    if(setCorrect==FALSE) { apply(p, 2, scale, scale=scaleVar) } else {
+    if(setcorrect==FALSE) { 
+        apply(p, 2, scale, scale=scalevar) 
+    } else {
         s=apply(p, 2, function(x) { 
             xs = split(x,set)
             ms = lapply(xs, mean,na.rm=T)
             unlist(mapply(function(x,y) {x-y}, xs, ms))
         })
         apply(s, 2, scale, scale=scaleVar)
-        
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

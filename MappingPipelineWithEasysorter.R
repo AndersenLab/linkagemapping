@@ -19,12 +19,12 @@ N2xCB4856.cross <- calc.genoprob(N2xCB4856.cross, step=0)
 N2xCB4856.cross$pheno <- mergepheno(N2xCB4856.cross, reduced.pheno)
 
 # Extract the scaled and centered phenotype data
-pdata.01s = extractScaledPhenotype(N2xCB4856.cross)
+pdata.01s = extract_scaled_phenotype(N2xCB4856.cross)
 
 # Extract the genotype data and get the number of strains per trait
 
-gdata = extractGenotype(N2xCB4856.cross)
-n.pheno  = countStrainsPerTrait(pdata.01s)
+gdata = extract_genotype(N2xCB4856.cross)
+n.pheno  = count_strains_per_trait(pdata.01s)
 
 # Calculate avg RIL relatedness (for VC models)
 # Additive
