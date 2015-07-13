@@ -12,8 +12,9 @@ mapformat <- function(pheno){
     pheno <- pheno %>% dplyr::group_by(strain) %>%
         dplyr::summarise_each(funs = funs(mean(., na.rm = TRUE))) %>%
         dplyr::select(-date, -experiment, -round, -assay, -condition, -control,
-                      -plate, -row, -col, -trait)
-    pheno$id <- stringr::str_split_fixed(pheno$strain, "QX", 2)[,2]
+                      -plate, -row, -col, -trait) %>%
+        dplyr::mutate(id = stringr::str_split_fixed(.$strain, "QX", 2)[,2]) %>%
+        dplyr::filter(id != "")
 }
 
 #' Merge the cross object and the phenotype data frame using a dplyr left_join
@@ -31,7 +32,7 @@ mergepheno <- function(cross, phenotype, set=NULL){
     phenotype$id <- as.numeric(phenotype$id)
     if(!is.null(set)){
         cross$pheno <- dplyr::left_join(cross$pheno, phenotype, by="id") %>%
-            dplyr::filter(set == set)
+            dplyr::filter(set == set) %>% select(-contains("strain"))
     } else {
         cross$pheno <- dplyr::left_join(cross$pheno, phenotype, by="id")
     }
@@ -69,7 +70,8 @@ count_strains_per_trait = function(pheno) {
 
 extract_scaled_phenotype=function(cross, set=NULL, setcorrect=FALSE,
                                   scalevar=TRUE){
-    p = cross$pheno[,7:ncol(cross$pheno)]
+    p <- cross$pheno %>%
+        dplyr::select(which(sapply(., class) == "numeric"), -id, -set)
     if(setcorrect==FALSE) { 
         apply(p, 2, scale, scale=scalevar) 
     } else {
