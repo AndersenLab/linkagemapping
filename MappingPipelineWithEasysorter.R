@@ -1,30 +1,31 @@
 library(tidyr)
 library(dplyr)
 library(stringr)
-
-source("~/LinkageMapping/LinkageMappingFunctions.R")
-
-pheno <- readRDS("~/Dropbox/AndersenLab/LabFolders/PastMembers/Tyler/ForTrip/RIAILs1_processed.rds")
-pheno <- mapformat(pheno, set)
-
-#-----------------------End processing, start mapping--------------------------#
+library(foreach)
 
 # Load in the rqtl files 
 load("~/Dropbox/AndersenLab/RCode/Linkage mapping/N2xCB4856_RIAILs_Rqtlfiles.RData")
 
-# Remove interpolated SNPs
-N2xCB4856.cross <- calc.genoprob(N2xCB4856.cross, step=0)
+pheno <- readRDS("~/Dropbox/AndersenLab/LabFolders/PastMembers/Tyler/ForTrip/RIAILs1_processed.rds")
+pheno <- readRDS("~/Dropbox/AndersenLab/LabFolders/PastMembers/Tyler/ForTrip/RIAILs2_processed.rds")
+pheno <- mapformat(pheno)
+N2xCB4856.cross$pheno <- mergepheno(N2xCB4856.cross, pheno)
+result <- map(N2xCB4856.cross)
+peaks <- maxpeaks(resultS, N2xCB4856.cross)
+peaks2 <- get_peak_array(peaks, 3.5)
 
-# Set the phenotype information for the cross object
-N2xCB4856.cross$pheno <- mergepheno(N2xCB4856.cross, reduced.pheno)
+FDR <- get_peak_fdr(peaks, N2xCB4856.cross, 10, doGPU=F)
 
-# Extract the scaled and centered phenotype data
-pdata.01s = extract_scaled_phenotype(N2xCB4856.cross)
+# Set arbitrary FDR threshold
+FDR <- 3.5
 
-# Extract the genotype data and get the number of strains per trait
+peaks2 <- get_peaks_above_thresh(resultS, FDR)
 
-gdata = extract_genotype(N2xCB4856.cross)
-n.pheno  = count_strains_per_trait(pdata.01s)
+
+#-----------------------End processing, start mapping--------------------------#
+
+
+
 
 # Calculate avg RIL relatedness (for VC models)
 # Additive
@@ -134,6 +135,36 @@ colnames(meltLods) <- c("SNP", "chr", "pos", "trait", "LOD")
 finalLods <- merge(meltLods, peakFit.df, by=c("trait", "SNP"), all.x=TRUE)
 
 write.csv(finalLods, file="~/RIAILs1Map.csv", row.names=FALSE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 h2.set=list()
 for(i in 1:ncol(pdata.01s)){
