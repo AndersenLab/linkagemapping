@@ -4,7 +4,6 @@
 #' @return A fully formatted phenotype data frame ready to be joined to the
 #' cross object
 #' @importFrom dplyr %>%
-#' @export
 
 mapformat <- function(pheno){
     pheno$conpheno <- paste0(pheno$condition, ".", pheno$trait)
@@ -28,6 +27,7 @@ mapformat <- function(pheno){
 #' @export
 
 mergepheno <- function(cross, phenotype, set=NULL){
+    phenotype <- mapformat(phenotype)
     cross$pheno$id <- as.numeric(cross$pheno$id)
     phenotype$id <- as.numeric(phenotype$id)
     if(!is.null(set)){
@@ -53,7 +53,8 @@ extract_genotype=function(cross){
 #' Count number of strains with data for each phenotype from cross structure
 #' 
 #' @param pheno The phenotype elemnt of the cross object
-#' @return A named vector of the number of strains present for each phenotype measurement
+#' @return A named vector of the number of strains present for each phenotype
+#' measurement
 
 count_strains_per_trait = function(pheno) {
     apply(pheno, 2, function(x){sum(!is.na(x))})
@@ -64,7 +65,8 @@ count_strains_per_trait = function(pheno) {
 #' 
 #' @param cross A cross object
 #' @param set A vector of set IDs for all RIAILs
-#' @param setcorrect Boolean, whether or not to correct for sets by scaling phenotype values based on the set ID
+#' @param setcorrect Boolean, whether or not to correct for sets by scaling
+#' phenotype values based on the set ID
 #' @param scalevar Boolean, whether or not to standarize the variance
 #' @return A matrix of scaled phenotype values
 
