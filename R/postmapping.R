@@ -132,8 +132,7 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
 #' @param threshold The FDR threshold value used to determine significant peaks
 #' @param intercept Boolean stating whether or not to include intercept term in
 #' linear model. Defaults to \code{FALSE}.
-#' @return The genotype matrix, encoded as -1 or 1 for genotype
-#' @export
+#' @return The residuals of the phenotypes
 
 get_pheno_resids = function(lods, cross, threshold, intercept = FALSE) {
     
@@ -269,7 +268,6 @@ annotate_lods <- function(lods, cross) {
 #' @param cross An example cross object from which to extract scanone skeleton
 #' @param LL
 #' @return The genotype matrix, encoded as -1 or 1 for genotype
-#' @export
 
 cint <- function(lods, chr, lodcolumn=5, drop=1.5){
     data <- lods[lods$chr==chr,]

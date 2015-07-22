@@ -18,7 +18,7 @@ get_pheno_resids(lods, cross, threshold, intercept = FALSE)
 linear model. Defaults to \code{FALSE}.}
 }
 \value{
-The genotype matrix, encoded as -1 or 1 for genotype
+The residuals of the phenotypes
 }
 \description{
 Regress genotype from phenotype and resturn the residual phenotype values
