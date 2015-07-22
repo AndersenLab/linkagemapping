@@ -1,14 +1,16 @@
 #' Convert LODmatrix to scanone object
 #' 
-#' @param LODS A data frame output by the mapping functions to be converted to a
+#' @param lods A data frame output by the mapping functions to be converted to a
 #' \code{scanone} object
 #' @param cross An example cross object from which to extract scanone skeleton
-#' @return The genotype matrix, encoded as -1 or 1 for genotype
+#' @return A scanone onject with the resultant mapping data in the lod column
 
 lodmatrix2scanone <- function(lods, cross) {
+    # Throws a warning for missing phenotype data that we don't care about
+    # because we're only using the fake mapping to get the scanone class object
     suppressWarnings({
         LODSm <- t(as.matrix(lods))
-        LODSs <- scanone(cross, pheno.col=10, method='mr')
+        LODSs <- scanone(cross, pheno.col=6, method='mr')
         LODSso <- data.frame(LODSs, LODSm)
         LODSso <- LODSso[,-3]
         class(LODSso) <- class(LODSs)
@@ -16,62 +18,99 @@ lodmatrix2scanone <- function(lods, cross) {
     })
 }
 
-#' Get max lod score and SNP index for each mapped trait
+#' Get max LOD score and SNP index for each mapped trait
 #' 
 #' @param lods A data frame output by the mapping functions to be converted to a
 #' @param cross An example cross object from which to extract scanone skeleton
-#' @return The genotype matrix, encoded as -1 or 1 for genotype
+#' @return A list consisting of two vectors, the first being the max peak LOD
+#' height and the second being the index of the SNP at which the peak LOD occurs
 
 maxpeaks <- function(lods, cross) {
+    
+    # Get rid of all non-LOD infomation
     lods <- data.frame(lods[,3:ncol(lods)])
+    
+    # Get the maximum LOD score for each trait
     maxpeaklod <- vapply(lods, max, numeric(1))
     
-    # Get marker index of LOD peaks per chromosomes                             
+    # Get marker index of LOD peak per trait                         
     maxpeakindex <- vapply(lods, which.max, integer(1))
+    
+    # Return the LODs and the indices as a two element list
     return(list(maxpeaklod = maxpeaklod, maxpeakindex=maxpeakindex))
 }
 
-#' Convert jb LODmatrix to scanone object
+#' Get the FDR value for a particular mapping by phenotype permutation
 #' 
-#' @param LODS A data frame output by the mapping functions to be converted to a
+#' @param lods A data frame output by the mapping functions to be converted to a
 #' \code{scanone} object
-#' @param cross An example cross object from which to extract scanone skeleton
-#' @param LL
-#' @return The genotype matrix, encoded as -1 or 1 for genotype
-#' @importFrom foreach %do%
-#' @export
+#' @param cross The original cross object used to perform the mapping
+#' @param perms
+#' @param doGPU Boolean, whether to use the gputools package to speed up,
+#' mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
+#' graphics card with the gputools package installed. Defaults to \code{FALSE}.
+#' @return The value of the 5% FDR threshold
+#' @importFrom foreach %do% %dopar%
 
 get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
     
-    peaklods <- maxpeaks(lods)$maxpeaklods
-
-    pheno <- extract_scaled_phenotype(cross)
-    geno <- extract_genotype(cross)
-    
-    npheno <- count_strains_per_trait(pheno)
-    
-    # Change dopar for multithreaded
-    permpeakLODs <- foreach( i = 1:perms ) %do% {
-        print(i)
-        lods <- lodmatrix2scanone(get_lod_by_cor(npheno, pheno[sample(1:nrow(pheno)),], geno, doGPU), cross)
-        maxpeaks(cross, lods)$maxpeaklod
+    # Set the appropriate divisor for printing frequency
+    if (perms < 100) {
+        div = 1
+    } else if (perms >= 100 & perms < 1000) {
+        div = 10
+    } else {
+        div = 100
     }
     
+    # Get the maximum peak height for each trait
+    peaklods <- maxpeaks(lods, cross)$maxpeaklod
+
+    # Get the information necessary to do the permutation mapping
+    pheno <- extract_scaled_phenotype(cross)
+    geno <- extract_genotype(cross)
+    npheno <- count_strains_per_trait(pheno)
+    
+    # Print a new line to the console to make the updates prettier
+    cat("\n")
+    
+    # Permute the phenotype data and do a mapping for each round of permutation
+    # Change to %dopar% for multithreaded
+    permpeakLODs <- foreach::foreach(i = 1:perms) %do% {
+        if (i %% div == 0) {
+            cat(paste0("Permutation ", i, " of ", perms, "...\n"))
+        }
+        lods <- lodmatrix2scanone(get_lod_by_cor(npheno, pheno[sample(1:nrow(pheno)),], geno, doGPU), cross)
+        maxpeaks(lods, cross)$maxpeaklod
+    }
+    
+    # Get all of the permutation peak lods
     permpeakLODs <- lapply(permpeakLODs, function(x) data.frame(t(data.frame(x))))
     permpeakLODs <- dplyr::rbind_all(permpeakLODs)
     permpeakLODs <- tidyr::gather(permpeakLODs, trait, lod)
     
-    # Chromosome and peak-based FDR
+    # Get the obeserved number of peaks 
     obsPcnt <- sapply(seq(2, 5, .01), function(thresh) {
         sum(peaklods>thresh)
     })
-    names(obsPcnt) = seq(2,5, .01)
+    names(obsPcnt) <- seq(2,5, .01)
     
     # Expected number of QTL peaks with LOD greater than threshold
-    expPcnt = sapply(seq(2, 5, .01), function(thresh) sum(permpeakLODs$lod > thresh))
-    names(expPcnt) = seq(2, 5, .01)
-    pFDR = expPcnt/obsPcnt
-    threshold <- as.numeric(names(pFDR)[which(is.infinite(pFDR))[1]])
+    expPcnt <- sapply(seq(2, 5, .01), function(thresh) sum(permpeakLODs$lod > thresh))
+    names(expPcnt) <- seq(2, 5, .01)
+    
+    # Ratio of expected peaks to observed peaks
+    pFDR <- expPcnt/obsPcnt
+    
+    # Get the threshold value such that the ratio of expected peaks to observed
+    # peaks is less than .05
+    belowalpha <- sapply(pFDR, function(x) x < .05)
+    suppressWarnings({
+            threshold <- as.numeric(names(belowalpha)[min(which(belowalpha))])
+        })
+    if (is.na(threshold)) {
+        threshold <- as.numeric(names(belowalpha)[min(which(is.na(belowalpha)))])
+    }
     return(threshold)
 }
 
@@ -99,33 +138,36 @@ get_peak_array = function(peaklist, threshold) {
 #' @return The genotype matrix, encoded as -1 or 1 for genotype
 #' @export
 
-###### fix QTLs and get residual phenotypes ###########################################################
-get_pheno_resids = function(pdata, gdata, peakArray, intercept=FALSE) {
-    presids <- pdata
-    si <- c()
-    for (i in 1:ncol(pdata)) {
-        spA <- peakArray[peakArray$trait==i,]
-        if(nrow(spA) > 0){
-            si <- c(si,i)
-            if(intercept) {
-                rr <- residuals(lm(pdata[,i]~gdata[,spA$markerIndex]))
-            }else{
-                rr <- residuals(lm(pdata[,i]~gdata[,spA$markerIndex]-1))
-            }
-            presids[as.numeric(names(rr)),i] <- rr
-        }
-    }
-    print(length(si))
-    return(presids)
-}
-
-
-get_pheno_resids = function(cross, map, threshold, intercept=FALSE) {
-    pheno <- extract_scaled_phenotype(cross)
-    lods <- map[,3:ncol(map)]
-    geno <- extract_genotype(cross)
+get_pheno_resids = function(cross, lods, threshold, intercept=FALSE) {
+    pheno <- data.frame(extract_scaled_phenotype(cross))
+    lods <- data.frame(lods[,3:ncol(lods)])
+    geno <- data.frame(extract_genotype(cross))
     
-    lapply(pdata, )
+    traitsabovethresh <- lapply(1:ncol(lods), function(x){
+        if(max(lods[x])>threshold){
+            return(colnames(lods)[x])
+        }
+    })
+    tat <- unlist(traitsabovethresh)
+    
+    maxsnp <- vapply(tat, function(x){
+        which.max(lods[,x])
+    }, numeric(1))
+    
+    peaks <- data.frame(trait = tat, snp = maxsnp)
+    
+    if (intercept) {
+        presids <- data.frame(lapply(1:nrow(peaks), function(x) {
+            residuals(lm(pheno[,peaks$trait[x]]~geno[,peaks$snp[x]] - 1, na.action = na.exclude))
+        }))
+    } else {
+        presids <- data.frame(lapply(1:nrow(peaks), function(x) {
+            residuals(lm(pheno[,peaks$trait[x]]~geno[,peaks$snp[x]] - 1, na.action = na.exclude))
+        }))
+    }
+    
+    colnames(presids) <- peaks$trait
+    
     return(presids)
 }
 
@@ -141,12 +183,10 @@ get_pheno_resids = function(cross, map, threshold, intercept=FALSE) {
 
 get_peaks_above_thresh <- function(lods, threshold) {
     do.call(rbind, lapply(3:ncol(lods), function(x){
-        print(x)
         data <- data.frame(cbind(SNP=rownames(lods), data.frame(lods[,c(1, x)])))
         data$trait <- colnames(lods)[x]
         colnames(data)[3] <- "LOD"
         peaks <- data %>%
-            group_by(chr) %>%
             filter(LOD==max(LOD)) %>%
             do(data.frame(.[1,])) %>%
             filter(LOD > threshold)
@@ -154,51 +194,91 @@ get_peaks_above_thresh <- function(lods, threshold) {
     }))
 }
 
+#' Convert jb LODmatrix to scanone object
+#' 
+#' @param LODS A data frame output by the mapping functions to be converted to a
+#' \code{scanone} object
+#' @param cross An example cross object from which to extract scanone skeleton
+#' @param LL
+#' @return The genotype matrix, encoded as -1 or 1 for genotype
+#' @export
 
-
-annotate_lods <- function(peaks) {
+annotate_lods <- function(lods, cross) {
+    peaks <- lods %>%
+        dplyr::filter(lod > threshold) %>%
+        dplyr::group_by(trait, iteration) %>%
+        dplyr::filter(lod == max(lod))
+    geno <- data.frame(extract_genotype(cross))
+    pheno <- data.frame(extract_scaled_phenotype(cross))
+    
     # trait chr pos LOD VE scaled_effect_size CI.L CI.R
-    peakFit=list()
-    for(i in 1:nrow(peaks)) {
+    peaklist <- lapply(1:nrow(peaks), function(i) {
         print(i)
-        trait=as.character(peaks$trait[i])
-        peak.markers=as.character(peaks$SNP[i])
-        chr.vec = as.numeric(as.character(peaks$chr[i]))
-        LOD.vec = LODS.01[which(rownames(LODS.01)==trait),]
-        SNP.name = as.character(peaks$SNP[i]) 
-        ax = paste('gdata[,', which(colnames(gdata)==peak.markers),']', sep='')
-        aq = paste(ax, collapse= ' + ')
-        am = lm(paste('pdata.01s[,' , which(gsub("-", "\\.", colnames(pdata.01s))==trait), ']', '~', (aq), '-1'))
-        aov.a=anova(am)
-        tssq = sum(aov.a[,2])
-        a.var.exp = aov.a[1:(nrow(aov.a)-1),2]/tssq  
-        a.eff.size= as.vector(coefficients(am))
+        peaktrait <- as.character(peaks$trait[i])
+        marker <- gsub('-', '\\.', as.character(peaks$marker[i]))
+        
+        genotypes <- geno[, which(colnames(geno) == marker)]
+        phenotypes <- pheno[, which(colnames(pheno) == peaktrait)]
+        
+    
+        am <- lm(phenotypes ~ genotypes - 1)
+        modelanova <- anova(am)
+        tssq <- sum(modelanova[,2])
+        variance_explained <- modelanova[1:(nrow(modelanova)-1),2]/tssq  
+        effect_size <- as.vector(coefficients(am))
         
         # Calculate confidence interval bounds
-        lodsData <- LODS.01s[,c(1, 2, which(colnames(LODS.01s)==trait))]
-        lodsData$chr <- as.numeric(as.character(lodsData$chr))
-        CIs <- list()
-        j <- chr.vec
-        int <- cint(lodsData, chr=j, lodcolumn=3)
-        CI.L.marker <- rownames(int)[1]
-        CI.L.pos <- as.numeric(int[1,2])
-        CI.R.marker <- rownames(int)[nrow(int)]
-        CI.R.pos <- as.numeric(int[nrow(int),2])
-        CI <- data.frame(CI.L.marker, CI.L.pos, CI.R.marker, CI.R.pos)
-        CIs <- append(CIs, list(CI))
-        CIs <- do.call(rbind, CIs)
+        peakchr = as.character(peaks$chr[i])
+        peakiteration <- peaks$iteration[i]
+        traitlods <- lods %>% dplyr::filter(trait == peaktrait, iteration == peakiteration)
+        confint <- cint(traitlods, peakchr)
         
+        peak = peaks[i,]
         
-        peakFit=append(peakFit, list(data.frame(cbind(data.frame(trait=trait, SNP=SNP.name, var.exp=a.var.exp, eff.size=a.eff.size), CIs))))
+        peak$var_exp <- variance_explained
+        peak$eff_size <- effect_size
+        peak$ci_l_marker <- unlist(confint[1, "marker"])
+        peak$ci_l_pos <- unlist(confint[1, "pos"])
+        peak$ci_r_marker <- unlist(confint[2, "marker"])
+        peak$ci_r_pos <- unlist(confint[2, "pos"])
+        return(peak)
+    })
+    ann_peaks <- do.call(rbind, peaklist)
+    finallods <- dplyr::left_join(lods, ann_peaks)
+    return(finallods)
+}
+
+
+
+#' Convert jb LODmatrix to scanone object
+#' 
+#' @param LODS A data frame output by the mapping functions to be converted to a
+#' \code{scanone} object
+#' @param cross An example cross object from which to extract scanone skeleton
+#' @param LL
+#' @return The genotype matrix, encoded as -1 or 1 for genotype
+#' @export
+
+cint <- function(lods, chr, lodcolumn=5, drop=1.5){
+    data <- lods[lods$chr==chr,]
+    peak <- which.max(unlist(data[,lodcolumn]))
+    peakLOD <- unlist(data[peak, lodcolumn])
+    if(peak > 1){
+        left <- peak - 1
+        while(left > 1 & peakLOD - data[left, lodcolumn] < drop){
+            left <- left-1
+        }
+    } else {
+        left <- 1
     }
-    peakFit.df = do.call('rbind', peakFit)
-    
-    lods <- data.frame(cbind(SNP=rownames(LODS.01s), data.frame(LODS.01s)))
-    lods[,c(1,2)] <- lapply(lods[,c(1,2)], as.character)
-    lods[,3] <- as.numeric(lods[,3])
-    meltLods <- melt(lods, id=c("SNP", "chr", "pos"), value="LOD")
-    colnames(meltLods) <- c("SNP", "chr", "pos", "trait", "LOD")
-    
-    finalLods <- merge(meltLods, peakFit.df, by=c("trait", "SNP"), all.x=TRUE)
-    return(finalLods)
+    if(peak < nrow(data)){
+        right <- peak + 1
+        while(right < nrow(data) & peakLOD - data[right, lodcolumn] < drop){
+            right <- right + 1
+        }
+    } else {
+        right <- nrow(data)
+    }
+    bounds <- rbind(data[left,], data[right,])
+    return(bounds)
 }
