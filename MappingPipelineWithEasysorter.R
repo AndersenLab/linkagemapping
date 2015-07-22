@@ -12,4 +12,4 @@ N2xCB4856.cross$pheno <- mergepheno(N2xCB4856.cross, pheno)
 test <- fsearch(N2xCB4856.cross, 10)
 
 debug(annotate_lods)
-annotate_lods(test, N2xCB4856.cross)
+annlods <- annotate_lods(test, N2xCB4856.cross)
