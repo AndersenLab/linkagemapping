@@ -85,7 +85,8 @@ fsearch <- function(cross, iterations = 1000, doGPU = FALSE) {
     }
     cat("\nConverting marker position to physical position. This step takes a while...\n")
     finallods$pos <- vapply(finallods$marker, function(marker) {
-            return(as.numeric(unlist(markers[markers$SNP == marker, "WS244.pos"])))
+            return(as.numeric(unlist(
+                linkagemapping::markers[markers$SNP == marker, "WS244.pos"])))
         }, numeric(1))
     
     return(finallods)
