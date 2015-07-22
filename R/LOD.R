@@ -30,14 +30,14 @@ map <- function(cross, doGPU = FALSE) {
     cross <- qtl::calc.genoprob(cross, step=0)
     
     # Extract the necessary information from the cross object
-    scaledpheno <- linkagemapping::extract_scaled_phenotype(cross)
-    npheno <- linkagemapping::count_strains_per_trait(scaledpheno)
-    geno <- linkagemapping::extract_genotype(cross)
+    scaledpheno <- extract_scaled_phenotype(cross)
+    npheno <- count_strains_per_trait(scaledpheno)
+    geno <- extract_genotype(cross)
     
     # Do and return the mapping
-    lods <- linkagemapping::get_lod_by_cor(npheno, scaledpheno, geno, doGPU)
+    lods <- get_lod_by_cor(npheno, scaledpheno, geno, doGPU)
     
-    lods <- linkagemapping::lodmatrix2scanone(lods, cross)
+    lods <- lodmatrix2scanone(lods, cross)
     
     return(lods)
 }
@@ -55,9 +55,9 @@ map <- function(cross, doGPU = FALSE) {
 
 fsearch <- function(cross, iterations = 1000, doGPU = FALSE) {
     iteration <- 1
-    lods <- linkagemapping::map(cross)
-    fdr <- linkagemapping::get_peak_fdr(lods, cross, iterations, doGPU)
-    peaks <- linkagemapping::get_peaks_above_thresh(lods, fdr)
+    lods <- map(cross)
+    fdr <- get_peak_fdr(lods, cross, iterations, doGPU)
+    peaks <- get_peaks_above_thresh(lods, fdr)
     if (nrow(peaks) > 0) {
         lodslist <- list()
         while (nrow(peaks) > 0){
@@ -67,12 +67,12 @@ fsearch <- function(cross, iterations = 1000, doGPU = FALSE) {
             meltedlods <- tidyr::gather(lodswiththresh, trait, lod, -chr, -pos, -marker, -threshold, -iteration) %>%
                 dplyr::select(marker, chr, pos, trait, lod, threshold, iteration)
             lodslist <- append(lodslist, list(meltedlods))
-            resids <- linkagemapping::get_pheno_resids(lods, cross, fdr)
+            resids <- get_pheno_resids(lods, cross, fdr)
             metapheno <- cross$pheno[1:5]
             cross$pheno <- data.frame(metapheno, resids)
-            lods <- linkagemapping::map(cross)
-            fdr <- linkagemapping::get_peak_fdr(lods, cross, iterations, doGPU)
-            peaks <- linkagemapping::get_peaks_above_thresh(lods, fdr)
+            lods <- map(cross)
+            fdr <- get_peak_fdr(lods, cross, iterations, doGPU)
+            peaks <- get_peaks_above_thresh(lods, fdr)
             iteration <- iteration + 1
         }
         finallods <- dplyr::rbind_all(lodslist)
@@ -86,7 +86,7 @@ fsearch <- function(cross, iterations = 1000, doGPU = FALSE) {
     cat("\nConverting marker position to physical position. This step takes a while...\n")
     finallods$pos <- vapply(finallods$marker, function(marker) {
             return(as.numeric(unlist(
-                linkagemapping::markers[markers$SNP == marker, "WS244.pos"])))
+                markers[markers$SNP == marker, "WS244.pos"])))
         }, numeric(1))
     
     return(finallods)
