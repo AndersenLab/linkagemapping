@@ -7,8 +7,8 @@
 
 mapformat <- function(pheno){
     pheno$conpheno <- paste0(pheno$condition, ".", pheno$trait)
-    pheno <- tidyr::spread(pheno, conpheno, phenotype)
-    pheno <- pheno %>% dplyr::group_by(strain) %>%
+    pheno <- tidyr::spread(pheno, conpheno, phenotype) %>%
+        dplyr::group_by(strain) %>%
         dplyr::summarise_each(funs = funs(mean(., na.rm = TRUE))) %>%
         dplyr::select(-date, -experiment, -round, -assay, -condition, -control,
                       -plate, -row, -col, -trait) %>%
