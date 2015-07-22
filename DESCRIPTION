@@ -1,8 +1,14 @@
-Package: LinkageMapping
-Title: What the Package Does (one line, title case)
+Package: linkagemapping
+Title: Functions for the Mapping of Andersen Lab RIAILs and RILs
 Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
+Authors@R: person("Tyler", "Shimko", email = "TShimko126@gmail.com", role = c("aut", "cre"))
 Description: What the package does (one paragraph)
 Depends: R (>= 3.2.0)
-License: What license is it under?
+Imports:
+	dplyr,
+	qtl,
+	tidyr
+Suggests:
+	gputools
+License: MIT
 LazyData: true
