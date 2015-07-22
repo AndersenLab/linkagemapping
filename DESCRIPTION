@@ -11,4 +11,4 @@ Imports:
 Suggests:
 	gputools
 License: MIT
-LazyData: true
+LazyData: false
