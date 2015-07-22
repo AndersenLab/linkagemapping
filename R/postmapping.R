@@ -10,7 +10,7 @@ lodmatrix2scanone <- function(lods, cross) {
     # because we're only using the fake mapping to get the scanone class object
     suppressWarnings({
         LODSm <- t(as.matrix(lods))
-        LODSs <- scanone(cross, pheno.col=6, method='mr')
+        LODSs <- qtl::scanone(cross, pheno.col=6, method='mr')
         LODSso <- data.frame(LODSs, LODSm)
         LODSso <- LODSso[,-3]
         class(LODSso) <- class(LODSs)
@@ -64,7 +64,7 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
     }
     
     # Get the maximum peak height for each trait
-    peaklods <- maxpeaks(lods, cross)$maxpeaklod
+    peaklods <- linkagemapping::maxpeaks(lods, cross)$maxpeaklod
 
     # Get the information necessary to do the permutation mapping
     pheno <- extract_scaled_phenotype(cross)
@@ -80,12 +80,19 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
         if (i %% div == 0) {
             cat(paste0("Permutation ", i, " of ", perms, "...\n"))
         }
-        lods <- lodmatrix2scanone(get_lod_by_cor(npheno, pheno[sample(1:nrow(pheno)),], geno, doGPU), cross)
+        lods <- linkagemapping::lodmatrix2scanone(
+            get_lod_by_cor(npheno,
+                           pheno[sample(1:nrow(pheno)),],
+                           geno,
+                           doGPU),
+            cross)
         maxpeaks(lods, cross)$maxpeaklod
     }
     
     # Get all of the permutation peak lods
-    permpeakLODs <- lapply(permpeakLODs, function(x) data.frame(t(data.frame(x))))
+    permpeakLODs <- lapply(permpeakLODs, function(x) {
+            data.frame(t(data.frame(x)))
+        })
     permpeakLODs <- dplyr::rbind_all(permpeakLODs)
     permpeakLODs <- tidyr::gather(permpeakLODs, trait, lod)
     
@@ -96,7 +103,9 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
     names(obsPcnt) <- seq(2,5, .01)
     
     # Expected number of QTL peaks with LOD greater than threshold
-    expPcnt <- sapply(seq(2, 5, .01), function(thresh) sum(permpeakLODs$lod > thresh))
+    expPcnt <- sapply(seq(2, 5, .01), function(thresh) {
+            sum(permpeakLODs$lod > thresh)
+        })
     names(expPcnt) <- seq(2, 5, .01)
     
     # Ratio of expected peaks to observed peaks
@@ -109,21 +118,24 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
             threshold <- as.numeric(names(belowalpha)[min(which(belowalpha))])
         })
     if (is.na(threshold)) {
-        threshold <- as.numeric(names(belowalpha)[min(which(is.na(belowalpha)))])
+        threshold <- as.numeric(
+            names(belowalpha)[min(which(is.na(belowalpha)))])
     }
     return(threshold)
 }
 
-#' Convert jb LODmatrix to scanone object
+#' Regress genotype from phenotype and resturn the residual phenotype values
 #' 
-#' @param LODS A data frame output by the mapping functions to be converted to a
+#' @param lods A data frame output by the mapping functions to be converted to a
 #' \code{scanone} object
-#' @param cross An example cross object from which to extract scanone skeleton
-#' @param LL
+#' @param cross The cross object used for the original mapping
+#' @param threshold The FDR threshold value used to determine significant peaks
+#' @param intercept Boolean stating whether or not to include intercept term in
+#' linear model. Defaults to \code{FALSE}.
 #' @return The genotype matrix, encoded as -1 or 1 for genotype
 #' @export
 
-get_pheno_resids = function(cross, lods, threshold, intercept=FALSE) {
+get_pheno_resids = function(lods, cross, threshold, intercept = FALSE) {
     pheno <- data.frame(extract_scaled_phenotype(cross))
     lods <- data.frame(lods[,3:ncol(lods)])
     geno <- data.frame(extract_genotype(cross))
@@ -143,11 +155,13 @@ get_pheno_resids = function(cross, lods, threshold, intercept=FALSE) {
     
     if (intercept) {
         presids <- data.frame(lapply(1:nrow(peaks), function(x) {
-            residuals(lm(pheno[,peaks$trait[x]]~geno[,peaks$snp[x]] - 1, na.action = na.exclude))
+            residuals(lm(pheno[,peaks$trait[x]]~geno[,peaks$snp[x]] - 1,
+                         na.action = na.exclude))
         }))
     } else {
         presids <- data.frame(lapply(1:nrow(peaks), function(x) {
-            residuals(lm(pheno[,peaks$trait[x]]~geno[,peaks$snp[x]] - 1, na.action = na.exclude))
+            residuals(lm(pheno[,peaks$trait[x]]~geno[,peaks$snp[x]] - 1,
+                         na.action = na.exclude))
         }))
     }
     
