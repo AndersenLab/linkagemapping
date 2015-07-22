@@ -37,7 +37,7 @@ mergepheno <- function(cross, phenotype, set=NULL){
         cross$pheno <- dplyr::left_join(cross$pheno, phenotype, by="id")
     }
     cross$pheno <- cross$pheno[order(cross$pheno$id),]
-    return(cross$pheno)
+    return(cross)
 }
 
 
