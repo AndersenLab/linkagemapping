@@ -64,7 +64,7 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
     }
     
     # Get the maximum peak height for each trait
-    peaklods <- linkagemapping::maxpeaks(lods, cross)$maxpeaklod
+    peaklods <- maxpeaks(lods, cross)$maxpeaklod
 
     # Get the information necessary to do the permutation mapping
     pheno <- extract_scaled_phenotype(cross)
@@ -80,7 +80,7 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
         if (i %% div == 0) {
             cat(paste0("Permutation ", i, " of ", perms, "...\n"))
         }
-        lods <- linkagemapping::lodmatrix2scanone(
+        lods <- lodmatrix2scanone(
             get_lod_by_cor(npheno,
                            pheno[sample(1:nrow(pheno)),],
                            geno,
