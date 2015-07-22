@@ -123,21 +123,6 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
 #' @return The genotype matrix, encoded as -1 or 1 for genotype
 #' @export
 
-get_peak_array = function(peaklist, threshold) {
-    peaklist <- data.frame(trait = names(peaklist$maxpeaklod), lod = peaklist$maxpeaklod, peaklist$maxpeakindex)
-    peaks <- peaklist %>% dplyr::filter(lod > threshold)
-    return(peaks)
-}
-
-#' Convert jb LODmatrix to scanone object
-#' 
-#' @param LODS A data frame output by the mapping functions to be converted to a
-#' \code{scanone} object
-#' @param cross An example cross object from which to extract scanone skeleton
-#' @param LL
-#' @return The genotype matrix, encoded as -1 or 1 for genotype
-#' @export
-
 get_pheno_resids = function(cross, lods, threshold, intercept=FALSE) {
     pheno <- data.frame(extract_scaled_phenotype(cross))
     lods <- data.frame(lods[,3:ncol(lods)])
