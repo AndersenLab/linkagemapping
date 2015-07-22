@@ -1,15 +1,10 @@
-library(tidyr)
-library(dplyr)
-library(stringr)
-library(foreach)
+data("N2xCB4856cross")
 
-# Load in the rqtl files 
-load("~/Dropbox/AndersenLab/RCode/Linkage mapping/N2xCB4856_RIAILs_Rqtlfiles.RData")
-
+# Pick your poison
 pheno <- readRDS("~/Dropbox/AndersenLab/LabFolders/PastMembers/Tyler/ForTrip/RIAILs1_processed.rds")
 pheno <- readRDS("~/Dropbox/AndersenLab/LabFolders/PastMembers/Tyler/ForTrip/RIAILs2_processed.rds")
-N2xCB4856.cross$pheno <- mergepheno(N2xCB4856.cross, pheno)
-test <- fsearch(N2xCB4856.cross, 10)
 
-debug(annotate_lods)
-annlods <- annotate_lods(test, N2xCB4856.cross)
+
+N2xCB4856cross$pheno <- mergepheno(N2xCB4856cross, pheno)
+map <- fsearch(N2xCB4856cross, 1000)
+annlods <- annotate_lods(map, N2xCB4856cross)
