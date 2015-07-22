@@ -97,16 +97,16 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
     permpeakLODs <- tidyr::gather(permpeakLODs, trait, lod)
     
     # Get the obeserved number of peaks 
-    obsPcnt <- sapply(seq(2, 5, .01), function(thresh) {
+    obsPcnt <- sapply(seq(2, 10, .01), function(thresh) {
         sum(peaklods>thresh)
     })
-    names(obsPcnt) <- seq(2,5, .01)
+    names(obsPcnt) <- seq(2, 10, .01)
     
     # Expected number of QTL peaks with LOD greater than threshold
-    expPcnt <- sapply(seq(2, 5, .01), function(thresh) {
+    expPcnt <- sapply(seq(2, 10, .01), function(thresh) {
             sum(permpeakLODs$lod > thresh)
         })
-    names(expPcnt) <- seq(2, 5, .01)
+    names(expPcnt) <- seq(2, 10, .01)
     
     # Ratio of expected peaks to observed peaks
     pFDR <- expPcnt/obsPcnt
@@ -136,10 +136,13 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
 #' @export
 
 get_pheno_resids = function(lods, cross, threshold, intercept = FALSE) {
+    
+    # Get the scaled phenotype, the LODs, and the genotype data
     pheno <- data.frame(extract_scaled_phenotype(cross))
     lods <- data.frame(lods[,3:ncol(lods)])
     geno <- data.frame(extract_genotype(cross))
     
+    # Get only the traits with a peak above threshold
     traitsabovethresh <- lapply(1:ncol(lods), function(x){
         if(max(lods[x])>threshold){
             return(colnames(lods)[x])
@@ -147,12 +150,15 @@ get_pheno_resids = function(lods, cross, threshold, intercept = FALSE) {
     })
     tat <- unlist(traitsabovethresh)
     
+    # Get the index of the peak marker
     maxsnp <- vapply(tat, function(x){
         which.max(lods[,x])
     }, numeric(1))
     
+    # Make a data frame of traits and peak markers
     peaks <- data.frame(trait = tat, snp = maxsnp)
     
+    # Do the regression with or without the intercept term
     if (intercept) {
         presids <- data.frame(lapply(1:nrow(peaks), function(x) {
             residuals(lm(pheno[,peaks$trait[x]]~geno[,peaks$snp[x]] - 1,
@@ -165,20 +171,23 @@ get_pheno_resids = function(lods, cross, threshold, intercept = FALSE) {
         }))
     }
     
+    # Rename the columns to traits and return the resids as a data frame 
     colnames(presids) <- peaks$trait
     
     return(presids)
 }
 
 
-#' Convert jb LODmatrix to scanone object
+#' Return entries from a LOD data frame that are above the threshold value
 #' 
-#' @param LODS A data frame output by the mapping functions to be converted to a
+#' If more two or more markers from the same trait share the max LOD score, only
+#' the first marker will be taken to be the peak. 
+#' 
+#' @param lods A data frame output by the mapping functions to be converted to a
 #' \code{scanone} object
-#' @param cross An example cross object from which to extract scanone skeleton
-#' @param LL
-#' @return The genotype matrix, encoded as -1 or 1 for genotype
-#' @export
+#' @param threshold The FDR threshold value used to determine significant peaks
+#' @return A subset of the \code{lods} data for only markers with a LOD score
+#' above the threshold value
 
 get_peaks_above_thresh <- function(lods, threshold) {
     do.call(rbind, lapply(3:ncol(lods), function(x){
@@ -187,7 +196,11 @@ get_peaks_above_thresh <- function(lods, threshold) {
         colnames(data)[3] <- "LOD"
         peaks <- data %>%
             filter(LOD==max(LOD)) %>%
+            
+            # If there is more than one marker with the peak LOD value, only
+            # take the first one 
             do(data.frame(.[1,])) %>%
+            
             filter(LOD > threshold)
         return(peaks)
     }))
