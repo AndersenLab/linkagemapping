@@ -67,7 +67,7 @@ fsearch <- function(cross, iterations = 1000, doGPU = FALSE) {
             meltedlods <- tidyr::gather(lodswiththresh, trait, lod, -chr, -pos, -marker, -threshold, -iteration) %>%
                 dplyr::select(marker, chr, pos, trait, lod, threshold, iteration)
             lodslist <- append(lodslist, list(meltedlods))
-            resids <- linkagemapping::get_pheno_resids(cross, lods, fdr)
+            resids <- linkagemapping::get_pheno_resids(lods, cross, fdr)
             metapheno <- cross$pheno[1:5]
             cross$pheno <- data.frame(metapheno, resids)
             lods <- linkagemapping::map(cross)
