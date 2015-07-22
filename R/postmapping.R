@@ -194,13 +194,13 @@ get_peaks_above_thresh <- function(lods, threshold) {
         data$trait <- colnames(lods)[x]
         colnames(data)[3] <- "LOD"
         peaks <- data %>%
-            filter(LOD==max(LOD)) %>%
+            dplyr::filter(LOD==max(LOD)) %>%
             
             # If there is more than one marker with the peak LOD value, only
             # take the first one 
-            do(data.frame(.[1,])) %>%
+            dplyr::do(data.frame(.[1,])) %>%
             
-            filter(LOD > threshold)
+            dplyr::filter(LOD > threshold)
         return(peaks)
     }))
 }
