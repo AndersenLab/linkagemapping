@@ -2,22 +2,26 @@
 % Please edit documentation in R/postmapping.R
 \name{get_peak_fdr}
 \alias{get_peak_fdr}
-\title{Convert jb LODmatrix to scanone object}
+\title{Get the FDR value for a particular mapping by phenotype permutation}
 \usage{
-get_peak_fdr(peaklist, cross, perms = 1000, doGPU = F)
+get_peak_fdr(lods, cross, perms = 1000, doGPU = F)
 }
 \arguments{
-\item{cross}{An example cross object from which to extract scanone skeleton}
-
-\item{LODS}{A data frame output by the mapping functions to be converted to a
+\item{lods}{A data frame output by the mapping functions to be converted to a
 \code{scanone} object}
 
-\item{LL}{}
+\item{cross}{The original cross object used to perform the mapping}
+
+\item{perms}{}
+
+\item{doGPU}{Boolean, whether to use the gputools package to speed up,
+mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
+graphics card with the gputools package installed. Defaults to \code{FALSE}.}
 }
 \value{
-The genotype matrix, encoded as -1 or 1 for genotype
+The value of the 5% FDR threshold
 }
 \description{
-Convert jb LODmatrix to scanone object
+Get the FDR value for a particular mapping by phenotype permutation
 }
 

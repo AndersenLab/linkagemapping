@@ -7,13 +7,13 @@
 lodmatrix2scanone(lods, cross)
 }
 \arguments{
-\item{cross}{An example cross object from which to extract scanone skeleton}
-
-\item{LODS}{A data frame output by the mapping functions to be converted to a
+\item{lods}{A data frame output by the mapping functions to be converted to a
 \code{scanone} object}
+
+\item{cross}{An example cross object from which to extract scanone skeleton}
 }
 \value{
-The genotype matrix, encoded as -1 or 1 for genotype
+A scanone onject with the resultant mapping data in the lod column
 }
 \description{
 Convert LODmatrix to scanone object

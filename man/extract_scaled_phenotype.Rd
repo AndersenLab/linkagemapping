@@ -13,7 +13,8 @@ extract_scaled_phenotype(cross, set = NULL, setcorrect = FALSE,
 
 \item{set}{A vector of set IDs for all RIAILs}
 
-\item{setcorrect}{Boolean, whether or not to correct for sets by scaling phenotype values based on the set ID}
+\item{setcorrect}{Boolean, whether or not to correct for sets by scaling
+phenotype values based on the set ID}
 
 \item{scalevar}{Boolean, whether or not to standarize the variance}
 }

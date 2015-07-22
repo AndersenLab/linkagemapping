@@ -2,19 +2,20 @@
 % Please edit documentation in R/postmapping.R
 \name{maxpeaks}
 \alias{maxpeaks}
-\title{Get max lod score and SNP index for each mapped trait}
+\title{Get max LOD score and SNP index for each mapped trait}
 \usage{
-maxpeaks(cross, lods)
+maxpeaks(lods, cross)
 }
 \arguments{
-\item{cross}{An example cross object from which to extract scanone skeleton}
-
 \item{lods}{A data frame output by the mapping functions to be converted to a}
+
+\item{cross}{An example cross object from which to extract scanone skeleton}
 }
 \value{
-The genotype matrix, encoded as -1 or 1 for genotype
+A list consisting of two vectors, the first being the max peak LOD
+height and the second being the index of the SNP at which the peak LOD occurs
 }
 \description{
-Get max lod score and SNP index for each mapped trait
+Get max LOD score and SNP index for each mapped trait
 }
 

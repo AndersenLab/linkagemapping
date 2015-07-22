@@ -3,26 +3,26 @@
 \name{get_lod_by_cor}
 \alias{get_lod_by_cor}
 \title{Get the LOD value for each marker based on the correlation between genotype
-and phenotype at each marker.}
+and phenotype.}
 \usage{
 get_lod_by_cor(npheno, pheno, gdata, doGPU = FALSE)
 }
 \arguments{
-\item{npheno}{}
+\item{npheno}{The number of phenotypes present in the data set}
 
-\item{pheno}{}
+\item{pheno}{The extracted phenotype data from the cross object}
 
 \item{doGPU}{Boolean, whether to use the gputools package to speed up,
-mapping. This can only be set to \code{true} on machines with an NVIDEA
-graphics card with the gputools package installed.}
+mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
+graphics card with the gputools package installed. Defaults to \code{FALSE}.}
 
-\item{geno}{}
+\item{geno}{The extracted genotype data from the cross object}
 }
 \value{
 The LOD scores for all markers
 }
 \description{
 Get the LOD value for each marker based on the correlation between genotype
-and phenotype at each marker.
+and phenotype.
 }
 

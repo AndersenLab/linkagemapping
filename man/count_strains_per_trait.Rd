@@ -10,7 +10,8 @@ count_strains_per_trait(pheno)
 \item{pheno}{The phenotype elemnt of the cross object}
 }
 \value{
-A named vector of the number of strains present for each phenotype measurement
+A named vector of the number of strains present for each phenotype
+measurement
 }
 \description{
 Count number of strains with data for each phenotype from cross structure

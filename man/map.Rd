@@ -10,8 +10,8 @@ map(cross, doGPU = FALSE)
 \item{cross}{A complete cross object with the phenotype data merged}
 
 \item{doGPU}{Boolean, whether to use the gputools package to speed up,
-mapping. This can only be set to \code{true} on machines with an NVIDEA
-graphics card with the gputools package installed.}
+mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
+graphics card and the gputools package installed. Defaults to \code{FALSE}.}
 }
 \value{
 The LOD scores for all markers

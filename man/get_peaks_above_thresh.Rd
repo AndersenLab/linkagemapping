@@ -2,22 +2,22 @@
 % Please edit documentation in R/postmapping.R
 \name{get_peaks_above_thresh}
 \alias{get_peaks_above_thresh}
-\title{Convert jb LODmatrix to scanone object}
+\title{Return entries from a LOD data frame that are above the threshold value}
 \usage{
 get_peaks_above_thresh(lods, threshold)
 }
 \arguments{
-\item{LODS}{A data frame output by the mapping functions to be converted to a
+\item{lods}{A data frame output by the mapping functions to be converted to a
 \code{scanone} object}
 
-\item{cross}{An example cross object from which to extract scanone skeleton}
-
-\item{LL}{}
+\item{threshold}{The FDR threshold value used to determine significant peaks}
 }
 \value{
-The genotype matrix, encoded as -1 or 1 for genotype
+A subset of the \code{lods} data for only markers with a LOD score
+above the threshold value
 }
 \description{
-Convert jb LODmatrix to scanone object
+If more two or more markers from the same trait share the max LOD score, only
+the first marker will be taken to be the peak.
 }
 

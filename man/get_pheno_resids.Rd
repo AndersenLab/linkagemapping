@@ -2,22 +2,25 @@
 % Please edit documentation in R/postmapping.R
 \name{get_pheno_resids}
 \alias{get_pheno_resids}
-\title{Convert jb LODmatrix to scanone object}
+\title{Regress genotype from phenotype and resturn the residual phenotype values}
 \usage{
-get_pheno_resids(pdata, gdata, peakArray, intercept = FALSE)
+get_pheno_resids(lods, cross, threshold, intercept = FALSE)
 }
 \arguments{
-\item{LODS}{A data frame output by the mapping functions to be converted to a
+\item{lods}{A data frame output by the mapping functions to be converted to a
 \code{scanone} object}
 
-\item{cross}{An example cross object from which to extract scanone skeleton}
+\item{cross}{The cross object used for the original mapping}
 
-\item{LL}{}
+\item{threshold}{The FDR threshold value used to determine significant peaks}
+
+\item{intercept}{Boolean stating whether or not to include intercept term in
+linear model. Defaults to \code{FALSE}.}
 }
 \value{
 The genotype matrix, encoded as -1 or 1 for genotype
 }
 \description{
-Convert jb LODmatrix to scanone object
+Regress genotype from phenotype and resturn the residual phenotype values
 }
 
