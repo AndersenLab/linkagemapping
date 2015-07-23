@@ -1,39 +1,87 @@
 #' Map all of the traits in a given cross object with forward search
 #' 
 #' @param cross A complete cross object with the phenotype data merged
-#' @param iterations The number of iterations for the FDR calculation. Defaults
+#' @param phenocol The index number for the column of the phenotype of interest
+#' @param nperm The number of permutations for the GWER calculation. Defaults
 #' to \code{1000}.
-#' @param doGPU Boolean, whether to use the gputools package to speed up,
-#' mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
-#' graphics card with the gputools package installed. Defaults to \code{FALSE}.
+#' @param permevery Boolean, whether to calculate genome wide error rate for
+#' every iteration. Defaults to \code{TRUE}.
 #' @return The LOD scores for all markers
 #' @export
 
 scanonefs <- function(cross, phenocol = 5, nperm = 1000, permevery = TRUE) {
-    mapresult <- scanone(cross, pheno.col = phenocol)
-    threshold <- as.numeric(quantile(scanone(cross, n.perm = nperm), probs = .95))
-    lods <- data.frame(mapresult)
+    
+    # Create the list for all of the mappings
+    lodslist <- list()
+    
+    # Map the first iteration
+    mapresult <- qtl::scanone(cross, pheno.col = phenocol)
+    
+    # Get the max LOD score and threshold
+    maxlod <- max(mapresult)$lod
+    threshold <- as.numeric(
+        quantile(qtl::scanone(cross, n.perm = nperm), probs = .95))
+    
+    # Change the mapresult data frame into the same structure as for the Josh
+    # Bloom mapping code
+    mapresult <- data.frame(mapresult) %>%
+        dplyr::mutate(marker = rownames(.),
+                      trait = colnames(cross$pheno)[phenocol],
+                      threshold = threshold,
+                      iteration = 1) %>%
+        dplyr::select(marker, chr, pos, trait, lod, threshold, iteration)
+    
+    # Append the LODs to the lodslist and create an empty covariate matrix to be
+    # filled in later
+    lodslist <- append(lodslist, list(mapresult))
     covars = matrix(nrow = length(cross$pheno[, phenocol]), ncol = 0)
-    i = 1
-    while (max(mapresult)$lod > threshold) {
-        if (permevery){
-            threshold <- as.numeric(quantile(scanone(cross, n.perm = nperm), probs = .95))
-        }
+    
+    i = 2
+    
+    # While there is a peak LOD above the threshold...
+    while (maxlod > threshold) {
+        # Pull out the genotype for all individuals at the peak marker
         genoatlocus <- as.numeric(
-            pull.geno(cross,
-                      max(mapresult)$chr)[,rownames(max(mapresult))[1]])
+            qtl::pull.geno(cross,
+                           max(mapresult)$chr)[,rownames(max(mapresult))[1]])
+        
+        # Add the genotypes at peak marker to the covariate matrix
         covars <- cbind(covars, genoatlocus)
-        mapresult <- scanone(cross, phenocol, addcovar = covars)
-        if (max(mapresult)$lod > threshold) {
-            lods <- cbind(lods, mapresult$lod)
-            colnames(lods)[ncol(lods)] <- paste0("lod", i)
+        mapresult <- qtl::scanone(cross, phenocol, addcovar = covars)
+        
+        # If permutations are to be completed every iteration, permute again
+        if (permevery){
+            threshold <- as.numeric(
+                quantile(qtl::scanone(cross, n.perm = nperm, addcovar = covars),
+                         probs = .95))
+        }
+        
+        # Get the max LOD for this iteration
+        maxlod <- max(mapresult)$lod
+        
+        # If the max LOD is above the threshold, append it to the lodslist and
+        # start the next iteration
+        if (maxlod > threshold) {
+            mapresult <- data.frame(mapresult) %>%
+                dplyr::mutate(marker = rownames(.),
+                              trait = colnames(cross$pheno)[phenocol],
+                              threshold = threshold,
+                              iteration = i) %>%
+                dplyr::select(marker, chr, pos, trait, lod, threshold, iteration)
+            lodslist <- append(lodslist, list(mapresult))
             i = i+1
         }
     }
-    markers <- linkagemapping::markers
-    colnames(markers)[4] <- "phys.pos"
-    colnames(lod)[1:2] <- c("chr.roman", "gen.pos")
-    lods$SNP <- rownames(lods)
-    lods <- left_join(lods, markers)
-    return(lods)
+    
+    # rbind all of the elements in the lodslist
+    finallods <- dplyr::rbind_all(lodslist)
+    
+    # Convert all of the marker positions to physical position from genetic
+    # position
+    finallods$pos <- vapply(finallods$marker, function(marker) {
+        return(as.numeric(unlist(
+            markers[markers$SNP == marker, "WS244.pos"])))
+    }, numeric(1))
+    
+    return(finallods)
 }
