@@ -6,6 +6,7 @@
 #' @return A scanone onject with the resultant mapping data in the lod column
 
 lodmatrix2scanone <- function(lods, cross) {
+
     # Throws a warning for missing phenotype data that we don't care about
     # because we're only using the fake mapping to get the scanone class object
     suppressWarnings({
@@ -205,33 +206,53 @@ get_peaks_above_thresh <- function(lods, threshold) {
     }))
 }
 
-#' Convert jb LODmatrix to scanone object
+#' Annotate LOD peaks with variance explained, effect size, and confidence
+#' interval bounds
 #' 
-#' @param LODS A data frame output by the mapping functions to be converted to a
+#' @param lods A data frame output by the mapping functions to be converted to a
 #' \code{scanone} object
-#' @param cross An example cross object from which to extract scanone skeleton
-#' @param LL
-#' @return The genotype matrix, encoded as -1 or 1 for genotype
+#' @param cross The cross object used for the original mapping
+#' @return The annotated lods data frame with information added for peak markers
+#' of each iteration
 #' @export
 
 annotate_lods <- function(lods, cross) {
+    
+    # Get the peak marker for each trait:iteration pair
     peaks <- lods %>%
         dplyr::filter(lod > threshold) %>%
         dplyr::group_by(trait, iteration) %>%
         dplyr::filter(lod == max(lod))
+    
+    # Get the genotype and phenotype information
     geno <- data.frame(extract_genotype(cross))
     pheno <- data.frame(extract_scaled_phenotype(cross))
     
     # trait chr pos LOD VE scaled_effect_size CI.L CI.R
     peaklist <- lapply(1:nrow(peaks), function(i) {
-        print(i)
+        
+        # Pretty print the progress
+        if (nrow(peaks) <= 10) {
+            div = 1
+        } else if (nrow(peaks) > 10 & nrow(peaks) <= 100) {
+            div = 10
+        } else {
+            div = 100
+        }
+        
+        if (i %% div == 0) {
+            cat(paste0("Annotating peak ", i, " of ", nrow(peaks), "...\n"))
+        }
+        
+        # Get the trait and peak marker
         peaktrait <- as.character(peaks$trait[i])
         marker <- gsub('-', '\\.', as.character(peaks$marker[i]))
         
+        # Get the genotype and phenotype for that trait and marker
         genotypes <- geno[, which(colnames(geno) == marker)]
         phenotypes <- pheno[, which(colnames(pheno) == peaktrait)]
         
-    
+        # Calculate variance explained and effect size
         am <- lm(phenotypes ~ genotypes - 1)
         modelanova <- anova(am)
         tssq <- sum(modelanova[,2])
@@ -244,6 +265,7 @@ annotate_lods <- function(lods, cross) {
         traitlods <- lods %>% dplyr::filter(trait == peaktrait, iteration == peakiteration)
         confint <- cint(traitlods, peakchr)
         
+        # Assemble everything into a row in a data frame and return it
         peak = peaks[i,]
         
         peak$var_exp <- variance_explained
@@ -254,33 +276,49 @@ annotate_lods <- function(lods, cross) {
         peak$ci_r_pos <- unlist(confint[2, "pos"])
         return(peak)
     })
+    
+    # rbind the list and join it to the complete lods data frame
     ann_peaks <- do.call(rbind, peaklist)
     finallods <- dplyr::left_join(lods, ann_peaks)
     return(finallods)
 }
 
-
-
-#' Convert jb LODmatrix to scanone object
+#' Calculate the variance explained, effect size, and confidence interval bounds
+#' for each peak
 #' 
-#' @param LODS A data frame output by the mapping functions to be converted to a
+#' @param lods A data frame output by the mapping functions to be converted to a
 #' \code{scanone} object
-#' @param cross An example cross object from which to extract scanone skeleton
-#' @param LL
-#' @return The genotype matrix, encoded as -1 or 1 for genotype
+#' @param chr An example cross object from which to extract scanone skeleton
+#' @param lodcolumn The index of the column containing the lods scores
+#' @param drop The LOD drop for calculating the confidence interval
+#' @return The annotated LOD data frame with added columns for peak information
 
 cint <- function(lods, chr, lodcolumn=5, drop=1.5){
+    
+    # Get only the data for the chromosome containing the peak marker so that CI
+    # doesn't overflow chromsome bounds
     data <- lods[lods$chr==chr,]
+    
+    #Get the peak index and the peak lod score
     peak <- which.max(unlist(data[,lodcolumn]))
     peakLOD <- unlist(data[peak, lodcolumn])
+    
+    # If the peak is not at the end of a chromsome...
     if(peak > 1){
+        
+        # ...keep moving left until you find a LOD drop that equals that
+        # requested
         left <- peak - 1
         while(left > 1 & peakLOD - data[left, lodcolumn] < drop){
             left <- left-1
         }
     } else {
+        # Otherwise, the peak LOD marker, which is at the end of the chromsome
+        # is the left bound of the CI
         left <- 1
     }
+    
+    # Repeat the same process on the right side of the interval
     if(peak < nrow(data)){
         right <- peak + 1
         while(right < nrow(data) & peakLOD - data[right, lodcolumn] < drop){
@@ -289,6 +327,8 @@ cint <- function(lods, chr, lodcolumn=5, drop=1.5){
     } else {
         right <- nrow(data)
     }
+    
+    # rbind the left and right bounds and return the interval bound data frame
     bounds <- rbind(data[left,], data[right,])
     return(bounds)
 }
