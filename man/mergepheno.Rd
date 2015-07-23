@@ -15,7 +15,7 @@ mergepheno(cross, phenotype, set = NULL)
 Andersen=3) before joining to the data frame}
 }
 \value{
-The phenotype element of the cross object
+A cross object complete with phenotype information
 }
 \description{
 Merge the cross object and the phenotype data frame using a dplyr left_join

@@ -2,22 +2,26 @@
 % Please edit documentation in R/postmapping.R
 \name{cint}
 \alias{cint}
-\title{Convert jb LODmatrix to scanone object}
+\title{Calculate the variance explained, effect size, and confidence interval bounds
+for each peak}
 \usage{
 cint(lods, chr, lodcolumn = 5, drop = 1.5)
 }
 \arguments{
-\item{LODS}{A data frame output by the mapping functions to be converted to a
+\item{lods}{A data frame output by the mapping functions to be converted to a
 \code{scanone} object}
 
-\item{cross}{An example cross object from which to extract scanone skeleton}
+\item{chr}{An example cross object from which to extract scanone skeleton}
 
-\item{LL}{}
+\item{lodcolumn}{The index of the column containing the lods scores}
+
+\item{drop}{The LOD drop for calculating the confidence interval}
 }
 \value{
-The genotype matrix, encoded as -1 or 1 for genotype
+The annotated LOD data frame with added columns for peak information
 }
 \description{
-Convert jb LODmatrix to scanone object
+Calculate the variance explained, effect size, and confidence interval bounds
+for each peak
 }
 

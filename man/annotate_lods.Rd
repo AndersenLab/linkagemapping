@@ -2,22 +2,23 @@
 % Please edit documentation in R/postmapping.R
 \name{annotate_lods}
 \alias{annotate_lods}
-\title{Convert jb LODmatrix to scanone object}
+\title{Annotate LOD peaks with variance explained, effect size, and confidence
+interval bounds}
 \usage{
 annotate_lods(lods, cross)
 }
 \arguments{
-\item{cross}{An example cross object from which to extract scanone skeleton}
-
-\item{LODS}{A data frame output by the mapping functions to be converted to a
+\item{lods}{A data frame output by the mapping functions to be converted to a
 \code{scanone} object}
 
-\item{LL}{}
+\item{cross}{The cross object used for the original mapping}
 }
 \value{
-The genotype matrix, encoded as -1 or 1 for genotype
+The annotated lods data frame with information added for peak markers
+of each iteration
 }
 \description{
-Convert jb LODmatrix to scanone object
+Annotate LOD peaks with variance explained, effect size, and confidence
+interval bounds
 }
 
