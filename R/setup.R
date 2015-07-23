@@ -6,13 +6,23 @@
 #' @importFrom dplyr %>%
 
 mapformat <- function(pheno){
+    
+    # Make the condensed phenotype name column (condition + trait)
     pheno$conpheno <- paste0(pheno$condition, ".", pheno$trait)
+    
+    # Spread the phenotypes and condense down to one row per strain
     pheno <- tidyr::spread(pheno, conpheno, phenotype) %>%
         dplyr::group_by(strain) %>%
         dplyr::summarise_each(funs = dplyr::funs(mean(., na.rm = TRUE))) %>%
+        
+        # Remove unnecessary metadata
         dplyr::select(-date, -experiment, -round, -assay, -condition, -control,
                       -plate, -row, -col, -trait) %>%
+        
+        # Change ID to QX number
         dplyr::mutate(id = stringr::str_split_fixed(.$strain, "QX", 2)[,2]) %>%
+        
+        # Remove non-QX strain (e.g. N2 and CB4856)
         dplyr::filter(id != "")
 }
 
@@ -22,20 +32,26 @@ mapformat <- function(pheno){
 #' @param phenotype The phenotype data frame with the id numbers for each strain
 #' @param set Filter the phenotype data to one specific set (Rockman=1 or 2,
 #' Andersen=3) before joining to the data frame
-#' @return The phenotype element of the cross object
+#' @return A cross object complete with phenotype information
 #' @importFrom dplyr %>%
 #' @export
 
 mergepheno <- function(cross, phenotype, set=NULL){
+    # Format the phenotype data
     phenotype <- mapformat(phenotype)
     cross$pheno$id <- as.numeric(cross$pheno$id)
     phenotype$id <- as.numeric(phenotype$id)
+    
+    # If a specific set is selected, merge only that set's information to the 
     if(!is.null(set)){
         cross$pheno <- dplyr::left_join(cross$pheno, phenotype, by="id") %>%
             dplyr::filter(set == set) %>% select(-contains("strain"))
     } else {
+        # Otherwise, merge everything
         cross$pheno <- dplyr::left_join(cross$pheno, phenotype, by="id")
     }
+    
+    # Order the phenotype element rows by id
     cross$pheno <- cross$pheno[order(cross$pheno$id),]
     return(cross)
 }
@@ -70,16 +86,22 @@ count_strains_per_trait = function(pheno) {
 #' @param scalevar Boolean, whether or not to standarize the variance
 #' @return A matrix of scaled phenotype values
 
-extract_scaled_phenotype=function(cross, set=NULL, setcorrect=FALSE,
-                                  scalevar=TRUE){
+extract_scaled_phenotype=function(cross, set = NULL, setcorrect = FALSE,
+                                  scalevar = TRUE){
+    
+    # Select only the phenotype columns
     p <- cross$pheno %>%
         dplyr::select(which(sapply(., class) == "numeric"), -id, -set)
-    if(setcorrect==FALSE) { 
+    
+    # If not corrrecting for set effects...
+    if(setcorrect==FALSE) {
+        # Scale by the variance on all sets equally
         apply(p, 2, scale, scale=scalevar) 
     } else {
-        s=apply(p, 2, function(x) { 
-            xs = split(x,set)
-            ms = lapply(xs, mean,na.rm=T)
+        # Otherwise, break up into individual sets and scale
+        s <- apply(p, 2, function(x) { 
+            xs <- split(x,set)
+            ms <- lapply(xs, mean, na.rm=T)
             unlist(mapply(function(x,y) {x-y}, xs, ms))
         })
         apply(s, 2, scale, scale=scaleVar)
