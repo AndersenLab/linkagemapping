@@ -48,14 +48,14 @@ mergepheno <- function(cross, phenotype, set=NULL){
     # If a specific set is selected, merge only that set's information to the 
     if(!is.null(set)){
         phenotype <- phenotype[phenotype$set == set,] %>%
-            select(-set)
+            dplyr::select(-set)
         cross$pheno <- dplyr::left_join(cross$pheno, phenotype, by="id")
     } else {
         # Otherwise, merge everything
         phenotype <- phenotype %>%
             dplyr::select(-set)
         cross$pheno <- dplyr::left_join(cross$pheno, phenotype, by="id") %>%
-            select(-strain)
+            dplyr::select(-strain)
     }
     
     # Order the phenotype element rows by id
