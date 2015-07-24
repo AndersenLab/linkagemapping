@@ -11,8 +11,8 @@ mergepheno(cross, phenotype, set = NULL)
 
 \item{phenotype}{The phenotype data frame with the id numbers for each strain}
 
-\item{set}{Filter the phenotype data to one specific set (Rockman=1 or 2,
-Andersen=3) before joining to the data frame}
+\item{set}{Filter the phenotype data to one specific set (Rockman=1,
+Andersen=2) before joining to the data frame}
 }
 \value{
 A cross object complete with phenotype information
