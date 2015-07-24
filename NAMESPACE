@@ -3,7 +3,6 @@
 export(annotate_lods)
 export(fsearch)
 export(mergepheno)
-export(scanonefs)
 importFrom(dplyr,"%>%")
 importFrom(foreach,"%do%")
 importFrom(foreach,"%dopar%")

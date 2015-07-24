@@ -4,7 +4,7 @@
 \alias{fsearch}
 \title{Map all of the traits in a given cross object with forward search}
 \usage{
-fsearch(cross, iterations = 1000, doGPU = FALSE)
+fsearch(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE)
 }
 \arguments{
 \item{cross}{A complete cross object with the phenotype data merged}
