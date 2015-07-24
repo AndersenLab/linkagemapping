@@ -67,8 +67,10 @@ fsearch <- function(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE) {
     
     # Select the subset of the phenotype data frame to map
     if (!is.null(phenotype)) {
+        pattern = paste(phenotype, collapse = "|")
+        selectedcols <- which(grepl(pattern, colnames(cross$pheno)))
         cross$pheno <- cross$pheno %>%
-            dplyr::select(id, QX, RILname, set, strain, contains(phenotype))
+            dplyr::select(id, QX, RILname, set, strain, selectedcols)
     }
     
     # Set up the iteration count
