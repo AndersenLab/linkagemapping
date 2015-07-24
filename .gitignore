@@ -3,3 +3,9 @@ set1Perm.csv
 set2Perm.csv
 set3Perm.csv
 .Rproj.user
+
+.Rbuildignore
+.Rhistory
+LinkageMappingFunctions.R
+MappingPipelineWithEasysorter.R
+MappingPipeline.R
