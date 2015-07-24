@@ -60,9 +60,17 @@ map <- function(cross, doGPU = FALSE) {
 #' mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
 #' graphics card with the gputools package installed. Defaults to \code{FALSE}.
 #' @return The LOD scores for all markers
+#' @importFrom dplyr %>%
 #' @export
 
-fsearch <- function(cross, iterations = 1000, doGPU = FALSE) {
+fsearch <- function(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE) {
+    
+    # Select the subset of the phenotype data frame to map
+    if (!is.null(phenotype)) {
+        cross$pheno <- cross$pheno %>%
+            dplyr::select(id, QX, RILname, set, strain, contains(phenotype))
+    }
+    
     # Set up the iteration count
     iteration <- 1
     
