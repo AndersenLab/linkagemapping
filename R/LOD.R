@@ -103,7 +103,7 @@ fsearch <- function(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE) {
             # Get the residual phenotype cvalues and put them back in the cross
             # object
             resids <- get_pheno_resids(lods, cross, fdr)
-            metapheno <- cross$pheno[1:5]
+            metapheno <- cross$pheno %>% dplyr::select(id, QX, RILname, set)
             cross$pheno <- data.frame(metapheno, resids)
             
             # Repeat the mapping, FDR calculationa and peak finding
