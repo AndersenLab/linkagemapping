@@ -70,7 +70,7 @@ fsearch <- function(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE) {
         pattern = paste(phenotype, collapse = "|")
         selectedcols <- which(grepl(pattern, colnames(cross$pheno)))
         cross$pheno <- cross$pheno %>%
-            dplyr::select(id, QX, RILname, set, strain, selectedcols)
+            dplyr::select(id, QX, RILname, set, selectedcols)
     }
     
     # Set up the iteration count
