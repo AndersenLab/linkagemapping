@@ -94,7 +94,7 @@ fsearch <- function(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE) {
             # Bind the threshold and iteration information to the map data,
             # melt the resulting data frame, and add it to the lodslist
             lods <- data.frame(lods)
-            lodswiththresh <- cbind(lods, fdr) %>%
+            lodswiththresh <- lods %>%
                 dplyr::mutate(marker = rownames(.), threshold = fdr, iteration = iteration)
             meltedlods <- tidyr::gather(lodswiththresh, trait, lod, -chr, -pos, -marker, -threshold, -iteration) %>%
                 dplyr::select(marker, chr, pos, trait, lod, threshold, iteration)
