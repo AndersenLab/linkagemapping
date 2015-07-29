@@ -2,6 +2,7 @@
 #' 
 #' @param map The mapping output for a single trait
 #' @return A plot with a line for each iteration of the forward search mapping
+#' @export
 
 lodplot <- function(map){
     cis <- map %>% 
@@ -51,6 +52,7 @@ lodplot <- function(map){
 #' @param map The mapping output for a single trait
 #' @return A plot with single line with the maximum LOD score at each marker
 #' from a mapping
+#' @export
 
 maxlodplot <- function(map){
     map <- map %>%
@@ -98,6 +100,7 @@ maxlodplot <- function(map){
 #' @param map The mapping output for a single trait
 #' @return A boxplot of the phenotype by genotype split at each peak marker in a
 #' mapping
+#' @export
 
 pxgplot <- function(cross, map) {
     peaks <- map %>% 
@@ -156,6 +159,7 @@ pxgplot <- function(cross, map) {
 #' @param cross The cross object used for the mapping
 #' @param map The mapping output for a single trait
 #' @return A line plot of the effect size at each marker
+#' @export
 
 effectplot <- function(cross, map) {
     map <- map %>%
