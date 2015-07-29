@@ -114,10 +114,18 @@ fsearch <- function(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE) {
             # Add one to the iteration
             iteration <- iteration + 1
         }
+        
+        # Add the lods to the lodslist for the final iteration
+        lods <- data.frame(lods)
+        lodswiththresh <- lods %>%
+            dplyr::mutate(marker = rownames(.), threshold = fdr, iteration = iteration)
+        meltedlods <- tidyr::gather(lodswiththresh, trait, lod, -chr, -pos, -marker, -threshold, -iteration) %>%
+            dplyr::select(marker, chr, pos, trait, lod, threshold, iteration)
         lodslist <- append(lodslist, list(meltedlods))
         
         # rbind the whole list of maps
         finallods <- dplyr::rbind_all(lodslist)
+        
     } else {
         
         # If no peaks were found from the first iteration, just melt the lods
