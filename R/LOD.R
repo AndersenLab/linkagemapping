@@ -114,6 +114,7 @@ fsearch <- function(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE) {
             # Add one to the iteration
             iteration <- iteration + 1
         }
+        lodslist <- append(lodslist, list(meltedlods))
         
         # rbind the whole list of maps
         finallods <- dplyr::rbind_all(lodslist)
