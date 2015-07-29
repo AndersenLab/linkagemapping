@@ -108,6 +108,11 @@ pxgplot <- function(cross, map) {
         dplyr::filter(!is.na(var_exp)) %>%
         do(head(., n=1))
     
+    if(nrow(peaks) == 0) {
+        plot <- ggplot(map, aes(x = genotype, y = pheno)) + geom_blank()
+        return(plot)
+    }
+    
     uniquemarkers <- gsub("-", "\\.", unique(peaks$marker))
     
     pheno <- cross$pheno %>%
