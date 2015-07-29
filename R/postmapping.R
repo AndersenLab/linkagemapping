@@ -212,17 +212,25 @@ get_peaks_above_thresh <- function(lods, threshold) {
 #' @param lods A data frame output by the mapping functions to be converted to a
 #' \code{scanone} object
 #' @param cross The cross object used for the original mapping
+#' @param annotate_all Boolean whether or not to annotate all markers with
+#' variance explained and effect size. If \code{FALSE} (default), only peak lods
+#' will be annotated.
 #' @return The annotated lods data frame with information added for peak markers
 #' of each iteration
 #' @export
 
-annotate_lods <- function(lods, cross) {
+annotate_lods <- function(lods, cross, annotate_all = FALSE) {
     
-    # Get the peak marker for each trait:iteration pair
-    peaks <- lods %>%
-        dplyr::filter(lod > threshold) %>%
-        dplyr::group_by(trait, iteration) %>%
-        dplyr::filter(lod == max(lod))
+    if (annotate_all) {
+        peaks <- lods
+    } else {
+        # Get the peak marker for each trait:iteration pair
+        peaks <- lods %>%
+            dplyr::filter(lod > threshold) %>%
+            dplyr::group_by(trait, iteration) %>%
+            dplyr::filter(lod == max(lod))
+    }
+    
     
     # Get the genotype and phenotype information
     geno <- data.frame(extract_genotype(cross))
@@ -241,7 +249,9 @@ annotate_lods <- function(lods, cross) {
         }
         
         if (i %% div == 0) {
-            cat(paste0("Annotating peak ", i, " of ", nrow(peaks), "...\n"))
+            if (!annotate_all) {
+                cat(paste0("Annotating peak ", i, " of ", nrow(peaks), "...\n"))
+            }
         }
         
         # Get the trait and peak marker
@@ -259,21 +269,28 @@ annotate_lods <- function(lods, cross) {
         variance_explained <- modelanova[1:(nrow(modelanova)-1),2]/tssq  
         effect_size <- as.vector(coefficients(am))
         
-        # Calculate confidence interval bounds
-        peakchr = as.character(peaks$chr[i])
-        peakiteration <- peaks$iteration[i]
-        traitlods <- lods %>% dplyr::filter(trait == peaktrait, iteration == peakiteration)
-        confint <- cint(traitlods, peakchr)
+        if (!annotate_all){
+            # Calculate confidence interval bounds
+            peakchr = as.character(peaks$chr[i])
+            peakiteration <- peaks$iteration[i]
+            traitlods <- lods %>% dplyr::filter(trait == peaktrait, iteration == peakiteration)
+            confint <- cint(traitlods, peakchr)
+        }
+        
         
         # Assemble everything into a row in a data frame and return it
         peak = peaks[i,]
         
         peak$var_exp <- variance_explained
         peak$eff_size <- effect_size
-        peak$ci_l_marker <- unlist(confint[1, "marker"])
-        peak$ci_l_pos <- unlist(confint[1, "pos"])
-        peak$ci_r_marker <- unlist(confint[2, "marker"])
-        peak$ci_r_pos <- unlist(confint[2, "pos"])
+        
+        if (!annotate_all) {
+            peak$ci_l_marker <- unlist(confint[1, "marker"])
+            peak$ci_l_pos <- unlist(confint[1, "pos"])
+            peak$ci_r_marker <- unlist(confint[2, "marker"])
+            peak$ci_r_pos <- unlist(confint[2, "pos"])
+        }
+        
         return(peak)
     })
     

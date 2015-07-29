@@ -5,13 +5,17 @@
 \title{Annotate LOD peaks with variance explained, effect size, and confidence
 interval bounds}
 \usage{
-annotate_lods(lods, cross)
+annotate_lods(lods, cross, annotate_all = FALSE)
 }
 \arguments{
 \item{lods}{A data frame output by the mapping functions to be converted to a
 \code{scanone} object}
 
 \item{cross}{The cross object used for the original mapping}
+
+\item{annotate_all}{Boolean whether or not to annotate all markers with
+variance explained and effect size. If \code{FALSE} (default), only peak lods
+will be annotated.}
 }
 \value{
 The annotated lods data frame with information added for peak markers
