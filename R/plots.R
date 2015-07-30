@@ -16,22 +16,24 @@ lodplot <- function(map){
     
     maxmap <- cidefiner(cis, maxmap)
     
-    plot <- ggplot(map) +
-        geom_ribbon(data = maxmap, aes(x = pos/1e6, ymin = 0, ymax = ci_lod),
-                    fill = "blue",
-                    alpha = 0.5) +
+    plot <- ggplot(map)
+    
+    if(nrow(cis) != 0) {
+        plot <- geom_ribbon(aes(ymin = 0, ymax = ci_lod), fill = "blue", alpha = 0.5) +
+            geom_point(data = cis, aes(x=pos/1e6, y=lod + 0.75),
+                       fill ="red", shape=25, size=3.2, show_guide = FALSE) +
+            geom_text(data = cis,
+                      aes(x=pos/1e6,
+                          y=lod + 1.5,
+                          label = paste0(100*round(var_exp, digits = 4),"%")),
+                      colour = "black", size=5)
+    }
+    
+    plot <- plot + 
         geom_line(aes(x = pos/1e6, y = lod, colour = as.factor(iteration)),
                   size = 1, alpha = 0.85) +
         facet_grid(.~chr, scales ="free") +
         labs(x = "Position (Mb)", y = "LOD") +
-        geom_point(data = cis, aes(x=pos/1e6, y=lod + 0.75),
-                   fill ="red", shape=25, size=3.2, show_guide = FALSE,
-                   colour = "black") +
-        geom_text(data = cis,
-                  aes(x=pos/1e6,
-                      y=lod + 1.5,
-                      label = paste0(100*round(var_exp, digits = 4),"%")),
-                  colour = "black", size=5) +
         scale_colour_discrete(name="Mapping\nIteration") +
         ggtitle(map$trait[1]) +
         
@@ -64,21 +66,30 @@ maxlodplot <- function(map){
         dplyr::filter(!is.na(var_exp)) %>%
         do(head(., n=1))
     
+    if(nrow(cis) == 0) {
+        plot <- ggplot(map, aes(x = genotype, y = pheno)) + geom_blank()
+        return(plot)
+    }
+    
     map <- cidefiner(cis, map)
     
     plot <- ggplot(map) +
-        aes(x = pos/1e6, y = lod) +
-        geom_ribbon(aes(ymin = 0, ymax = ci_lod), fill = "blue", alpha = 0.5) +
-        geom_line(size = 1, alpha = 0.85) +
+        aes(x = pos/1e6, y = lod)
+    
+    if(nrow(cis) != 0) {
+        plot <- geom_ribbon(aes(ymin = 0, ymax = ci_lod), fill = "blue", alpha = 0.5) +
+            geom_point(data = cis, aes(x=pos/1e6, y=lod + 0.75),
+                       fill ="red", shape=25, size=3.2, show_guide = FALSE) +
+            geom_text(data = cis,
+                      aes(x=pos/1e6,
+                          y=lod + 1.5,
+                          label = paste0(100*round(var_exp, digits = 4),"%")),
+                      colour = "black", size=5)
+    }
+    
+    geom_line(size = 1, alpha = 0.85) +
         facet_grid(.~chr, scales ="free") +
         labs(x = "Position (Mb)", y = "LOD") +
-        geom_point(data = cis, aes(x=pos/1e6, y=lod + 0.75),
-                   fill ="red", shape=25, size=3.2, show_guide = FALSE) +
-        geom_text(data = cis,
-                  aes(x=pos/1e6,
-                      y=lod + 1.5,
-                      label = paste0(100*round(var_exp, digits = 4),"%")),
-                  colour = "black", size=5) +
         scale_colour_discrete(name="Mapping\nIteration") +
         ggtitle(map$trait[1]) +
         
@@ -122,17 +133,17 @@ pxgplot <- function(cross, map) {
         data.frame(., pheno)
     
     colnames(geno)[1:(ncol(geno)-1)] <- sapply(colnames(geno)[1:(ncol(geno)-1)],
-                                             function(marker) {
-                                                 paste(
-                                                     unlist(
-                                                         peaks[
-                                                             peaks$marker == 
-                                                                 gsub("\\.",
-                                                                      "-",
-                                                                      marker),
-                                                             c("chr", "pos")]),
-                                                     collapse = ":")
-                                             })
+                                               function(marker) {
+                                                   paste(
+                                                       unlist(
+                                                           peaks[
+                                                               peaks$marker == 
+                                                                   gsub("\\.",
+                                                                        "-",
+                                                                        marker),
+                                                               c("chr", "pos")]),
+                                                       collapse = ":")
+                                               })
     colnames(geno)[ncol(geno)] <- "pheno"
     
     split <- tidyr::gather(geno, marker, genotype, -pheno)
