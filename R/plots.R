@@ -125,8 +125,7 @@ pxgplot <- function(cross, map) {
         do(head(., n=1))
     
     if(nrow(peaks) == 0) {
-        plot <- ggplot(map, aes(x = genotype, y = pheno)) + geom_blank()
-        return(plot)
+        stop("No QTL identified")
     }
     
     uniquemarkers <- gsub("-", "\\.", unique(peaks$marker))
