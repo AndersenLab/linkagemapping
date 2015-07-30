@@ -29,6 +29,14 @@ mapformat <- function(pheno){
 
 #' Merge the cross object and the phenotype data frame using a dplyr left_join
 #' 
+#' Incoming phenotype data frame must have the following columns:
+#' \code{condition}
+#' \code{trait}
+#' \code{strain}
+#' \code{phenotype}
+#' 
+#' 
+#' 
 #' @param cross A cross object
 #' @param phenotype The phenotype data frame with the id numbers for each strain
 #' @param set Filter the phenotype data to one specific set (Rockman=1,
