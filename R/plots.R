@@ -11,15 +11,18 @@ lodplot <- function(map){
         do(head(., n=1))
     
     maxmap <- map %>%
-        dplyr::group_by(marker) %>%
-        dplyr::filter(lod == max(lod))
+            dplyr::group_by(marker) %>%
+            dplyr::filter(lod == max(lod))
     
     maxmap <- cidefiner(cis, maxmap)
     
     plot <- ggplot(map)
     
     if(nrow(cis) != 0) {
-        plot <- geom_ribbon(aes(ymin = 0, ymax = ci_lod), fill = "blue", alpha = 0.5) +
+        plot <- plot + 
+            geom_ribbon(data = maxmap,
+                        aes(x = pos/1e6, ymin = 0, ymax = ci_lod),
+                        fill = "blue", alpha = 0.5) +
             geom_point(data = cis, aes(x=pos/1e6, y=lod + 0.75),
                        fill ="red", shape=25, size=3.2, show_guide = FALSE) +
             geom_text(data = cis,
@@ -77,7 +80,9 @@ maxlodplot <- function(map){
         aes(x = pos/1e6, y = lod)
     
     if(nrow(cis) != 0) {
-        plot <- geom_ribbon(aes(ymin = 0, ymax = ci_lod), fill = "blue", alpha = 0.5) +
+        plot <- plot + 
+            geom_ribbon(aes(x = pos/1e6, ymin = 0, ymax = ci_lod),
+                        fill = "blue", alpha = 0.5) +
             geom_point(data = cis, aes(x=pos/1e6, y=lod + 0.75),
                        fill ="red", shape=25, size=3.2, show_guide = FALSE) +
             geom_text(data = cis,
@@ -87,7 +92,7 @@ maxlodplot <- function(map){
                       colour = "black", size=5)
     }
     
-    geom_line(size = 1, alpha = 0.85) +
+    plot <- plot + geom_line(size = 1, alpha = 0.85) +
         facet_grid(.~chr, scales ="free") +
         labs(x = "Position (Mb)", y = "LOD") +
         scale_colour_discrete(name="Mapping\nIteration") +
@@ -125,6 +130,8 @@ pxgplot <- function(cross, map) {
     }
     
     uniquemarkers <- gsub("-", "\\.", unique(peaks$marker))
+    
+    colnames(cross$pheno) <- gsub("-", "\\.", colnames(cross$pheno))
     
     pheno <- cross$pheno %>%
         select_(map$trait[1])
