@@ -78,7 +78,12 @@ mergepheno <- function(cross, phenotype, set=NULL){
 #' @return The genotype matrix, encoded as -1 or 1 for genotype
 
 extract_genotype=function(cross){
-    (do.call('cbind', sapply(cross$geno, function(x) { x$argmax }))*2)-3
+    sapply(cross$geno, function(x) {
+            sapply(x$argmax, function(y) {
+                genos <- list("1" = -1, "2" = 1, "3" = 0)
+                return(genos[[as.character(y)]])
+            })
+        })
 }
 
 #' Count number of strains with data for each phenotype from cross structure
