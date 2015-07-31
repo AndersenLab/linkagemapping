@@ -78,12 +78,28 @@ mergepheno <- function(cross, phenotype, set=NULL){
 #' @return The genotype matrix, encoded as -1 or 1 for genotype
 
 extract_genotype=function(cross){
-    sapply(cross$geno, function(x) {
-            sapply(x$argmax, function(y) {
-                genos <- list("1" = -1, "2" = 1, "3" = 0)
-                return(genos[[as.character(y)]])
-            })
-        })
+    
+    # Pull out the genotypes into snp x strain matrix
+    genomat <- do.call(cbind, sapply(cross$geno, function(x) {
+            x$argmax
+    }))
+    
+    genomat <- apply(genomat, c(1,2), function(y) {
+        
+        # Create a list to use to convert between the numbers
+        genos <- list("1" = -1, "2" = 1, "3" = 0)
+        
+        # If the list entry for the number is not in the dictionary, replace
+        # with NA
+        if (is.null(genos[[as.character(y)]])) {
+            return(NA)
+        } else {
+            
+            # Otherwise pull the correct genotype notation from the list
+            return(genos[[as.character(y)]])
+        }
+    })
+    return(genomat)
 }
 
 #' Count number of strains with data for each phenotype from cross structure
