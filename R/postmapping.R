@@ -11,7 +11,8 @@ lodmatrix2scanone <- function(lods, cross) {
     # because we're only using the fake mapping to get the scanone class object
     suppressWarnings({
         LODSm <- t(as.matrix(lods))
-        LODSs <- qtl::scanone(cross, pheno.col = 5, method='mr')
+        phenocol <- which(sapply(cross$pheno, class) == "numeric")[1]
+        LODSs <- qtl::scanone(cross, pheno.col = phenocol, method='mr')
         LODSso <- data.frame(LODSs, LODSm)
         LODSso <- LODSso[,-3]
         class(LODSso) <- class(LODSs)
