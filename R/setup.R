@@ -72,7 +72,6 @@ extract_genotype=function(cross){
     
     # Pull out the genotypes into snp x strain matrix
     genomat <- qtl::pull.geno(cross)
-    genomat <- as.factor(genomat)
     return(genomat)
 }
 
