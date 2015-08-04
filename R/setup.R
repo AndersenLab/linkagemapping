@@ -71,7 +71,8 @@ mergepheno <- function(cross, phenotype, parents, set=NULL){
 extract_genotype=function(cross){
     
     # Pull out the genotypes into snp x strain matrix
-    genomat <- as.numeric(qtl::pull.geno(cross))
+    genomat <- data.frame(qtl::pull.geno(cross))
+    genomat <- as.numeric(genomat)
     return(genomat)
 }
 
