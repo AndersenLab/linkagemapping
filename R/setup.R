@@ -50,7 +50,8 @@ mergepheno <- function(cross, phenotype, parents, set=NULL){
     
     # If a specific set is selected, merge only that set's information to the 
     if(!is.null(set)){
-        phenotype <- phenotype[phenotype$set == set,]
+        strainset <- cross$pheno$strain[cross$pheno$set == set]
+        phenotype <- phenotype[phenotype$strain %in% strainset,]
         cross$pheno <- dplyr::left_join(cross$pheno, phenotype, by="strain")
     } else {
         # Otherwise, merge everything
@@ -71,8 +72,16 @@ mergepheno <- function(cross, phenotype, parents, set=NULL){
 extract_genotype=function(cross){
     
     # Pull out the genotypes into snp x strain matrix
-    genomat <- data.frame(qtl::pull.geno(cross))
-    genomat <- as.numeric(genomat)
+    genomat <- qtl::pull.geno(cross)
+    class(genomat) <- "numeric"
+    
+    # Handle genotype encodings with heterozygous individuals
+    # (encoded as 1, 2, 3) and without (encoded 1, 2)
+    if(max(genomat, na.rm = TRUE) == 3) {
+        genomat <- genomat - 2
+    } else {
+        genomat <- (genomat * 2) - 3
+    }
     return(genomat)
 }
 
