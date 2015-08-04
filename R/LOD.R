@@ -70,7 +70,7 @@ fsearch <- function(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE) {
         pattern = paste(phenotype, collapse = "|")
         selectedcols <- which(grepl(pattern, colnames(cross$pheno)))
         cross$pheno <- cross$pheno %>%
-            dplyr::select(id, QX, RILname, set, selectedcols)
+            dplyr::select(strain, set, selectedcols)
     }
     
     # Set up the iteration count
@@ -103,7 +103,7 @@ fsearch <- function(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE) {
             # Get the residual phenotype cvalues and put them back in the cross
             # object
             resids <- get_pheno_resids(lods, cross, fdr)
-            metapheno <- cross$pheno %>% dplyr::select(id, QX, RILname, set)
+            metapheno <- cross$pheno %>% dplyr::select(strain, set)
             cross$pheno <- data.frame(metapheno, resids)
             
             # Repeat the mapping, FDR calculationa and peak finding
