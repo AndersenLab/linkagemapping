@@ -131,7 +131,7 @@ fsearch <- function(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE) {
         # If no peaks were found from the first iteration, just melt the lods
         # and return them
         lods <- data.frame(lods)
-        lodswiththresh <- cbind(lods, fdr) %>%
+        lodswiththresh <- lods %>%
             dplyr::mutate(marker = rownames(.), threshold = fdr, iteration = 1)
         finallods <- tidyr::gather(lodswiththresh, trait, lod, -chr, -pos, -marker, -threshold, -iteration) %>%
             dplyr::select(marker, chr, pos, trait, lod, threshold, iteration)
@@ -139,11 +139,11 @@ fsearch <- function(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE) {
     
     # Switch genetic position to physical position (WS244) for all of the
     # markers in the map
-    cat("\nConverting marker position to physical position. This step takes a while...\n")
-    finallods$pos <- vapply(finallods$marker, function(marker) {
-            return(as.numeric(unlist(
-                markers[markers$SNP == marker, "WS244.pos"])))
-        }, numeric(1))
+#     cat("\nConverting marker position to physical position. This step takes a while...\n")
+#     finallods$pos <- vapply(finallods$marker, function(marker) {
+#             return(as.numeric(unlist(
+#                 markers[markers$SNP == marker, "WS244.pos"])))
+#         }, numeric(1))
     
     return(finallods)
 }
