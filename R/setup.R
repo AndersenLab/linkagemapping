@@ -5,7 +5,11 @@
 #' cross object
 #' @importFrom dplyr %>%
 
-mapformat <- function(pheno){
+mapformat <- function(pheno, parents){
+    
+    # Filter out parental strains which may have been repetitively phenotyped
+    pheno <- pheno %>%
+        dplyr::filter(!(strain %in% parents))
     
     # Make the condensed phenotype name column (condition + trait)
     pheno$conpheno <- paste0(pheno$condition, ".", pheno$trait)
@@ -45,9 +49,9 @@ mapformat <- function(pheno){
 #' @importFrom dplyr %>%
 #' @export
 
-mergepheno <- function(cross, phenotype, set=NULL){
+mergepheno <- function(cross, phenotype, parents, set=NULL){
     # Format the phenotype data
-    phenotype <- mapformat(phenotype)
+    phenotype <- mapformat(phenotype, parents)
     cross$pheno$id <- as.numeric(cross$pheno$id)
     phenotype$id <- as.numeric(phenotype$id)
     phenotype <- dplyr::left_join(phenotype, cross$pheno) %>%
@@ -80,8 +84,8 @@ mergepheno <- function(cross, phenotype, set=NULL){
 extract_genotype=function(cross){
     
     # Pull out the genotypes into snp x strain matrix
-    genomat <- do.call(cbind, sapply(cross$geno, function(x) {
-            x$argmax
+    genomat <- do.call(cbind, sapply(cross$pheno, function(x) {
+            x$data
     }))
     
     genomat <- apply(genomat, c(1,2), function(y) {
