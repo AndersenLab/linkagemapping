@@ -18,17 +18,12 @@ mapformat <- function(pheno, parents){
         dplyr::select(strain, conpheno, phenotype)
     
     # Spread the phenotypes and condense down to one row per strain
-    pheno <- t <- pheno %>%
-        dplyr::filter(strain != "N2", strain != "CB4856") %>%
+    pheno <- pheno %>%
         tidyr::spread(conpheno, phenotype) %>%
         dplyr::group_by(strain) %>%
-        dplyr::summarise_each(funs = dplyr::funs(mean(., na.rm = TRUE))) %>%
-        
-        # Change ID to QX number
-        dplyr::mutate(id = stringr::str_split_fixed(.$strain, "QX", 2)[,2]) %>%
-        
-        # Remove non-QX strain (e.g. N2 and CB4856)
-        dplyr::filter(id != "")
+        dplyr::summarise_each(funs = dplyr::funs(mean(., na.rm = TRUE)))
+    
+    return(pheno)
 }
 
 #' Merge the cross object and the phenotype data frame using a dplyr left_join
@@ -52,26 +47,18 @@ mapformat <- function(pheno, parents){
 mergepheno <- function(cross, phenotype, parents, set=NULL){
     # Format the phenotype data
     phenotype <- mapformat(phenotype, parents)
-    cross$pheno$id <- as.numeric(cross$pheno$id)
-    phenotype$id <- as.numeric(phenotype$id)
-    phenotype <- dplyr::left_join(phenotype, cross$pheno) %>%
-        dplyr::select(-QX, -RILname, -strain)
     
     # If a specific set is selected, merge only that set's information to the 
     if(!is.null(set)){
-        phenotype <- phenotype[phenotype$set == set,] %>%
-            dplyr::select(-set)
-        cross$pheno <- dplyr::left_join(cross$pheno, phenotype, by="id")
+        phenotype <- phenotype[phenotype$set == set,]
+        cross$pheno <- dplyr::left_join(cross$pheno, phenotype, by="strain")
     } else {
         # Otherwise, merge everything
-        phenotype <- phenotype %>%
-            dplyr::select(-set)
-        cross$pheno <- dplyr::left_join(cross$pheno, phenotype, by="id") %>%
-            dplyr::select(-strain)
+        cross$pheno <- dplyr::left_join(cross$pheno, phenotype, by="strain")
     }
     
     # Order the phenotype element rows by id
-    cross$pheno <- cross$pheno[order(cross$pheno$id),]
+    cross$pheno <- cross$pheno[order(cross$pheno$strain),]
     return(cross)
 }
 
