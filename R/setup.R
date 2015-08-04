@@ -118,7 +118,7 @@ extract_scaled_phenotype=function(cross, set = NULL, setcorrect = FALSE,
     
     # Select only the phenotype columns
     p <- cross$pheno %>%
-        dplyr::select(which(sapply(., class) == "numeric"), -id, -set)
+        dplyr::select(which(sapply(., class) == "numeric"), -set)
     
     # If not corrrecting for set effects...
     if(setcorrect==FALSE) {
