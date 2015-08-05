@@ -5,11 +5,7 @@
 #' cross object
 #' @importFrom dplyr %>%
 
-mapformat <- function(pheno, parents){
-    
-    # Filter out parental strains which may have been repetitively phenotyped
-    pheno <- pheno %>%
-        dplyr::filter(!(strain %in% parents))
+mapformat <- function(pheno){
     
     # Make the condensed phenotype name column (condition + trait)
     pheno$conpheno <- paste0(pheno$condition, ".", pheno$trait)
@@ -44,9 +40,9 @@ mapformat <- function(pheno, parents){
 #' @importFrom dplyr %>%
 #' @export
 
-mergepheno <- function(cross, phenotype, parents, set=NULL){
+mergepheno <- function(cross, phenotype, set=NULL){
     # Format the phenotype data
-    phenotype <- mapformat(phenotype, parents)
+    phenotype <- mapformat(phenotype)
     
     # If a specific set is selected, merge only that set's information to the 
     if(!is.null(set)){

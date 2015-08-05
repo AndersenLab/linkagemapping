@@ -4,7 +4,7 @@
 \alias{mapformat}
 \title{Get the LOD value for each marker based on the correlation between genotype}
 \usage{
-mapformat(pheno, parents)
+mapformat(pheno)
 }
 \arguments{
 \item{pheno}{A phenotype data frame output from the easysorter pipeline}
