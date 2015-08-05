@@ -4,17 +4,27 @@
 \alias{fsearch}
 \title{Map all of the traits in a given cross object with forward search}
 \usage{
-fsearch(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE)
+fsearch(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
+  threshold = "FDR")
 }
 \arguments{
 \item{cross}{A complete cross object with the phenotype data merged}
 
-\item{iterations}{The number of iterations for the FDR/GWER calculation. Defaults
+\item{phenotype}{A string or vector of strings used in subsetting the
+phenotype data. For example: \code{"bleomycin"} to map only the traits
+phenotyped in bleomycin or \code{"amsacrine.q90.TOF"} for only that specific
+trait. To get the union of these two sets, enter \code{c("bleomycin",
+"amsacrine.q90.TOF")}.}
+
+\item{permutations}{The number of permutations for the FDR/GWER calculation. Defaults
 to \code{1000}.}
 
 \item{doGPU}{Boolean, whether to use the gputools package to speed up,
 mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
 graphics card with the gputools package installed. Defaults to \code{FALSE}.}
+
+\item{threshold}{Can be set to either \code{FDR} for false discovery rate or
+\code{GWER} for genome-wide error rate. Defaults to \code{FDR}.}
 }
 \value{
 The LOD scores for all markers

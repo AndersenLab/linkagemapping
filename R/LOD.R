@@ -54,16 +54,29 @@ map <- function(cross, doGPU = FALSE) {
 #' Map all of the traits in a given cross object with forward search
 #' 
 #' @param cross A complete cross object with the phenotype data merged
-#' @param iterations The number of iterations for the FDR calculation. Defaults
+#' @param phenotype A string or vector of strings used in subsetting the
+#' phenotype data. For example: \code{"bleomycin"} to map only the traits
+#' phenotyped in bleomycin or \code{"amsacrine.q90.TOF"} for only that specific
+#' trait. To get the union of these two sets, enter \code{c("bleomycin", 
+#' "amsacrine.q90.TOF")}.
+#' @param permutations The number of permutations for the FDR/GWER calculation. Defaults
 #' to \code{1000}.
 #' @param doGPU Boolean, whether to use the gputools package to speed up,
 #' mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
 #' graphics card with the gputools package installed. Defaults to \code{FALSE}.
+#' @param threshold Can be set to either \code{FDR} for false discovery rate or
+#' \code{GWER} for genome-wide error rate. Defaults to \code{FDR}.
 #' @return The LOD scores for all markers
 #' @importFrom dplyr %>%
 #' @export
 
-fsearch <- function(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE) {
+fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
+                    threshold = "FDR") {
+    
+    if (threshold != "FDR" | threshold != "GWER") {
+        stop("Unknown threshold type. Threshold should be set to either
+             'FDR' or 'GWER'.")
+    }
     
     # Select the subset of the phenotype data frame to map
     if (!is.null(phenotype)) {
@@ -76,10 +89,16 @@ fsearch <- function(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE) {
     # Set up the iteration count
     iteration <- 1
     
-    # Complete the first mapping with FDR calculation
+    # Complete the first mapping with FDR/GWER calculation
     lods <- map(cross)
-    fdr <- get_peak_fdr(lods, cross, iterations, doGPU)
-    peaks <- get_peaks_above_thresh(lods, fdr)
+    
+    if (threshold == "GWER") {
+        threshold <- get_peak_gwer(lods, cross, permutations, doGPU)
+    } else {
+        threshold <- get_peak_fdr(lods, cross, permutations, doGPU)
+    }
+    
+    peaks <- get_peaks_above_thresh(lods, threshold)
     
     # If there are more than 0 peaks in the map...
     if (nrow(peaks) > 0) {
@@ -95,21 +114,27 @@ fsearch <- function(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE) {
             # melt the resulting data frame, and add it to the lodslist
             lods <- data.frame(lods)
             lodswiththresh <- lods %>%
-                dplyr::mutate(marker = rownames(.), threshold = fdr, iteration = iteration)
+                dplyr::mutate(marker = rownames(.), threshold = threshold, iteration = iteration)
             meltedlods <- tidyr::gather(lodswiththresh, trait, lod, -chr, -pos, -marker, -threshold, -iteration) %>%
                 dplyr::select(marker, chr, pos, trait, lod, threshold, iteration)
             lodslist <- append(lodslist, list(meltedlods))
             
             # Get the residual phenotype cvalues and put them back in the cross
             # object
-            resids <- get_pheno_resids(lods, cross, fdr)
+            resids <- get_pheno_resids(lods, cross, threshold)
             metapheno <- cross$pheno %>% dplyr::select(strain, set)
             cross$pheno <- data.frame(metapheno, resids)
             
-            # Repeat the mapping, FDR calculationa and peak finding
+            # Repeat the mapping, FDR/GWER calculationa and peak finding
             lods <- map(cross)
-            fdr <- get_peak_fdr(lods, cross, iterations, doGPU)
-            peaks <- get_peaks_above_thresh(lods, fdr)
+            
+            if (threshold == "GWER") {
+                threshold <- get_peak_gwer(lods, cross, permutations, doGPU)
+            } else {
+                threshold <- get_peak_fdr(lods, cross, permutations, doGPU)
+            }
+            
+            peaks <- get_peaks_above_thresh(lods, threshold)
             
             # Add one to the iteration
             iteration <- iteration + 1
@@ -118,7 +143,7 @@ fsearch <- function(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE) {
         # Add the lods to the lodslist for the final iteration
         lods <- data.frame(lods)
         lodswiththresh <- lods %>%
-            dplyr::mutate(marker = rownames(.), threshold = fdr, iteration = iteration)
+            dplyr::mutate(marker = rownames(.), threshold = threshold, iteration = iteration)
         meltedlods <- tidyr::gather(lodswiththresh, trait, lod, -chr, -pos, -marker, -threshold, -iteration) %>%
             dplyr::select(marker, chr, pos, trait, lod, threshold, iteration)
         lodslist <- append(lodslist, list(meltedlods))
@@ -132,7 +157,7 @@ fsearch <- function(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE) {
         # and return them
         lods <- data.frame(lods)
         lodswiththresh <- lods %>%
-            dplyr::mutate(marker = rownames(.), threshold = fdr, iteration = 1)
+            dplyr::mutate(marker = rownames(.), threshold = threshold, iteration = 1)
         finallods <- tidyr::gather(lodswiththresh, trait, lod, -chr, -pos, -marker, -threshold, -iteration) %>%
             dplyr::select(marker, chr, pos, trait, lod, threshold, iteration)
     }
