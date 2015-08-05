@@ -9,7 +9,7 @@ fsearch(cross, phenotype = NULL, iterations = 1000, doGPU = FALSE)
 \arguments{
 \item{cross}{A complete cross object with the phenotype data merged}
 
-\item{iterations}{The number of iterations for the FDR calculation. Defaults
+\item{iterations}{The number of iterations for the FDR/GWER calculation. Defaults
 to \code{1000}.}
 
 \item{doGPU}{Boolean, whether to use the gputools package to speed up,

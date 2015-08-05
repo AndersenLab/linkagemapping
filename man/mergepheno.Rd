@@ -4,7 +4,7 @@
 \alias{mergepheno}
 \title{Merge the cross object and the phenotype data frame using a dplyr left_join}
 \usage{
-mergepheno(cross, phenotype, set = NULL)
+mergepheno(cross, phenotype, parents, set = NULL)
 }
 \arguments{
 \item{cross}{A cross object}
@@ -18,6 +18,10 @@ Andersen=2) before joining to the data frame}
 A cross object complete with phenotype information
 }
 \description{
-Merge the cross object and the phenotype data frame using a dplyr left_join
+Incoming phenotype data frame must have the following columns:
+\code{condition}
+\code{trait}
+\code{strain}
+\code{phenotype}
 }
 
