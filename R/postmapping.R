@@ -126,6 +126,66 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
     return(threshold)
 }
 
+#' Get the GWER value for a particular mapping by phenotype permutation
+#' 
+#' @param lods A data frame output by the mapping functions to be converted to a
+#' \code{scanone} object
+#' @param cross The original cross object used to perform the mapping
+#' @param perms
+#' @param doGPU Boolean, whether to use the gputools package to speed up,
+#' mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
+#' graphics card with the gputools package installed. Defaults to \code{FALSE}.
+#' @return The value of the 5% GWER threshold
+#' @importFrom foreach %do% %dopar%
+
+get_peak_gwer <- function(lods, cross, perms=1000, doGPU=F) {
+    
+    # Set the appropriate divisor for printing frequency
+    if (perms < 100) {
+        div = 1
+    } else if (perms >= 100 & perms < 1000) {
+        div = 10
+    } else {
+        div = 100
+    }
+    
+    # Get the maximum peak height for each trait
+    peaklods <- maxpeaks(lods, cross)$maxpeaklod
+    
+    # Get the information necessary to do the permutation mapping
+    pheno <- extract_scaled_phenotype(cross)
+    geno <- extract_genotype(cross)
+    npheno <- count_strains_per_trait(pheno)
+    
+    # Print a new line to the console to make the updates prettier
+    cat("\n")
+    
+    # Permute the phenotype data and do a mapping for each round of permutation
+    # Change to %dopar% for multithreaded
+    permpeakLODs <- foreach::foreach(i = 1:perms) %do% {
+        if (i %% div == 0) {
+            cat(paste0("Permutation ", i, " of ", perms, "...\n"))
+        }
+        lods <- lodmatrix2scanone(
+            get_lod_by_cor(npheno,
+                           pheno[sample(1:nrow(pheno)),],
+                           geno,
+                           doGPU),
+            cross)
+        maxpeaks(lods, cross)$maxpeaklod
+    }
+    
+    # Get all of the permutation peak lods
+    permpeakLODs <- lapply(permpeakLODs, function(x) {
+        data.frame(t(data.frame(x)))
+    })
+    permpeakLODs <- dplyr::rbind_all(permpeakLODs)
+    permpeakLODs <- tidyr::gather(permpeakLODs, trait, lod)
+    
+    threshold <- quantile(permpeakLODs$lod, probs = .95)
+    return(threshold)
+}
+
 #' Regress genotype from phenotype and resturn the residual phenotype values
 #' 
 #' @param lods A data frame output by the mapping functions to be converted to a
