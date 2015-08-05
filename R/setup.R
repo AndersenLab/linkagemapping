@@ -59,7 +59,7 @@ mergepheno <- function(cross, phenotype, parents, set=NULL){
     }
     
     # Order the phenotype element rows by id
-    cross$pheno <- cross$pheno[order(cross$pheno$strain),]
+    cross$pheno <- cross$pheno[gtools::mixedorder(cross$pheno$strain), ]
     return(cross)
 }
 
