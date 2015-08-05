@@ -7,6 +7,8 @@ Depends: R (>= 3.2.0)
 Imports:
 	dplyr,
 	foreach,
+	ggplot2,
+	gtools,
 	qtl,
 	tidyr
 Suggests:
