@@ -293,7 +293,7 @@ annotate_lods <- function(lods, cross, annotate_all = FALSE) {
     }
     
     # Handle a situation in which no peaks are detected 
-    if (nrow(peaks == 0)) {
+    if (nrow(peaks) == 0) {
         lods$var_exp <- NA
         lods$eff_size <- NA
         lods$ci_l_marker <- NA
@@ -330,6 +330,10 @@ annotate_lods <- function(lods, cross, annotate_all = FALSE) {
         # Get the trait and peak marker
         peaktrait <- as.character(peaks$trait[i])
         marker <- gsub('-', '\\.', as.character(peaks$marker[i]))
+        
+        if (grepl("^[0-9]", marker)) {
+            marker <- paste0("X", marker)
+        }
         
         # Get the genotype and phenotype for that trait and marker
         genotypes <- geno[, which(colnames(geno) == marker)]
