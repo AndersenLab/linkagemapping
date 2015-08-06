@@ -292,6 +292,18 @@ annotate_lods <- function(lods, cross, annotate_all = FALSE) {
             dplyr::filter(lod == max(lod))
     }
     
+    # Handle a situation in which no peaks are detected 
+    if (nrow(peaks == 0)) {
+        lods$var_exp <- NA
+        lods$eff_size <- NA
+        lods$ci_l_marker <- NA
+        lods$ci_l_pos <- NA
+        lods$ci_r_marker <- NA
+        lods$ci_r_pos <- NA
+        
+        return(lods)
+    }
+    
     
     # Get the genotype and phenotype information
     geno <- data.frame(extract_genotype(cross))
