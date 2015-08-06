@@ -41,6 +41,8 @@ mapformat <- function(pheno){
 #' @export
 
 mergepheno <- function(cross, phenotype, set=NULL){
+    phenotype <- phenotype[phenotype$strain %in% cross$pheno$strain, ]
+    
     # Format the phenotype data
     phenotype <- mapformat(phenotype)
     
