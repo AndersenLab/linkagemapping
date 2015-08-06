@@ -30,7 +30,13 @@ The measured quantitative value for the phenotype. For example `175.657` or `18`
 
 #### Cross Object
 
-The cross object is included the data directory of the package. In order to access the object in a mutable fashion, it should be read in, then assigned to another variable name as below:
+You will first need a cross object to complete the mapping. Included with this package are three cross objects to choose from:
+
++ `N2xCB4856cross` - N2/CB4856(Hawaiian)
++ `N2xLSJ2cross` - N2/LSJ2
++ `AF16xHK104cross` - AF16/HK104 (*C. briggsae*)
+
+The cross objects are included in the data directory of the package. In order to access the objects in a mutable fashion, they should be read in, then assigned to another variable name as below:
 
 ```r
 data(N2xCB4856cross)
@@ -46,14 +52,86 @@ Phenotype data in the format outlined above can be merged with the cross object 
 phenocross <- mergepheno(cross, pheno)
 ```
 
-As of this writing (7/24/2015) the genotypes for the first two sets of RIAILs are unclear and these strains do not contribute to the mapping. Consequently, it is advised to subset to only the third set of RIAILs prior to mapping, as below:
+**As of this writing (7/24/2015) the genotypes for the first two sets of RIAILs are unclear and these strains do not contribute to the mapping. Consequently, it is advised to subset to only the third set of RIAILs prior to mapping when using the N2/CB4856 cross object, as below:**
 
 ```r
 # Assuming the phenotype data is in a data frame named "pheno"
-phenocross <- mergepheno(cross, pheno, set = 3)
+phenocross <- mergepheno(cross, pheno, set = 2)
 ```
 
 ### Completing the Mapping
 
+Mapping is completed by the `fsearch` function. This function performs a mapping with forward search and returns a long-format data frame of all LOD scores across all traits in the given phenotype data.
+
+```r
+fsearch(cross)
+```
+
+In order to calculate significance cutoffs, the function needs to permute the phenotypes and remap a number of times to get either false discovery rate or genome-wide error rate. This step can take a while with 1000 iterations (the default value), so it is suggested that the number of permutations for testing large datasets locally be reduced. This will reduce the accuracy of the mappings, but will expedite exploratory analyses.
+
+```r
+fsearch(cross, permutations = 10)
+```
+
+If your computer has an NVIDEA graphics card and you have installed the gputools package, you can alternatively enable `doGPU` which will massively expedite the mapping process and allow you to complete the recommended 1000 permutations.
 
 
+```r
+fsearch(cross, permutations = 1000, doGPU = TRUE)
+```
+
+If you only need to map a subset of a much larger trait set, you can set a value to the `phenotype` parameter. This parameter and the subsequent trait selection follow the rules outlined by the `select` and `contains` functions from the `dplyr` package.
+
+```r
+fsearch(cross, phenotype = "bleomycin", permutations = 1000, doGPU = TRUE)
+```
+
+#### Choosing a Thresholding Method
+
+Without overwhelming you with the details, you should generally choose false discovery rate (FDR) as your thresholding method if you are mapping more than 100 traits. Otherwise use genome-wide error rate (GWER).
+
+Traits > 100
+
+```r
+fsearch(cross, threshold = "FDR")
+```
+
+Traits < 100
+
+```r
+fsearch(cross, phenotype = "bleomycin", threshold = "GWER")
+```
+
+### Annotating LOD scores
+
+The final step in completing a mapping is to annotate all peak LOD scores with confidence interval bounds, effect size, and variance explained. This can be completed as below:
+
+```r
+annotate_lods(map, cross)
+```
+
+### Example
+
+Below is a complete example of a mapping script run start to finish
+
+```r
+# Install and load the package
+devtools::install_github("AndersenLab/linkagemapping")
+library("linkagemapping")
+
+# Get the cross object
+data("N2xCB4856cross")
+cross <- N2xCB4856cross
+
+# Get the phenotype data
+pheno <- readRDS("~/Dropbox/AndersenLab/LabFolders/PastMembers/Tyler/ForTrip/RIAILs2_processed.rds")
+
+# Merge the cross object and the phenotype data
+cross <- mergepheno(cross, pheno)
+
+# Perform a mapping with only 10 iterations of the phenotype data for FDR calc
+map <- fsearch(cross, permutations = 10)
+
+# Annotate the LOD scores
+annotatedlods <- annotate_lods(map, cross)
+```
