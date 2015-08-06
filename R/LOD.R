@@ -73,7 +73,7 @@ map <- function(cross, doGPU = FALSE) {
 fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
                     threshold = "FDR") {
     
-    if (threshold != "FDR" | threshold != "GWER") {
+    if (threshold != "FDR" & threshold != "GWER") {
         stop("Unknown threshold type. Threshold should be set to either
              'FDR' or 'GWER'.")
     }
