@@ -13,6 +13,6 @@ lodplot(map)
 A plot with a line for each iteration of the forward search mapping
 }
 \description{
-Plot all lod scores for a forward search mapping by iteration
+Plots the linkage mapping for each iteration of scanone
 }
 
