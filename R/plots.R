@@ -1,5 +1,7 @@
 #' Plot all lod scores for a forward search mapping by iteration
 #' 
+#' Plots the linkage mapping for each iteration of scanone
+#' 
 #' @param map The mapping output for a single trait
 #' @return A plot with a line for each iteration of the forward search mapping
 #' @export
@@ -20,10 +22,10 @@ lodplot <- function(map){
     
     if(nrow(cis) != 0) {
         plot <- plot + 
-            geom_ribbon(data = maxmap,
+            ggplot2::geom_ribbon(data = maxmap,
                         aes(x = pos/1e6, ymin = 0, ymax = ci_lod),
                         fill = "blue", alpha = 0.5) +
-            geom_point(data = cis, aes(x=pos/1e6, y=lod + 0.75),
+            ggplot2::geom_point(data = cis, ggplot2::aes(x=pos/1e6, y=lod + 0.75),
                        fill ="red", shape=25, size=3.2, show_guide = FALSE) +
             geom_text(data = cis,
                       aes(x=pos/1e6,
