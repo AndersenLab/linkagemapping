@@ -10,8 +10,7 @@ mapformat <- function(pheno){
     # Make the condensed phenotype name column (condition + trait)
     pheno$conpheno <- paste0(pheno$condition, ".", pheno$trait)
     
-    pheno <- pheno %>%
-        dplyr::select(strain, conpheno, phenotype)
+    pheno <- pheno[, c("strain", "conpheno", "phenotype")]
     
     # Spread the phenotypes and condense down to one row per strain
     pheno <- pheno %>%
