@@ -225,7 +225,7 @@ effectplot <- function(cross, map, parental = "N2/CB4856") {
         dplyr::filter(!is.na(var_exp)) %>%
         do(head(., n=1))
     
-    annotated_map <- annotate_lods(map2, mapcross, annotate_all = TRUE)
+    annotated_map <- annotate_lods(map2, cross, annotate_all = TRUE)
     
     
     plot <- ggplot2::ggplot(annotated_map) +
