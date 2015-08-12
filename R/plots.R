@@ -188,7 +188,7 @@ pxgplot <- function(cross, map, parent="N2/CB4856") {
         
     ggplot2::ggplot(split) +
         ggplot2::geom_boxplot(ggplot2::aes(x = genotype, y = pheno, fill = genotype), outlier.shape = NA) +
-        ggplot2::scale_fill_manual(values = c("N2" = "orange", "CB4856" = "blue", "LSJ2" = "purple", "AF16" = "pink", "HK104"= "green")) +
+        ggplot2::scale_fill_manual(values = c("N2" = "orange", "CB4856" = "blue", "LSJ2" = "green", "AF16" = "indianred", "HK104"= "gold")) +
         ggplot2::geom_jitter(ggplot2::aes(x = genotype, y = pheno), alpha = .8) +
         ggplot2::facet_wrap(~ marker, ncol = 5) +
         ggplot2::theme_bw() +
