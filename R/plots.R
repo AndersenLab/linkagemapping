@@ -8,11 +8,11 @@
 
 lodplot <- function(map){
     
-    maxmap <- mean.TOF %>%
+    maxmap <- map %>%
             dplyr::group_by(marker) %>%
             dplyr::filter(lod == max(lod))
     
-    cis <- mean.TOF %>% 
+    cis <- map %>% 
         dplyr::group_by(iteration) %>%
         dplyr::filter(!is.na(var_exp)) %>%
         do(head(., n=1))
@@ -40,7 +40,7 @@ lodplot <- function(map){
     if(nrow(cis) != 0) {
         plot <- plot + 
             ggplot2::geom_ribbon(data = maxmap,
-                        ggplot2::aes(x = pos/1e6, ymin = 0, ymax = ci_lod, fill="grey"),
+                        ggplot2::aes(x = pos/1e6, ymin = 0, ymax = ci_lod, fill="gray2"),
                         alpha = 0.5, show_guide=FALSE) +
             ggplot2::geom_point(data = cis, ggplot2::aes(x=pos/1e6, y=lod + 1.00, fill=as.factor(iteration)),
                        shape=25, size=3.2, show_guide = FALSE) +
@@ -81,8 +81,6 @@ maxlodplot <- function(map){
     }
     
     map1 <- cidefiner(cis, map1)
-    
-    
     
     plot <- ggplot2::ggplot(map1) +
         ggplot2::aes(x = pos/1e6, y = lod)
@@ -126,7 +124,7 @@ maxlodplot <- function(map){
 #' mapping
 #' @export
 
-pxgplot <- function(cross, map) {
+pxgplot <- function(cross, map, parent="N2/CB4856") {
     peaks <- map %>% 
         dplyr::group_by(iteration) %>%
         dplyr::filter(!is.na(var_exp)) %>%
@@ -162,12 +160,35 @@ pxgplot <- function(cross, map) {
     
     split <- tidyr::gather(geno, marker, genotype, -pheno)
     
-    split <- split %>%
-        dplyr::mutate(genotype = ifelse(genotype == -1, "N2", "CB4856"))
-    
+    split$genotype <- sapply(split$genotype, function(x){
+        if(parent=="N2/CB4856") {
+            if(x == -1) {
+                "N2"
+            } else {
+                "CB4856"
+            }
+        } else {
+            if(parent=="N2/LSJ2") {
+                if(x == -1) {
+                    "N2"
+                } else {
+                    "LSJ2"
+                }
+            } else {
+                if(parent=="AF16/HK104") {
+                    if(x==-1) {
+                        "AF16"
+                    } else {
+                        "HK104"
+                    }
+                }
+            }
+        }
+    })
+        
     ggplot2::ggplot(split) +
         ggplot2::geom_boxplot(ggplot2::aes(x = genotype, y = pheno, fill = genotype), outlier.shape = NA) +
-        ggplot2::scale_fill_manual(values = c("N2" = "orange", "CB4856" = "blue")) +
+        ggplot2::scale_fill_manual(values = c("N2" = "orange", "CB4856" = "blue", "LSJ2" = "purple", "AF16" = "pink", "HK104"= "green")) +
         ggplot2::geom_jitter(ggplot2::aes(x = genotype, y = pheno), alpha = .8) +
         ggplot2::facet_wrap(~ marker, ncol = 5) +
         ggplot2::theme_bw() +
@@ -191,15 +212,23 @@ pxgplot <- function(cross, map) {
 #' @return A line plot of the effect size at each marker
 #' @export
 
-effectplot <- function(cross, map) {
-    map <- map %>%
+effectplot <- function(cross, map, parental = "N2/CB4856") {
+    map2 <- map %>%
         dplyr::group_by(marker) %>%
         dplyr::filter(lod == max(lod)) %>%
         dplyr::select(marker:iteration)
     
-    annotated_map <- annotate_lods(map, cross, annotate_all = TRUE)
+    cis <- map %>%
+        dplyr::group_by(marker) %>%
+        dplyr::mutate(maxlod=max(lod))%>%
+        dplyr::group_by(iteration) %>%
+        dplyr::filter(!is.na(var_exp)) %>%
+        do(head(., n=1))
     
-    ggplot2::ggplot(annotated_map) +
+    annotated_map <- annotate_lods(map2, mapcross, annotate_all = TRUE)
+    
+    
+    plot <- ggplot2::ggplot(annotated_map) +
         ggplot2::geom_line(ggplot2::aes(x = pos/1e6, y = eff_size), size = 1, alpha = 0.85) +
         ggplot2::facet_grid(.~chr, scales ="free") +
         ggplot2::labs(x = "Position (Mb)", y = "Effect Size") +
@@ -213,6 +242,13 @@ effectplot <- function(cross, map) {
               strip.text.y = ggplot2::element_text(size=20, face="bold", color="black"),
               plot.title = ggplot2::element_text(size=24, face="bold", vjust = 1),
               panel.background = ggplot2::element_rect( color="black",size=1.2))
+    if(nrow(cis) != 0) {
+        plot <- plot + 
+            ggplot2::geom_rect(data=cis, ggplot2::aes(xmin=ci_l_pos/1e6, xmax=ci_r_pos/1e6, ymin=-Inf, ymax=Inf), fill="blue", alpha=.5, show_guide=FALSE) +
+            ggplot2::geom_point(data = cis, ggplot2::aes(x=pos/1e6, y=0),
+                                fill ="red", shape=25, size=3.2, show_guide = FALSE)
+    }
+    plot
 }
 
 
