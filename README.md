@@ -18,7 +18,7 @@ The strain name for each individual row.
 
 ##### `condition`
 
-The name of the condition to which that strain was exposed during the particular experiment. For example `bleomycin` or `etoposide`.
+The name of the condition to which that strain was exposed during the particular experiment. For example `bleomycin` or `etoposide`. This column is optional, but plot names will be affected by an absence of a `condition` column (e.g. ".mean.TOF" vs "amsacrine.mean.TOF").
 
 ##### `trait`
 
