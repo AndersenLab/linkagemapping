@@ -183,7 +183,7 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
     if (!is.na(markerset)) {
         finallods$pos <- vapply(finallods$marker, function(marker) {
             return(as.numeric(unlist(
-                markers[markers$SNP == marker, "WS244.pos"])))
+                markers[markers$marker == marker, "WS244.pos"])))
         }, numeric(1))
     }
     
