@@ -5,7 +5,8 @@
 \title{Map all of the traits in a given cross object with forward search}
 \usage{
 fsearch(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
-  threshold = "FDR")
+  threshold = "FDR", markerset = c("N2xCB4856", "N2xLSJ2", "AF16xHK104",
+  NA))
 }
 \arguments{
 \item{cross}{A complete cross object with the phenotype data merged}
@@ -25,6 +26,9 @@ graphics card with the gputools package installed. Defaults to \code{FALSE}.}
 
 \item{threshold}{Can be set to either \code{FDR} for false discovery rate or
 \code{GWER} for genome-wide error rate. Defaults to \code{FDR}.}
+
+\item{markerset}{The set of markers to use for conversion of position to
+physical position, if set to \code{NA}, no conversion will be completed.}
 }
 \value{
 The LOD scores for all markers

@@ -66,12 +66,15 @@ map <- function(cross, doGPU = FALSE) {
 #' graphics card with the gputools package installed. Defaults to \code{FALSE}.
 #' @param threshold Can be set to either \code{FDR} for false discovery rate or
 #' \code{GWER} for genome-wide error rate. Defaults to \code{FDR}.
+#' @param markerset The set of markers to use for conversion of position to
+#' physical position, if set to \code{NA}, no conversion will be completed.
 #' @return The LOD scores for all markers
 #' @importFrom dplyr %>%
 #' @export
 
 fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
-                    threshold = "FDR") {
+                    threshold = "FDR", markerset = c("N2xCB4856", "N2xLSJ2",
+                                                     "AF16xHK104", NA)) {
     
     if (threshold != "FDR" & threshold != "GWER") {
         stop("Unknown threshold type. Threshold should be set to either
@@ -164,11 +167,25 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
     
     # Switch genetic position to physical position (WS244) for all of the
     # markers in the map
-#     cat("\nConverting marker position to physical position. This step takes a while...\n")
-#     finallods$pos <- vapply(finallods$marker, function(marker) {
-#             return(as.numeric(unlist(
-#                 markers[markers$SNP == marker, "WS244.pos"])))
-#         }, numeric(1))
+    cat("\nConverting marker position to physical position. This step takes a while...\n")
+    
+    # If you need to add possible marker sets, add them here
+    if (markerset == "N2xCB4856") {
+        markers <- N2xCB4856markers
+    } else if (markerset == "N2xLSJ2") {
+        markers <- N2xLSJ2markers
+    } else if (markerset == "AF16xHK104") {
+        markers <- N2xLSJ2markers
+    } else {
+        markers <- NA
+    }
+    
+    if (!is.na(markerset)) {
+        finallods$pos <- vapply(finallods$marker, function(marker) {
+            return(as.numeric(unlist(
+                markers[markers$SNP == marker, "WS244.pos"])))
+        }, numeric(1))
+    }
     
     return(finallods)
 }
