@@ -42,11 +42,11 @@ lodplot <- function(map){
             ggplot2::geom_ribbon(data = maxmap,
                         ggplot2::aes(x = pos/1e6, ymin = 0, ymax = ci_lod, fill="gray2"),
                         alpha = 0.5, show_guide=FALSE) +
-            ggplot2::geom_point(data = cis, ggplot2::aes(x=pos/1e6, y=lod + 1.00, fill=as.factor(iteration)),
+            ggplot2::geom_point(data = cis, ggplot2::aes(x=pos/1e6, y=(1.05*lod), fill=as.factor(iteration)),
                        shape=25, size=3.2, show_guide = FALSE) +
             ggplot2::geom_text(data = cis,
                       ggplot2::aes(x=pos/1e6,
-                          y=lod + 2.5,
+                          y=(1.2*lod),
                           label = paste0(100*round(var_exp, digits = 4),"%")),
                       colour = "black", size=5)
     }
@@ -89,11 +89,11 @@ maxlodplot <- function(map){
         plot <- plot + 
             ggplot2::geom_ribbon(ggplot2::aes(x = pos/1e6, ymin = 0, ymax = ci_lod),
                         fill = "blue", alpha = 0.5) +
-            ggplot2::geom_point(data = cis, ggplot2::aes(x=pos/1e6, y=maxlod + 1.00),
+            ggplot2::geom_point(data = cis, ggplot2::aes(x=pos/1e6, y=(1.05*maxlod)),
                        fill ="red", shape=25, size=3.2, show_guide = FALSE) +
             ggplot2::geom_text(data = cis,
                                ggplot2::aes(x=pos/1e6,
-                          y=lod + 2.5,
+                          y=(1.2*lod),
                           label = paste0(100*round(var_exp, digits = 4),"%")),
                       colour = "black", size=5)
     }
@@ -161,27 +161,26 @@ pxgplot <- function(cross, map, parent="N2/CB4856") {
     split <- tidyr::gather(geno, marker, genotype, -pheno)
     
     split$genotype <- sapply(split$genotype, function(x){
+        if(is.na(x)) {
+            return(NA)
+        }
         if(parent=="N2/CB4856") {
             if(x == -1) {
                 "N2"
             } else {
                 "CB4856"
             }
-        } else {
-            if(parent=="N2/LSJ2") {
-                if(x == -1) {
-                    "N2"
-                } else {
-                    "LSJ2"
-                }
+        } else if(parent=="N2/LSJ2") {
+            if(x == -1) {
+                "N2"
             } else {
-                if(parent=="AF16/HK104") {
-                    if(x==-1) {
-                        "AF16"
-                    } else {
-                        "HK104"
-                    }
-                }
+                "LSJ2"
+            }
+        } else if(parent=="AF16/HK104") {
+            if(x==-1) {
+                "AF16"
+            } else {
+                "HK104"
             }
         }
     })
