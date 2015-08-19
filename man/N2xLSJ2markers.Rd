@@ -8,11 +8,11 @@
   \item{marker}{the name of the marker used for genotyping}
   \item{chr.num}{the chromosome number in arabic numerals}
   \item{chr.roman}{the chromosome number in roman numerals}
-  \item{chr.roman}{the position of the marker in genome build WS195}
+  \item{chr.roman}{the position of the marker in genome build WS245}
 }}
 \description{
 This data frame contains a lookup table for the translation of marker
 positions from genetic to physical positions. The physical positions in this
-table come from C. elegans genome build WS195.
+table come from C. elegans genome build WS245.
 }
 
