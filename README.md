@@ -135,3 +135,7 @@ map <- fsearch(cross, permutations = 10)
 # Annotate the LOD scores
 annotatedlods <- annotate_lods(map, cross)
 ```
+
+# Marker liftover
+
+In order too keep marker positions up to date, it will be necessary to use Dan's [liftover utilities](https://github.com/AndersenLab/liftover-utils) occasionally. For the marker positions to be updated, the markers data files in the `/data` subdirectory of the package must be updated as well as the internal markers files in `R/sysdata.rda`. Use the `use_data` function from the devtools package in order to update both the user accessible as well as the internal data sets. Additionally, make sure to update the documentation (in `R/datasets.R`) to reflect the new genome build from which the marker positions are taken.
