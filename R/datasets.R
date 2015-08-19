@@ -13,7 +13,7 @@
 #' phenotype subobjects.
 NULL
 
-#' Cross object for N2xCB4856 RIAILs
+#' Cross object for N2xLSJ2 RIAILs
 #'
 #' In this object, N2 genotypes are encoded as 1 and LSJ2 genotypes are
 #' encoded as 3. This cross object had heterozyous loci removed (set to NA). If

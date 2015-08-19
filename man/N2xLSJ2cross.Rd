@@ -2,7 +2,7 @@
 % Please edit documentation in R/datasets.R
 \name{N2xLSJ2cross}
 \alias{N2xLSJ2cross}
-\title{Cross object for N2xCB4856 RIAILs}
+\title{Cross object for N2xLSJ2 RIAILs}
 \format{A cross object made with the \code{qtl} package, with genotype and
 phenotype subobjects.}
 \description{
