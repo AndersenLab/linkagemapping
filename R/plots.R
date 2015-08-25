@@ -20,6 +20,14 @@ lodplot <- function(map){
     maxmap <- cidefiner(cis, maxmap)
     
     plot <- ggplot2::ggplot(map)
+    
+    if(nrow(cis) !=0) {
+        plot <- plot + 
+            ggplot2::geom_ribbon(data=maxmap,
+                                 ggplot2::aes(x=pos/1e6, ymin=0, ymax=ci_lod), fill="grey",
+                                 show_guide=FALSE)
+    }
+    
     plot <- plot + 
         ggplot2::geom_line(ggplot2::aes(x = pos/1e6, y = lod, colour = as.factor(iteration)),
                            size = 1, alpha = 0.85) +
@@ -38,19 +46,28 @@ lodplot <- function(map){
                        panel.background = ggplot2::element_rect( color="black",size=1.2))
     
     if(nrow(cis) != 0) {
+        cis$height1=NULL
+        cis$height2=NULL
+        for(i in 1:nrow(cis)) {
+            if(cis$lod[i] < 10) {
+                cis$height1[i] <- 1.3*cis$lod[i]
+                cis$height2[i] <- 1.5*cis$lod[i]
+            } else  if(cis$lod[i] < 20){
+                cis$height1[i] <- 1.15*cis$lod[i]
+                cis$height2[i] <- 1.3*cis$lod[i]
+            } else {
+                cis$height1[i] <- cis$lod[i]+2
+                cis$height2[i] <- cis$lod[i]+4
+            }
+        }
+            
         plot <- plot + 
-            ggplot2::geom_ribbon(data = maxmap,
-                        ggplot2::aes(x = pos/1e6, ymin = 0, ymax = ci_lod, fill="gray2"),
-                        alpha = 0.5, show_guide=FALSE) +
-            ggplot2::geom_point(data = cis, ggplot2::aes(x=pos/1e6, y=(1.05*lod), fill=as.factor(iteration)),
-                       shape=25, size=3.2, show_guide = FALSE) +
+            ggplot2::geom_point(data = cis, ggplot2::aes(x=pos/1e6, y= height1, fill=as.factor(iteration)),
+                       shape=25, size=3.2, alpha=.85, show_guide = FALSE) +
             ggplot2::geom_text(data = cis,
-                      ggplot2::aes(x=pos/1e6,
-                          y=(1.2*lod),
-                          label = paste0(100*round(var_exp, digits = 4),"%")),
+                      ggplot2::aes(x=pos/1e6, y=height2, label = paste0(100*round(var_exp, digits = 4),"%")),
                       colour = "black", size=5)
     }
-    
 
     return(plot)
 }
