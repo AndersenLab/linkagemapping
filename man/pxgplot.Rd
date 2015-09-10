@@ -4,7 +4,7 @@
 \alias{pxgplot}
 \title{Plot the phenotype by genotype split at each peak marker in a mapping}
 \usage{
-pxgplot(cross, map, parent = "N2/CB4856")
+pxgplot(cross, map, parent = "N2xCB4856")
 }
 \arguments{
 \item{cross}{The cross object used for the mapping}

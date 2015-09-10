@@ -191,6 +191,26 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
     return(finallods)
 }
 
+
+#' Map all of the traits in a given cross object with forward search with manual marker setting
+#' 
+#' @param cross A complete cross object with the phenotype data merged
+#' @param phenotype A string or vector of strings used in subsetting the
+#' phenotype data. For example: \code{"bleomycin"} to map only the traits
+#' phenotyped in bleomycin or \code{"amsacrine.q90.TOF"} for only that specific
+#' trait. To get the union of these two sets, enter \code{c("bleomycin", 
+#' "amsacrine.q90.TOF")}.
+#' @param permutations The number of permutations for the FDR/GWER calculation. Defaults
+#' to \code{1000}.
+#' @param doGPU Boolean, whether to use the gputools package to speed up,
+#' mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
+#' graphics card with the gputools package installed. Defaults to \code{FALSE}.
+#' @param threshold Can be set to either \code{FDR} for false discovery rate or
+#' \code{GWER} for genome-wide error rate. Defaults to \code{FDR}.
+#' @return The LOD scores for all markers
+#' @importFrom dplyr %>%
+#' @export
+
 fsearch.manmarker <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
                     threshold = "FDR") {
     

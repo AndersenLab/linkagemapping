@@ -4,7 +4,7 @@
 \alias{effectplot}
 \title{Plot effect size by marker}
 \usage{
-effectplot(cross, map, parental = "N2/CB4856")
+effectplot(cross, map, parental = "N2xCB4856")
 }
 \arguments{
 \item{cross}{The cross object used for the mapping}
