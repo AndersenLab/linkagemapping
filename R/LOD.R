@@ -169,6 +169,7 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
     # markers in the map
     cat("\nConverting marker position to physical position. This step takes a while...\n")
     
+    markers <- NA
     # If you need to add possible marker sets, add them here
     if (markerset == "N2xCB4856") {
         markers <- N2xCB4856markers
