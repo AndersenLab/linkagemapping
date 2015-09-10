@@ -306,5 +306,5 @@ fsearch.manmarker <- function(cross, phenotype = NULL, permutations = 1000, doGP
 #         }, numeric(1))
 #     }
 #     
-#     return(finallods)
+     return(finallods)
     }
