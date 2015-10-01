@@ -29,13 +29,12 @@ lodplot <- function(map){
     }
     
     plot <- plot + 
-        ggplot2::geom_line(ggplot2::aes(x = pos/1e6, y = lod, colour = as.factor(iteration)),
+        theme_bw() +
+        ggplot2::geom_line(ggplot2::aes(x = pos/1e6, y = lod, color = as.factor(iteration)),
                            size = 1, alpha = 0.85) +
         ggplot2::facet_grid(.~chr, scales ="free") +
         ggplot2::labs(x = "Position (Mb)", y = "LOD") +
-        ggplot2::scale_colour_discrete(name="Mapping\nIteration") +
         ggplot2::ggtitle(map$trait[1]) +
-        ggplot2::theme_bw() +
         ggplot2::theme(axis.text.x = ggplot2::element_text(size=16, face="bold", color="black"),
                        axis.text.y = ggplot2::element_text(size=16, face="bold", color="black"),
                        axis.title.x = ggplot2::element_text(size=20, face="bold", color="black", vjust=-.3),
@@ -62,8 +61,10 @@ lodplot <- function(map){
         }
             
         plot <- plot + 
-            ggplot2::geom_point(data = cis, ggplot2::aes(x=pos/1e6, y= height1, fill=as.factor(iteration)),
-                       shape=25, size=3.2, alpha=.85, show_guide = FALSE) +
+            ggplot2::geom_point(data = cis, ggplot2::aes(x=pos/1e6, y= height1, fill = as.factor(iteration) ),
+                       shape=25, size=3.5, alpha=1, show_guide = FALSE) +
+            ggplot2::scale_fill_manual(values = c("#FF66B2", "#00CCCC", "#80FF00", "#9999FF", "FFB266", "0000FF","FFFF66")) +
+            ggplot2::scale_colour_manual(name="Mapping\nIteration", values = c("#FF66B2", "#00CCCC", "#80FF00", "#9999FF", "FFB266", "0000FF","FFFF66")) +
             ggplot2::geom_text(data = cis,
                       ggplot2::aes(x=pos/1e6, y=height2, label = paste0(100*round(var_exp, digits = 4),"%")),
                       colour = "black", size=5)
@@ -141,7 +142,7 @@ maxlodplot <- function(map){
 #' mapping
 #' @export
 
-pxgplot <- function(cross, map, parent="N2/CB4856") {
+pxgplot <- function(cross, map, parent="N2xCB4856") {
     peaks <- map %>% 
         dplyr::group_by(iteration) %>%
         dplyr::filter(!is.na(var_exp)) %>%
@@ -181,19 +182,19 @@ pxgplot <- function(cross, map, parent="N2/CB4856") {
         if(is.na(x)) {
             return(NA)
         }
-        if(parent=="N2/CB4856") {
+        if(parent=="N2xCB4856") {
             if(x == -1) {
                 "N2"
             } else {
                 "CB4856"
             }
-        } else if(parent=="N2/LSJ2") {
+        } else if(parent=="LSJ2xN2") {
             if(x == -1) {
-                "N2"
-            } else {
                 "LSJ2"
+            } else {
+                "N2"
             }
-        } else if(parent=="AF16/HK104") {
+        } else if(parent=="AF16xHK104") {
             if(x==-1) {
                 "AF16"
             } else {
@@ -228,7 +229,7 @@ pxgplot <- function(cross, map, parent="N2/CB4856") {
 #' @return A line plot of the effect size at each marker
 #' @export
 
-effectplot <- function(cross, map, parental = "N2/CB4856") {
+effectplot <- function(cross, map, parental = "N2xCB4856") {
     map2 <- map %>%
         dplyr::group_by(marker) %>%
         dplyr::filter(lod == max(lod)) %>%
@@ -245,7 +246,7 @@ effectplot <- function(cross, map, parental = "N2/CB4856") {
     
     
     plot <- ggplot2::ggplot(annotated_map) +
-        ggplot2::geom_line(ggplot2::aes(x = pos/1e6, y = eff_size), size = 1, alpha = 0.85) +
+        ggplot2::geom_line(ggplot2::aes(x = pos/1e6, y = eff_size), size = 1, alpha = 0.85)+
         ggplot2::facet_grid(.~chr, scales ="free") +
         ggplot2::labs(x = "Position (Mb)", y = "Effect Size") +
         ggplot2::ggtitle(annotated_map$trait[1])+
