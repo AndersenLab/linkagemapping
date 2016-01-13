@@ -10,7 +10,8 @@ Imports:
 	ggplot2,
 	gtools,
 	qtl,
-	tidyr
+	tidyr,
+	Hmisc
 Suggests:
 	gputools
 License: MIT

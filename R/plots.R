@@ -34,7 +34,7 @@ lodplot <- function(map){
                            size = 1, alpha = 0.85) +
         ggplot2::facet_grid(.~chr, scales ="free") +
         ggplot2::labs(x = "Position (Mb)", y = "LOD") +
-        ggplot2::ggtitle(map$trait[1]) +
+        ggplot2::ggtitle(capitalize(map$trait[1])) +
         ggplot2::theme(axis.text.x = ggplot2::element_text(size=16, face="bold", color="black"),
                        axis.text.y = ggplot2::element_text(size=16, face="bold", color="black"),
                        axis.title.x = ggplot2::element_text(size=20, face="bold", color="black", vjust=-.3),
