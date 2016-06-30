@@ -179,7 +179,7 @@ get_peak_gwer <- function(lods, cross, perms=1000, doGPU=F) {
     permpeakLODs <- lapply(permpeakLODs, function(x) {
         data.frame(t(data.frame(x)))
     })
-    permpeakLODs <- dplyr::rbind_all(permpeakLODs)
+    permpeakLODs <- dplyr::bind_rows(permpeakLODs)
     permpeakLODs <- tidyr::gather(permpeakLODs, trait, lod)
     
     threshold <- quantile(permpeakLODs$lod, probs = .95)
@@ -200,7 +200,9 @@ get_pheno_resids = function(lods, cross, threshold, intercept = FALSE) {
     
     # Get the scaled phenotype, the LODs, and the genotype data
     pheno <- data.frame(extract_scaled_phenotype(cross))
+    clnames <- colnames(lods)
     lods <- data.frame(lods[,3:ncol(lods)])
+    colnames(lods) <- clnames[3:length(clnames)]
     geno <- data.frame(extract_genotype(cross))
     
     # Get only the traits with a peak above threshold
