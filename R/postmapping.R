@@ -95,7 +95,7 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
     permpeakLODs <- lapply(permpeakLODs, function(x) {
             data.frame(t(data.frame(x)))
         })
-    permpeakLODs <- dplyr::rbind_all(permpeakLODs)
+    permpeakLODs <- dplyr::bind_rows(permpeakLODs)
     permpeakLODs <- tidyr::gather(permpeakLODs, trait, lod)
     
     # Get the obeserved number of peaks 

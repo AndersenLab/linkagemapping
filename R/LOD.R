@@ -152,7 +152,7 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
         lodslist <- append(lodslist, list(meltedlods))
         
         # rbind the whole list of maps
-        finallods <- dplyr::rbind_all(lodslist)
+        finallods <- dplyr::bind_rows(lodslist)
         
     } else {
         
