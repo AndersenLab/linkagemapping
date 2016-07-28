@@ -283,6 +283,6 @@ cidefiner <- function(cis, map) {
         cilodscore <- ifelse(inci, lod, 0)
         return(cilodscore)
     }, numeric(1))
-    map <- cbind(map, ci_lod)
+    map$ci_lod <- ci_lod
     return(map)
 }
