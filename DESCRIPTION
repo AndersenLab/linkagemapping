@@ -3,16 +3,18 @@ Title: Functions for the Mapping of Andersen Lab RIAILs and RILs
 Version: 1.3
 Authors@R: person("Tyler", "Shimko", email = "TShimko126@gmail.com", role = c("aut", "cre"))
 Description: What the package does (one paragraph)
-Depends: R (>= 3.2.0)
+Depends:
+    R (>= 3.2.0)
 Imports:
-	dplyr,
-	foreach,
-	ggplot2,
-	gtools,
-	qtl,
-	tidyr,
-	Hmisc
+    dplyr,
+    foreach,
+    ggplot2,
+    gtools,
+    qtl,
+    tidyr,
+    Hmisc
 Suggests:
-	gputools
+    gputools
 License: MIT
 LazyData: false
+RoxygenNote: 5.0.1
