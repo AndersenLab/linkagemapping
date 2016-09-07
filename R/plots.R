@@ -15,7 +15,7 @@ lodplot <- function(map){
     cis <- map %>% 
         dplyr::group_by(iteration) %>%
         dplyr::filter(!is.na(var_exp)) %>%
-        do(head(., n=1))
+        dplyr::do(head(., n=1))
     
     maxmap <- cidefiner(cis, maxmap)
     
@@ -29,7 +29,7 @@ lodplot <- function(map){
     }
     
     plot <- plot + 
-        theme_bw() +
+        ggplot2::theme_bw() +
         ggplot2::geom_line(ggplot2::aes(x = pos/1e6, y = lod, color = as.factor(iteration)),
                            size = 1, alpha = 0.85) +
         ggplot2::facet_grid(.~chr, scales ="free") +
@@ -90,7 +90,7 @@ maxlodplot <- function(map){
         dplyr::mutate(maxlod=max(lod))%>%
         dplyr::group_by(iteration) %>%
         dplyr::filter(!is.na(var_exp)) %>%
-        do(head(., n=1))
+        dplyr::do(head(., n=1))
     
     
     if(nrow(cis) == 0) {
@@ -146,7 +146,7 @@ pxgplot <- function(cross, map, parent="N2xCB4856") {
     peaks <- map %>% 
         dplyr::group_by(iteration) %>%
         dplyr::filter(!is.na(var_exp)) %>%
-        do(head(., n=1))
+        dplyr::do(head(., n=1))
     
     if(nrow(peaks) == 0) {
         stop("No QTL identified")
@@ -157,7 +157,7 @@ pxgplot <- function(cross, map, parent="N2xCB4856") {
     colnames(cross$pheno) <- gsub("-", "\\.", colnames(cross$pheno))
     
     pheno <- cross$pheno %>%
-        select_(map$trait[1])
+        dplyr::select_(map$trait[1])
     geno <- data.frame(extract_genotype(cross)) %>%
         dplyr::select(which(colnames(.) %in% uniquemarkers)) %>%
         data.frame(., pheno)
@@ -240,7 +240,7 @@ effectplot <- function(cross, map, parental = "N2xCB4856") {
         dplyr::mutate(maxlod=max(lod))%>%
         dplyr::group_by(iteration) %>%
         dplyr::filter(!is.na(var_exp)) %>%
-        do(head(., n=1))
+        dplyr::do(head(., n=1))
     
     annotated_map <- annotate_lods(map2, cross, annotate_all = TRUE)
     
@@ -268,7 +268,104 @@ effectplot <- function(cross, map, parental = "N2xCB4856") {
     plot
 }
 
-
+#' Plot the phenotype by genotype split at each peak marker in a mapping
+#' next to parental phenotype split
+#' 
+#' @param cross The cross object used for the mapping
+#' @param map The mapping output for a single trait
+#' @param phenoframe The dataframe used to make the cross object
+#' @param parent The parental cross, either "N2xCB4856" (default), "N2xLSJ2",
+#' or "AF16xHK104"
+#' @return A boxplot of the phenotype by genotype split at each peak marker in a
+#' mapping, including parental phenotypes
+#' @export
+ 
+pxgplot_par <- function(cross, map, phenoframe, parent="N2xCB4856") {
+    peaks <- map %>% 
+        dplyr::group_by(iteration) %>%
+        dplyr::filter(!is.na(var_exp)) %>%
+        dplyr::do(head(., n=1)) %>%
+        tidyr::separate(trait, into = c("condition", "trait"), extra = "merge")
+    
+    if(nrow(peaks) == 0) {
+        stop("No QTL identified")
+    }
+    
+    conditions <- peaks$condition
+    traits <- peaks$trait
+    
+    uniquemarkers <- gsub("-", "\\.", unique(peaks$marker))
+    
+    colnames(cross$pheno) <- gsub("-", "\\.", colnames(cross$pheno))
+    
+    pheno <- cross$pheno %>%
+        dplyr::select_(map$trait[1])
+    
+    geno <- data.frame(extract_genotype(cross)) %>%
+        dplyr::select(which(colnames(.) %in% uniquemarkers)) %>%
+        data.frame(., pheno, cross$pheno$strain)
+    
+    if(parent == "N2xCB4856") {
+        geno <- geno %>%
+            dplyr::mutate(RIAIL = as.numeric(gsub("QX", "", cross.pheno.strain)))%>%
+            dplyr::filter(RIAIL > 239) %>%
+            dplyr::select(-RIAIL)
+    }
+    
+    
+    geno[,1:(ncol(geno)-2)] <- sapply(geno[,1:(ncol(geno)-2)], function(x) {
+        ifelse(parent == "N2xCB4856",
+               ifelse(x == -1, "N2-RIAIL", 
+                      ifelse(x == 1, "CB4856-RIAIL", x)),
+               ifelse(parent == "N2xLSJ2",
+                      ifelse(x == -1, "N2-RIAIL", 
+                             ifelse(x == 1, "LSJ2-RIAIL", x)),
+                      ifelse(parent == "AF16xHK104",
+                             ifelse(x == -1, "AF16-RIAIL", 
+                                    ifelse(x == 1, "HK104-RIAIL", x)))))})
+    colnames(geno)[ncol(geno)] <- "strain"
+    
+    parentphe <- subset(phenoframe, strain %in% c("N2","CB4856","LSJ2","AF16","HK104")) %>%
+        dplyr::filter(condition %in% conditions, trait %in% traits) %>%
+        dplyr::ungroup()%>%
+        dplyr::select(strain, phenotype)
+    
+    colnames(parentphe)[2] <- map$trait[1]
+    
+    new <- plyr::rbind.fill(geno, parentphe)
+    
+    for (i in 1:nrow(new)) {
+        for (j in 1:(ncol(new)-2)) {
+            new[i,j] <- ifelse(new$strain[i] %in% c("N2","CB4856","LSJ2","AF16","HK104"), new$strain[i], new[i,j])
+        }
+    }
+    
+    
+    plotting <- new %>%
+        tidyr::gather(marker, genotype, 1:(ncol(new)-2))
+    
+    ggplot2::ggplot(plotting) +
+        ggplot2::geom_boxplot(ggplot2::aes(x = factor(x = genotype,
+                                                      levels = c("N2" , "CB4856" , "LSJ2", "AF16", "HK104","N2-RIAIL" , "CB4856-RIAIL", "LSJ2-RIAIL", "AF16-RIAIL","HK104-RIAIL"),
+                                                      labels = c("N2" , "CB4856" , "LSJ2", "AF16", "HK104","N2-RIAIL" , "CB4856-RIAIL", "LSJ2-RIAIL", "AF16-RIAIL","HK104-RIAIL"),
+                                                      ordered = T),
+                                           y = plotting[,1], fill = genotype),
+                              outlier.shape = NA) +
+        ggplot2::scale_fill_manual(values = c("N2" = "orange", "CB4856" = "blue","N2-RIAIL" = "orange", "CB4856-RIAIL" = "blue", "LSJ2" = "green", "LSJ2-RIAIL" = "green", "AF16" = "indianred", "AF16-RIAIL" = "indianred", "HK104" = "gold", "HK104-RIAIL" = "gold")) +
+        ggplot2::facet_wrap(~marker, ncol = 5) +
+        ggplot2::theme_bw() +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(size = 14, face = "bold", color = "black"),
+                       axis.text.y = ggplot2::element_text(size = 16, face = "bold", color = "black"),
+                       axis.title.x = ggplot2::element_text(size = 20, face = "bold", color = "black", vjust = -0.3),
+                       axis.title.y = ggplot2::element_text(size = 20,face = "bold", color = "black"),
+                       strip.text.x = ggplot2::element_text(size = 20, face = "bold", color = "black"),
+                       strip.text.y = ggplot2::element_text(size = 20,face = "bold", color = "black"),
+                       plot.title = ggplot2::element_text(size = 24, face = "bold", vjust = 1),
+                       legend.position = "none",
+                       panel.background = ggplot2::element_rect(color = "black",size = 1.2)) +
+        ggplot2::ggtitle(paste0(peaks$condition[1]," ",peaks$trait[1])) +
+        ggplot2::labs(x = "Genotype", y = "Phenotype")
+}
 
 
 # A function to help in plotting the confidence intervals
