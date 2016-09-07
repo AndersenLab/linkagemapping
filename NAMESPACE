@@ -2,6 +2,7 @@
 
 export(annotate_lods)
 export(effectplot)
+export(findCBfosmids)
 export(fsearch)
 export(lodplot)
 export(maxlodplot)
