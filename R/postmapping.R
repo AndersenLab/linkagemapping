@@ -429,39 +429,16 @@ cint <- function(lods, chr, lodcolumn=5, drop=1.5){
     return(bounds)
 }
 
-#' Find N2 and CB4856 fosmids that tile across a given interval
+#' Find N2 fosmids that tile across a given interval
 #' 
 #' @param chrom The chromosome of interest, given as a roman numeral value in quotes
 #' @param left_pos The left position of the interval
 #' @param right_pos The right position of the interval
-#' @return A plot of fosmids that tile across the interval of interest and a data frame
+#' @return A plot of N2 fosmids that tile across the interval of interest and a data frame
 #' of chromosome, clone name, fosmid start, fosmid end, and where the fosmid can
 #' be found in the Andersen lab.
 #' @export
 
-
-findCBfosmids <- function(chrom, left_pos, right_pos) {
-    region <- AllCBfosmids %>%
-        dplyr::filter(chr == chrom) %>%
-        dplyr::group_by(clone) %>%
-        dplyr::filter(start, (between(start, left_pos, right_pos) | between(end, left_pos, right_pos) | between(left_pos, start, end) | between(right_pos, start, end))) %>%
-        dplyr::ungroup() %>%
-        dplyr::arrange(start) %>%
-        dplyr::mutate(plot=seq(2,4*(length(start)),4))
-    
-    plot <- ggplot2::ggplot(region) +
-        ggplot2::aes(xmin = start, xmax = end, ymin = plot, ymax = plot + 0.5) +
-        ggplot2::geom_rect(fill = "blue") +
-        ggplot2::geom_text(ggplot2::aes(x = start + (0.5 * (end - start)), y = plot + 1, label = clone), size = 4) +
-        ggplot2::xlab("Genomic Position") +
-        ggplot2::ylab("") +
-        ggplot2::geom_vline(xintercept = left_pos, colour= "blue") +
-        ggplot2::geom_vline(xintercept = right_pos, colour = "blue") +
-        ggplot2::ggtitle(paste0("CB4856 Fosmids ", chrom, ":",left_pos, "-",right_pos))
-    
-    assign("CBfosmidsfound", region, envir = .GlobalEnv)
-    return(plot)
-}
 
 findN2fosmids <- function(chrom, left_pos, right_pos) {
     #need to load in the Search_CBfosmids2 data
@@ -487,4 +464,35 @@ findN2fosmids <- function(chrom, left_pos, right_pos) {
     return(plot)
 }
 
+#' Find CB4856 fosmids that tile across a given interval
+#' 
+#' @param chrom The chromosome of interest, given as a roman numeral value in quotes
+#' @param left_pos The left position of the interval
+#' @param right_pos The right position of the interval
+#' @return A plot of CB4856 fosmids that tile across the interval of interest and a data frame
+#' of chromosome, clone name, fosmid start, fosmid end, and where the fosmid can
+#' be found in the Andersen lab.
+#' @export
 
+findCBfosmids <- function(chrom, left_pos, right_pos) {
+    region <- AllCBfosmids %>%
+        dplyr::filter(chr == chrom) %>%
+        dplyr::group_by(clone) %>%
+        dplyr::filter(start, (between(start, left_pos, right_pos) | between(end, left_pos, right_pos) | between(left_pos, start, end) | between(right_pos, start, end))) %>%
+        dplyr::ungroup() %>%
+        dplyr::arrange(start) %>%
+        dplyr::mutate(plot=seq(2,4*(length(start)),4))
+    
+    plot <- ggplot2::ggplot(region) +
+        ggplot2::aes(xmin = start, xmax = end, ymin = plot, ymax = plot + 0.5) +
+        ggplot2::geom_rect(fill = "blue") +
+        ggplot2::geom_text(ggplot2::aes(x = start + (0.5 * (end - start)), y = plot + 1, label = clone), size = 4) +
+        ggplot2::xlab("Genomic Position") +
+        ggplot2::ylab("") +
+        ggplot2::geom_vline(xintercept = left_pos, colour= "blue") +
+        ggplot2::geom_vline(xintercept = right_pos, colour = "blue") +
+        ggplot2::ggtitle(paste0("CB4856 Fosmids ", chrom, ":",left_pos, "-",right_pos))
+    
+    assign("CBfosmidsfound", region, envir = .GlobalEnv)
+    return(plot)
+}
