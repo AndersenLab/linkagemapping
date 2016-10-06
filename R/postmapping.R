@@ -507,7 +507,7 @@ findCBfosmids <- function(chrom, left_pos, right_pos) {
 #' contains quantitative information about detected eQTL in the interval.
 #' eQTL_GeneDescriptions contains GO terms and other qualitative data.
 #' @export
-#' 
+
 checkeQTLintervals <- function(chrom, left_pos, right_pos){
     data("eQTLpeaks")
     sigs <- eQTLpeaks %>% 
