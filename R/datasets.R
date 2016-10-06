@@ -124,3 +124,23 @@ NULL
 #'   \item{newpos}{the current location of the fosmid in the Andersen Lab}
 #' }
 NULL
+
+#' Dataframe of all eQTL peak location information from Matt Rockman
+#'
+#' This dataframe contains all position information for eQTL peaks
+#'
+#' @name eQTLpeaks
+#' @format A data frame with 2447 rows and 25 variables
+#' }
+NULL
+
+#' Dataframe of GO terms, descriptions, and other information for
+#' all genes in the eQTL dataset from Matt Rockman
+#'
+#' This data frame contains descriptive information for all genes
+#' included in the eQTL dataset
+#'
+#' @name probe_info
+#' @format A data frame with 43603 rows and 12 variables
+#' }
+NULL

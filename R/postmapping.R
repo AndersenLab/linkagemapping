@@ -497,3 +497,33 @@ findCBfosmids <- function(chrom, left_pos, right_pos) {
     assign("CBfosmidsfound", region, envir = .GlobalEnv)
     return(plot)
 }
+
+#' Find expression QTL from the Rockman dataset within a user-defined interval
+#' 
+#' @param chrom The chromosome of interest, given as an arabic numeral
+#' @param left_pos The left position of the interval
+#' @param right_pos The right position of the interval
+#' @return Assigns two data frames to the global environment. eQTL_PositionInfo
+#' contains quantitative information about detected eQTL in the interval.
+#' eQTL_GeneDescriptions contains GO terms and other qualitative data.
+#' @export
+#' 
+checkeQTLintervals <- function(chrom, left_pos, right_pos){
+    sigs <- peaks %>% 
+        dplyr::filter(peakchr == chrom)%>%
+        dplyr::filter(peakMarker > left_pos | rightMarker > left_pos)%>%
+        dplyr::filter(peakMarker < right_pos | leftMarker < right_pos)%>%
+        dplyr::arrange(trait)
+    
+    genes <- probe_info %>% 
+        dplyr::filter(ProbeID %in% sigs$trait)%>%
+        dplyr::select(ProbeID,PrimaryAccession,GeneSymbol,GeneName,GO,Description)%>%
+        dplyr::arrange(ProbeID)
+    
+    if(nrow(sigs) == 0){
+         print("NO eQTL")
+    }else{
+        assign("eQTL_PositionInfo", sigs, envir = .GlobalEnv)
+        assign("eQTL_GeneDescriptions", genes, envir = .GlobalEnv)
+    }
+}
