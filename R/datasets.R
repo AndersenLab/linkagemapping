@@ -92,3 +92,35 @@ NULL
 #'   \item{chr.roman}{the position of the marker in genome build cb4}
 #' }
 NULL
+
+#' Dataframe of all N2 fosmids in the Andersen Lab
+#'
+#' This data frame contains genomic position and laboratory stock
+#' information for all N2 fosmids.
+#'
+#' @name AllN2fosmids
+#' @format A data frame with 12468 rows and 5 variables:
+#' \describe{
+#'   \item{chr}{the chromosome (in roman numerals) on which the fosmid is found}
+#'   \item{clone}{the name of the fosmid}
+#'   \item{start}{the genetic position at which the fosmid begins}
+#'   \item{end}{the genetic position at which the fosmid ends}
+#'   \item{newpos}{the current location of the fosmid in the Andersen Lab}
+#' }
+NULL
+
+#' Dataframe of all CB4856 fosmids in the Andersen Lab
+#'
+#' This data frame contains genomic position and laboratory stock
+#' information for all CB4856 fosmids.
+#'
+#' @name AllCBfosmids
+#' @format A data frame with 11453 rows and 5 variables:
+#' \describe{
+#'   \item{chr}{the chromosome (in roman numerals) on which the fosmid is found}
+#'   \item{clone}{the name of the fosmid}
+#'   \item{start}{the genetic position at which the fosmid begins}
+#'   \item{end}{the genetic position at which the fosmid ends}
+#'   \item{newpos}{the current location of the fosmid in the Andersen Lab}
+#' }
+NULL
