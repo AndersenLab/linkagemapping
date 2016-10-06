@@ -441,7 +441,7 @@ cint <- function(lods, chr, lodcolumn=5, drop=1.5){
 
 
 findN2fosmids <- function(chrom, left_pos, right_pos) {
-    #need to load in the Search_CBfosmids2 data
+    data("AllN2fosmids")
     region <- AllN2fosmids %>%
         dplyr::filter(chr == chrom) %>%
         dplyr::group_by(clone) %>%
@@ -475,6 +475,7 @@ findN2fosmids <- function(chrom, left_pos, right_pos) {
 #' @export
 
 findCBfosmids <- function(chrom, left_pos, right_pos) {
+    data("AllCBfosmids")
     region <- AllCBfosmids %>%
         dplyr::filter(chr == chrom) %>%
         dplyr::group_by(clone) %>%
