@@ -509,12 +509,13 @@ findCBfosmids <- function(chrom, left_pos, right_pos) {
 #' @export
 #' 
 checkeQTLintervals <- function(chrom, left_pos, right_pos){
+    data("eQTLpeaks")
     sigs <- eQTLpeaks %>% 
         dplyr::filter(peakchr == chrom)%>%
         dplyr::filter(peakMarker > left_pos | rightMarker > left_pos)%>%
         dplyr::filter(peakMarker < right_pos | leftMarker < right_pos)%>%
         dplyr::arrange(trait)
-    
+    data("probe_info")
     genes <- probe_info %>% 
         dplyr::filter(ProbeID %in% sigs$trait)%>%
         dplyr::select(ProbeID,PrimaryAccession,GeneSymbol,GeneName,GO,Description)%>%
