@@ -172,11 +172,14 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
    
     # If you need to add possible marker sets, add them here
     if (markerset == "N2xCB4856") {
+        data("N2xCB4856markers")
         markers <- N2xCB4856markers
     } else if (markerset == "N2xLSJ2") {
+        data("N2xLSJ2markers")
         markers <- N2xLSJ2markers
     } else if (markerset == "AF16xHK104") {
-        markers <- N2xLSJ2markers
+        data("AF16xHK104markers")
+        markers <- AF16xHK104markers
     } else {
         markers <- NA
     }
