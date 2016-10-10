@@ -144,3 +144,24 @@ NULL
 #' @format A data frame with 43603 rows and 12 variables
 #' }
 NULL
+
+#' Genotypes of RIAILs at each of the 1454 markers
+#'
+#' This data frame contains the genotype information for each strain
+#' of the RIAIL panel at each of the 1454 markers. "AA" denotes
+#' the N2 genotype and "AB" denotes the CB4856 genotype.
+#'
+#' @name RIAILgenotypes
+#' @format A data frame with 1454 rows and 601 variables
+#' }
+NULL
+
+#' Marker conversions for each of the 1454 markers used in RIAILgenotypes
+#'
+#' This data frame contains marker name and position information for
+#' each of the 1454 markers used in the RIAILgenotypes data frame
+#'
+#' @name RIAILmarkerconversion
+#' @format A data frame with 1454 rows and 2 variables
+#' }
+NULL
