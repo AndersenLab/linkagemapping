@@ -812,3 +812,22 @@ FindRIAILsforNILs <- function(CI.L, CI.R, chromosome){
     
     return(list(CompleteInterval1, BreakInterval, breaks, complete))
 }
+
+#' Find indels to generate primers
+#' 
+#' @param left The left position of the N2 region of interest
+#' @param right The right position of the N2 region of interest
+#' @param chr The chromosome of interest, written as a quoted roman numeral
+#' @return Outputs a dataframe with all known indel information
+#' @export
+#' 
+
+findindels <- function(left, right, chr) {
+    data("indels")
+    
+    subset <- indels %>%
+        dplyr::filter(Chromosome == chr) %>%
+        dplyr::filter(Pos_N2 > left, Pos_N2 < right)
+    
+    return(subset)
+}

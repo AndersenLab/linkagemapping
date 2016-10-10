@@ -161,3 +161,12 @@ NULL
 #' @name RIAILmarkerconversion
 #' @format A data frame with 1454 rows and 2 variables
 NULL
+
+#' Dataframe of indels between N2 and CB4856
+#'
+#' This data frame contains position information for all indels between
+#' N2 and CB4856 greater than 25 bp. Developed by the Kammenga lab.
+#'
+#' @name indels
+#' @format A data frame with 10257 rows and 15 variables
+NULL
