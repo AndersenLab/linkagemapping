@@ -528,3 +528,287 @@ checkeQTLintervals <- function(chrom, left_pos, right_pos){
         assign("eQTL_GeneDescriptions", genes, envir = .GlobalEnv)
     }
 }
+
+#' Find RIAILs for generating NILs to isolate a genomic region
+#' 
+#' @param CI.L The left marker of the interval, e.g. "UCE1-526"
+#' @param CI.R The right marker of the interval, e.g. "CE1-108"
+#' @param chromosome The chromosome of the interval as a quoted roman numeral
+#' @return Outputs a list of four elements.
+#' CompleteInterval1 - dataframe of strains with a continous genotype block across user input interval
+#' strains also have a breakpoint in the surrounding region used to generate plot "complete".
+#' BreakInterval - dataframe of strains with breaks in the interval and outside the interval
+#' used to generate plot "complete".
+#' Breaks - ggplot object of all RIAILs identified to have break points in and around the interval
+#' Complete - ggplot object of all RIAILs identified to have a continous genotype stretch across the interval
+#' @export
+
+FindRIAILsforNILs <- function(CI.L, CI.R, chromosome){
+    data("RIAILgenotypes")
+    data("RIAILmarkerconversion")
+    
+    
+    genos <- data.frame(fread("~/Dropbox/AndersenLab/RCode/GWAS/Ancillary/N2xCB4856_598RIAILs_gen.csv",
+                              header = T))
+    
+    load("~/Dropbox/AndersenLab/RCode/GWAS/Ancillary/marker_pos_conversion.Rda")
+    
+    test <- do.call(cbind, lapply(RIAILgenotypes[,4:ncol(RIAILgenotypes)], function(x){
+        temp <- data.frame(gen = x)
+        temp <- mutate(temp, num = ifelse(gen =="AA",1,
+                                          ifelse(gen=="AB",0,NA)))
+        temp <- select(temp, -gen)
+    }))
+    
+    test1 <- data.frame(RIAILgenotypes[,1:3], test)
+    colnames(test1) <- c("id","chr","CM",seq(1,ncol(test1)-3))
+    
+    test1 <- left_join(test1, RIAILmarkerconversion, by = "id")
+    
+    interval <- c(CI.L,CI.R)
+    rown <- which(test1$id%in%interval)
+    
+    
+    startDist <- 10
+    CompleteInterval1 <- data.frame()
+    
+    while(length(unique(CompleteInterval1$riail)) < 20){
+        
+        if(rown[1] > startDist & rown[2] < 1444)
+        {
+            
+            markers <- test1 %>%
+                slice(rown[1]:rown[2])%>%
+                select(id)
+            
+            plumin <- c(rown[1]-startDist,rown[2]+startDist)
+            
+            leftmarks <- test1 %>%
+                dplyr::slice(plumin[1]:(rown[1]-1))%>%
+                dplyr::select(id)
+            
+            rightmarks <- test1 %>%
+                dplyr::slice((rown[2]+1):plumin[2])%>%
+                dplyr::select(id)
+            
+            intervals <- test1 %>%
+                dplyr::slice(rown[1]:rown[2])%>%
+                dplyr::select(pos)
+            
+            ints <- c(min(intervals$pos), max(intervals$pos))
+            
+            CompleteInterval <- test1 %>%
+                dplyr::slice(plumin[1]:plumin[2])%>%
+                dplyr::mutate(interval = ifelse(id%in%markers$id, "interval",
+                                                ifelse(id%in%leftmarks$id, "left",
+                                                       ifelse(id%in%rightmarks$id, "right", NA))))%>%
+                tidyr::gather(riail, geno, -id ,-chr,-pos,  -CM,-interval)%>%
+                dplyr::group_by(riail,interval)%>%
+                dplyr::mutate(block = sum(geno, na.rm=T))%>%
+                dplyr::ungroup()%>%
+                dplyr::group_by(riail)%>%
+                dplyr::mutate(inte = ifelse((interval == "interval") & (block == 0 | block == nrow(markers)), "complete",
+                                            ifelse((interval == "interval") & (block != 0 | block != nrow(markers)), "break",NA)),
+                              left = ifelse((interval == "left") & (block == 0 | block == nrow(leftmarks)), "completeL",
+                                            ifelse((interval == "left") & (block != 0 | block != nrow(leftmarks)), "breakL", NA)),
+                              right = ifelse( (interval == "right") & (block == 0 | block == nrow(rightmarks)), "completeR",
+                                              ifelse((interval == "right") & (block != 0 | block != nrow(rightmarks)), "breakR",NA)))%>%
+                # ungroup()%>%
+                dplyr::mutate(inte1 = rep(unique(grep("[:alpha:]",inte, value = T))),
+                              left1 = rep(unique(grep("[:alpha:]",left, value = T))),
+                              right1 = rep(unique(grep("[:alpha:]",right, value = T))))%>%
+                dplyr::select(-inte,-left,-right)%>%
+                dplyr::rename(inte = inte1, left = left1, right = right1)%>%
+                dplyr::ungroup()%>%
+                dplyr::mutate(bothBreak = ifelse(left == "breakL" & right == "breakR", "breakB",NA))%>%
+                dplyr::mutate(cbgen = ifelse(geno==1,0,
+                                             ifelse(geno==0,1,NA)),
+                              Lint = ints[1],
+                              Rint = ints[2])
+            
+            
+            
+            CompleteInterval1 <- CompleteInterval %>%
+                dplyr::filter(bothBreak == "breakB" & inte == "complete")
+            
+            startDist <- startDist + 5
+            if(startDist > 40){
+                break
+            }
+        }
+        else if(rown[1] <= startDist)
+        {
+            print("You are at the start of Chromosome I")
+            markers <- test1 %>%
+                dplyr::slice(rown[1]:rown[2])%>%
+                dplyr::select(id)
+            
+            plumin <- c(1,rown[2]+startDist)
+            
+            leftmarks <- test1 %>%
+                dplyr::slice(plumin[1]:(rown[1]-1))%>%
+                dplyr::select(id)
+            
+            rightmarks <- test1 %>%
+                dplyr::slice((rown[2]+1):plumin[2])%>%
+                dplyr::select(id)
+            
+            intervals <- test1 %>%
+                dplyr::slice(rown[1]:rown[2])%>%
+                dplyr::select(pos)
+            
+            ints <- c(min(intervals$pos), max(intervals$pos))
+            
+            CompleteInterval <- test1 %>%
+                dplyr::slice(plumin[1]:plumin[2])%>%
+                dplyr::mutate(interval = ifelse(id%in%markers$id, "interval",
+                                                ifelse(id%in%leftmarks$id, "left",
+                                                       ifelse(id%in%rightmarks$id, "right", NA))))%>%
+                tidyr::gather(riail, geno, -id ,-chr,-pos,  -CM,-interval)%>%
+                dplyr::group_by(riail,interval)%>%
+                dplyr::mutate(block = sum(geno, na.rm=T))%>%
+                dplyr::ungroup()%>%
+                dplyr::group_by(riail)%>%
+                dplyr::mutate(inte = ifelse((interval == "interval") & (block == 0 | block == nrow(markers)), "complete",
+                                            ifelse((interval == "interval") & (block != 0 | block != nrow(markers)), "break",NA)),
+                              left = ifelse((interval == "left") & (block == 0 | block == nrow(leftmarks)), "completeL",
+                                            ifelse((interval == "left") & (block != 0 | block != nrow(leftmarks)), "breakL", NA)),
+                              right = ifelse( (interval == "right") & (block == 0 | block == nrow(rightmarks)), "completeR",
+                                              ifelse((interval == "right") & (block != 0 | block != nrow(rightmarks)), "breakR",NA)))%>%
+                # ungroup()%>%
+                dplyr::mutate(inte1 = rep(unique(grep("[:alpha:]",inte, value = T))),
+                              left1 = rep(unique(grep("[:alpha:]",left, value = T))),
+                              right1 = rep(unique(grep("[:alpha:]",right, value = T))))%>%
+                dplyr::select(-inte,-left,-right)%>%
+                dplyr::rename(inte = inte1, left = left1, right = right1)%>%
+                dplyr::ungroup()%>%
+                dplyr::mutate(bothBreak = ifelse(left == "breakL" & right == "breakR", "breakB",NA))%>%
+                dplyr::mutate(cbgen = ifelse(geno==1,0,
+                                             ifelse(geno==0,1,NA)),
+                              Lint = ints[1],
+                              Rint = ints[2])
+            
+            
+            
+            CompleteInterval1 <- CompleteInterval %>%
+                dplyr::filter(right == "breakR" & inte == "complete")
+            
+            startDist <- startDist + 5
+            if(startDist > 40){
+                break
+            }
+        }
+        else if(rown[2] > (1454 - startDist) )
+        {
+            print("You are at the end of Chromosome X")
+            markers <- test1 %>%
+                dplyr::slice(rown[1]:rown[2])%>%
+                dplyr::select(id)
+            
+            plumin <- c(rown[1]-startDist,1454)
+            
+            leftmarks <- test1 %>%
+                dplyr::slice(plumin[1]:(rown[1]-1))%>%
+                dplyr::select(id)
+            
+            rightmarks <- test1 %>%
+                dplyr::slice((rown[2]+1):plumin[2])%>%
+                dplyr::select(id)
+            
+            intervals <- test1 %>%
+                dplyr::slice(rown[1]:rown[2])%>%
+                dplyr::select(pos)
+            
+            ints <- c(min(intervals$pos), max(intervals$pos))
+            
+            CompleteInterval <- test1 %>%
+                dplyr::slice(plumin[1]:plumin[2])%>%
+                dplyr::mutate(interval = ifelse(id%in%markers$id, "interval",
+                                                ifelse(id%in%leftmarks$id, "left",
+                                                       ifelse(id%in%rightmarks$id, "right", NA))))%>%
+                tidyr::gather(riail, geno, -id ,-chr,-pos,  -CM,-interval)%>%
+                dplyr::group_by(riail,interval)%>%
+                dplyr::mutate(block = sum(geno, na.rm=T))%>%
+                dplyr::ungroup()%>%
+                dplyr::group_by(riail)%>%
+                dplyr::mutate(inte = ifelse((interval == "interval") & (block == 0 | block == nrow(markers)), "complete",
+                                            ifelse((interval == "interval") & (block != 0 | block != nrow(markers)), "break",NA)),
+                              left = ifelse((interval == "left") & (block == 0 | block == nrow(leftmarks)), "completeL",
+                                            ifelse((interval == "left") & (block != 0 | block != nrow(leftmarks)), "breakL", NA)),
+                              right = ifelse( (interval == "right") & (block == 0 | block == nrow(rightmarks)), "completeR",
+                                              ifelse((interval == "right") & (block != 0 | block != nrow(rightmarks)), "breakR",NA)))%>%
+                # ungroup()%>%
+                dplyr::mutate(inte1 = rep(unique(grep("[:alpha:]",inte, value = T))),
+                              left1 = rep(unique(grep("[:alpha:]",left, value = T))),
+                              right1 = rep(unique(grep("[:alpha:]",right, value = T))))%>%
+                dplyr::select(-inte,-left,-right)%>%
+                dplyr::rename(inte = inte1, left = left1, right = right1)%>%
+                dplyr::ungroup()%>%
+                dplyr::mutate(bothBreak = ifelse(left == "breakL" & right == "breakR", "breakB",NA))%>%
+                dplyr::mutate(cbgen = ifelse(geno==1,0,
+                                             ifelse(geno==0,1,NA)),
+                              Lint = ints[1],
+                              Rint = ints[2])
+            
+            
+            CompleteInterval1 <- CompleteInterval %>%
+                dplyr::filter(left == "breakL" & inte == "complete")
+            
+            startDist <- startDist + 5
+            if(startDist > 40){
+                break
+            }
+        }
+    }
+    
+    if(length(unique(CompleteInterval1$chr)) > 1){
+        CompleteInterval1 <- CompleteInterval1 %>%
+            dplyr::filter(chr == chromosome)
+        print("You are at the end of a chromosome")
+    }
+    
+    BreakInterval <- CompleteInterval %>%
+        dplyr::filter((left == "breakL" | right == "breakR") & inte == "break")
+    
+    if(length(unique(BreakInterval$chr)) > 1){
+        BreakInterval <- BreakInterval %>%
+            dplyr::filter(chr == chromosome)
+        print("You are at the end of a chromosome")
+    }
+    
+    breaks <- ggplot2::ggplot(BreakInterval)+
+        ggplot2::aes(x = pos/1e6, y = geno)+
+        ggplot2::facet_grid(riail~chr, scales = "free_y")+
+        ggplot2::geom_ribbon(ggplot2::aes(ymin = 0, ymax = geno, alpha=.5), fill = "orange")+
+        ggplot2::geom_ribbon(ggplot2::aes(ymin = 0, ymax = cbgen, alpha=.5), fill = "blue")+
+        ggplot2::geom_vline(ggplot2::aes(xintercept = Lint/1e6))+
+        ggplot2::geom_vline(ggplot2::aes(xintercept = Rint/1e6))+
+        ggplot2::theme(axis.text.x = ggplot2::element_text(size=16, face="bold", color="black"),
+                       axis.text.y = ggplot2::element_text(size=0, face="bold", color="black"),
+                       axis.title.x = ggplot2::element_text(size=20, face="bold", color="black"),
+                       axis.title.y = ggplot2::element_text(size=20, face="bold", color="black"),
+                       strip.text.x = ggplot2::element_text(size=20,face="bold", color="black"),
+                       strip.text.y = ggplot2::element_text(size=20, angle =0, face="bold", color="black"),
+                       plot.title = ggplot2::element_text(size=24, face="bold"),
+                       legend.position = "none")+
+        ggplot2::labs(x = "Genomic Position (Mb)", y = "RIAIL")
+    
+    complete <- ggplot2::ggplot(CompleteInterval1)+
+        ggplot2::aes(x = pos/1e6, y = geno)+
+        ggplot2::facet_grid(riail~chr, scales = "free_y")+
+        ggplot2::geom_ribbon(ggplot2::aes(ymin = 0, ymax = geno, alpha=.5), fill ="orange")+
+        ggplot2::geom_ribbon(ggplot2::aes(ymin = 0, ymax = cbgen, alpha=.5), fill ="blue")+
+        ggplot2::geom_vline(ggplot2::aes(xintercept = Lint/1e6))+
+        ggplot2::geom_vline(ggplot2::aes(xintercept = Rint/1e6))+
+        ggplot2::theme(axis.text.x = ggplot2::element_text(size=16, face="bold", color="black"),
+                       axis.text.y = ggplot2::element_text(size=0, face="bold", color="black"),
+                       axis.title.x = ggplot2::element_text(size=20, face="bold", color="black"),
+                       axis.title.y = ggplot2::element_text(size=20, face="bold", color="black"),
+                       strip.text.x = ggplot2::element_text(size=20,face="bold", color="black"),
+                       strip.text.y = ggplot2::element_text(size=20, angle =0, face="bold", color="black"),
+                       plot.title = ggplot2::element_text(size=24, face="bold"),
+                       legend.position = "none")+
+        ggplot2::labs(x = "Genomic Position (Mb)", y = "RIAIL")
+    
+    return(list(CompleteInterval1, BreakInterval, breaks, complete))
+}
