@@ -10,6 +10,9 @@ pxgplot(cross, map, parent = "N2xCB4856")
 \item{cross}{The cross object used for the mapping}
 
 \item{map}{The mapping output for a single trait}
+
+\item{parent}{The parental strains used to generate RIAILs. Either "N2xCB4856"
+(default), "N2xLSJ2", or "AF16xHK104"}
 }
 \value{
 A boxplot of the phenotype by genotype split at each peak marker in a

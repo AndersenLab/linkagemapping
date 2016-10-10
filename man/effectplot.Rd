@@ -10,6 +10,9 @@ effectplot(cross, map, parental = "N2xCB4856")
 \item{cross}{The cross object used for the mapping}
 
 \item{map}{The mapping output for a single trait}
+
+\item{parental}{The parental strains used to generate RIAILs. Either
+"N2xCB4856" (default), "N2xLSJ2", or "AF16xHK104}
 }
 \value{
 A line plot of the effect size at each marker

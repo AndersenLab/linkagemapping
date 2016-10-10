@@ -138,6 +138,8 @@ maxlodplot <- function(map){
 #' 
 #' @param cross The cross object used for the mapping
 #' @param map The mapping output for a single trait
+#' @param parent The parental strains used to generate RIAILs. Either "N2xCB4856"
+#' (default), "N2xLSJ2", or "AF16xHK104"
 #' @return A boxplot of the phenotype by genotype split at each peak marker in a
 #' mapping
 #' @export
@@ -188,11 +190,11 @@ pxgplot <- function(cross, map, parent="N2xCB4856") {
             } else {
                 "CB4856"
             }
-        } else if(parent=="LSJ2xN2") {
+        } else if(parent=="N2xLSJ2") {
             if(x == -1) {
-                "LSJ2"
-            } else {
                 "N2"
+            } else {
+                "LSJ2"
             }
         } else if(parent=="AF16xHK104") {
             if(x==-1) {
@@ -202,6 +204,8 @@ pxgplot <- function(cross, map, parent="N2xCB4856") {
             }
         }
     })
+    
+    split$genotype <- factor(split$genotype, levels = c("N2","CB4856","LSJ2","AF16","HK104"))
         
     ggplot2::ggplot(split) +
         ggplot2::geom_boxplot(ggplot2::aes(x = genotype, y = pheno, fill = genotype), outlier.shape = NA) +
@@ -226,6 +230,8 @@ pxgplot <- function(cross, map, parent="N2xCB4856") {
 #' 
 #' @param cross The cross object used for the mapping
 #' @param map The mapping output for a single trait
+#' @param parental The parental strains used to generate RIAILs. Either
+#' "N2xCB4856" (default), "N2xLSJ2", or "AF16xHK104
 #' @return A line plot of the effect size at each marker
 #' @export
 
