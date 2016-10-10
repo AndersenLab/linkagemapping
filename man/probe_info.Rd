@@ -4,6 +4,7 @@
 \alias{probe_info}
 \title{Dataframe of GO terms, descriptions, and other information for
 all genes in the eQTL dataset from Matt Rockman}
+\format{A data frame with 43603 rows and 12 variables}
 \description{
 This data frame contains descriptive information for all genes
 included in the eQTL dataset

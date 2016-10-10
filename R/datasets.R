@@ -131,7 +131,6 @@ NULL
 #'
 #' @name eQTLpeaks
 #' @format A data frame with 2447 rows and 25 variables
-#' }
 NULL
 
 #' Dataframe of GO terms, descriptions, and other information for
@@ -142,7 +141,6 @@ NULL
 #'
 #' @name probe_info
 #' @format A data frame with 43603 rows and 12 variables
-#' }
 NULL
 
 #' Genotypes of RIAILs at each of the 1454 markers
@@ -153,7 +151,6 @@ NULL
 #'
 #' @name RIAILgenotypes
 #' @format A data frame with 1454 rows and 601 variables
-#' }
 NULL
 
 #' Marker conversions for each of the 1454 markers used in RIAILgenotypes
@@ -163,5 +160,4 @@ NULL
 #'
 #' @name RIAILmarkerconversion
 #' @format A data frame with 1454 rows and 2 variables
-#' }
 NULL
