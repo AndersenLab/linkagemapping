@@ -117,7 +117,7 @@ maxlodplot <- function(map){
     }
     
     plot <- plot + ggplot2::geom_line(size = 1, alpha = 0.85) +
-        ggplot2::facet_grid(.~chr, scales ="free") +
+        ggplot2::facet_grid(.~chr, scales ="free", space = "free") +
         ggplot2::labs(x = "Genomic Position (Mb)", y = "LOD") +
         ggplot2::scale_colour_discrete(name="Mapping\nIteration") +
         ggplot2::ggtitle(map1$trait[1]) +
