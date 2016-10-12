@@ -113,7 +113,7 @@ maxlodplot <- function(map){
                                ggplot2::aes(x=pos/1e6,
                           y=(1.2*lod),
                           label = paste0(100*round(var_exp, digits = 4),"%")),
-                      colour = "black", size=5)
+                      colour = "black", size=3)
     }
     
     plot <- plot + ggplot2::geom_line(size = 1, alpha = 0.85) +
