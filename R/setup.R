@@ -6,7 +6,7 @@
 # @importFrom dplyr %>%
 
 mapformat <- function(pheno){
-    
+    library(dplyr)
     # Make the condensed phenotype name column (condition + trait)
     pheno$conpheno <- paste0(pheno$condition, ".", pheno$trait)
     

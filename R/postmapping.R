@@ -55,7 +55,7 @@ maxpeaks <- function(lods, cross) {
 # @importFrom foreach %do% %dopar%
 
 get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
-    
+    library(foreach)
     # Set the appropriate divisor for printing frequency
     if (perms < 100) {
         div = 1
@@ -139,7 +139,7 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
 # @importFrom foreach %do% %dopar%
 
 get_peak_gwer <- function(lods, cross, perms=1000, doGPU=F) {
-    
+    library(foreach)
     # Set the appropriate divisor for printing frequency
     if (perms < 100) {
         div = 1
