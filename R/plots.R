@@ -318,17 +318,20 @@ pxgplot_par <- function(cross, map, phenoframe, parent="N2xCB4856") {
             dplyr::select(-RIAIL)
     }
     
+    for(i in 1:(ncol(geno)-2)) {
+        for(j in 1:nrow(geno)) {
+            geno[j,i] <- ifelse(parent == "N2xCB4856",
+                                ifelse(geno[j,i] == -1, "N2-RIAIL", 
+                                       ifelse(geno[j,i] == 1, "CB4856-RIAIL", NA)),
+                                ifelse(parent == "N2xLSJ2",
+                                       ifelse(geno[j,i] == -1, "N2-RIAIL", 
+                                              ifelse(geno[j,i] == 1, "LSJ2-RIAIL", NA)),
+                                       ifelse(parent == "AF16xHK104",
+                                              ifelse(geno[j,i] == -1, "AF16-RIAIL", 
+                                                     ifelse(geno[j,i] == 1, "HK104-RIAIL", NA)))))
+        }
+    }
     
-    geno[,1:(ncol(geno)-2)] <- sapply(geno[,1:(ncol(geno)-2)], function(x) {
-        ifelse(parent == "N2xCB4856",
-               ifelse(x == -1, "N2-RIAIL", 
-                      ifelse(x == 1, "CB4856-RIAIL", x)),
-               ifelse(parent == "N2xLSJ2",
-                      ifelse(x == -1, "N2-RIAIL", 
-                             ifelse(x == 1, "LSJ2-RIAIL", x)),
-                      ifelse(parent == "AF16xHK104",
-                             ifelse(x == -1, "AF16-RIAIL", 
-                                    ifelse(x == 1, "HK104-RIAIL", x)))))})
     colnames(geno)[ncol(geno)] <- "strain"
     
     parentphe <- subset(phenoframe, strain %in% c("N2","CB4856","LSJ2","AF16","HK104")) %>%
