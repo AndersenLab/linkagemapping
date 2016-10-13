@@ -77,13 +77,13 @@ NULL
 #' }
 NULL
 
-#' Marker/position lookup table for AF16xLSJ2 RIAILs
+#' Marker/position lookup table for AF16xHK104 RIAILs
 #'
 #' This data frame contains a lookup table for the translation of marker
 #' positions from genetic to physical positions. The physical positions in this
 #' table come from C. briggsae genome build cb4.
 #'
-#' @name AF16xLSJ2markers
+#' @name AF16xHK104markers
 #' @format A data frame with 1031 rows and 4 variables:
 #' \describe{
 #'   \item{marker}{the name of the marker used for genotyping}
