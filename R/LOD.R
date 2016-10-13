@@ -1,13 +1,13 @@
-#' Get the LOD value for each marker based on the correlation between genotype
-#' and phenotype.
-#' 
-#' @param npheno The number of phenotypes present in the data set
-#' @param pheno The extracted phenotype data from the cross object
-#' @param geno The extracted genotype data from the cross object
-#' @param doGPU Boolean, whether to use the gputools package to speed up,
-#' mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
-#' graphics card with the gputools package installed. Defaults to \code{FALSE}.
-#' @return The LOD scores for all markers
+# Get the LOD value for each marker based on the correlation between genotype
+# and phenotype.
+# 
+# @param npheno The number of phenotypes present in the data set
+# @param pheno The extracted phenotype data from the cross object
+# @param geno The extracted genotype data from the cross object
+# @param doGPU Boolean, whether to use the gputools package to speed up,
+# mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
+# graphics card with the gputools package installed. Defaults to \code{FALSE}.
+# @return The LOD scores for all markers
 
 get_lod_by_cor <- function(npheno, pheno, gdata, doGPU = FALSE) {
     
@@ -25,13 +25,13 @@ get_lod_by_cor <- function(npheno, pheno, gdata, doGPU = FALSE) {
     }
 }
 
-#' Map all of the traits in a given cross object
-#' 
-#' @param cross A complete cross object with the phenotype data merged
-#' @param doGPU Boolean, whether to use the gputools package to speed up,
-#' mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
-#' graphics card and the gputools package installed. Defaults to \code{FALSE}.
-#' @return The LOD scores for all markers
+# Map all of the traits in a given cross object
+# 
+# @param cross A complete cross object with the phenotype data merged
+# @param doGPU Boolean, whether to use the gputools package to speed up,
+# mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
+# graphics card and the gputools package installed. Defaults to \code{FALSE}.
+# @return The LOD scores for all markers
 
 map <- function(cross, doGPU = FALSE) {
     # Remove interpolated SNPs

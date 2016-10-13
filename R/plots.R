@@ -32,7 +32,7 @@ lodplot <- function(map){
         ggplot2::theme_bw() +
         ggplot2::geom_line(ggplot2::aes(x = pos/1e6, y = lod, color = as.factor(iteration)),
                            size = 1, alpha = 0.85) +
-        ggplot2::facet_grid(.~chr, scales ="free") +
+        ggplot2::facet_grid(.~chr, scales ="free", space = "free") +
         ggplot2::labs(x = "Genomic Position (Mb)", y = "LOD") +
         ggplot2::ggtitle(Hmisc::capitalize(map$trait[1])) +
         ggplot2::theme(axis.text.x = ggplot2::element_text(size=16, face="bold", color="black"),
@@ -253,7 +253,7 @@ effectplot <- function(cross, map, parental = "N2xCB4856") {
     
     plot <- ggplot2::ggplot(annotated_map) +
         ggplot2::geom_line(ggplot2::aes(x = pos/1e6, y = eff_size), size = 1, alpha = 0.85)+
-        ggplot2::facet_grid(.~chr, scales ="free") +
+        ggplot2::facet_grid(.~chr, scales ="free", space = "free") +
         ggplot2::labs(x = "Genomic Position (Mb)", y = "Effect Size") +
         ggplot2::ggtitle(annotated_map$trait[1])+
         ggplot2::theme_bw() +
