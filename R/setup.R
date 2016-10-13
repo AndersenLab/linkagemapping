@@ -1,9 +1,9 @@
-#' Get the LOD value for each marker based on the correlation between genotype
-#' 
-#' @param pheno A phenotype data frame output from the easysorter pipeline
-#' @return A fully formatted phenotype data frame ready to be joined to the
-#' cross object
-#' @importFrom dplyr %>%
+# Get the LOD value for each marker based on the correlation between genotype
+# 
+# @param pheno A phenotype data frame output from the easysorter pipeline
+# @return A fully formatted phenotype data frame ready to be joined to the
+# cross object
+# @importFrom dplyr %>%
 
 mapformat <- function(pheno){
     
@@ -65,6 +65,7 @@ mergepheno <- function(cross, phenotype, set=NULL){
 #' 
 #' @param cross A cross object
 #' @return The genotype matrix, encoded as -1 or 1 for genotype
+#' @export
 
 extract_genotype=function(cross){
     
@@ -82,25 +83,25 @@ extract_genotype=function(cross){
     return(genomat)
 }
 
-#' Count number of strains with data for each phenotype from cross structure
-#' 
-#' @param pheno The phenotype elemnt of the cross object
-#' @return A named vector of the number of strains present for each phenotype
-#' measurement
+# Count number of strains with data for each phenotype from cross structure
+# 
+# @param pheno The phenotype elemnt of the cross object
+# @return A named vector of the number of strains present for each phenotype
+# measurement
 
 count_strains_per_trait = function(pheno) {
     apply(pheno, 2, function(x){sum(!is.na(x))})
 }
 
-#' Extract phenotype matrix from cross object, mean center and optionally
-#' standardize variance
-#' 
-#' @param cross A cross object
-#' @param set A vector of set IDs for all RIAILs
-#' @param setcorrect Boolean, whether or not to correct for sets by scaling
-#' phenotype values based on the set ID
-#' @param scalevar Boolean, whether or not to standarize the variance
-#' @return A matrix of scaled phenotype values
+# Extract phenotype matrix from cross object, mean center and optionally
+# standardize variance
+# 
+# @param cross A cross object
+# @param set A vector of set IDs for all RIAILs
+# @param setcorrect Boolean, whether or not to correct for sets by scaling
+# phenotype values based on the set ID
+# @param scalevar Boolean, whether or not to standarize the variance
+# @return A matrix of scaled phenotype values
 
 extract_scaled_phenotype=function(cross, set = NULL, setcorrect = FALSE,
                                   scalevar = TRUE){

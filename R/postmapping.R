@@ -1,9 +1,9 @@
-#' Convert LODmatrix to scanone object
-#' 
-#' @param lods A data frame output by the mapping functions to be converted to a
-#' \code{scanone} object
-#' @param cross An example cross object from which to extract scanone skeleton
-#' @return A scanone onject with the resultant mapping data in the lod column
+# Convert LODmatrix to scanone object
+# 
+# @param lods A data frame output by the mapping functions to be converted to a
+# \code{scanone} object
+# @param cross An example cross object from which to extract scanone skeleton
+# @return A scanone onject with the resultant mapping data in the lod column
 
 lodmatrix2scanone <- function(lods, cross) {
 
@@ -20,12 +20,12 @@ lodmatrix2scanone <- function(lods, cross) {
     })
 }
 
-#' Get max LOD score and SNP index for each mapped trait
-#' 
-#' @param lods A data frame output by the mapping functions to be converted to a
-#' @param cross An example cross object from which to extract scanone skeleton
-#' @return A list consisting of two vectors, the first being the max peak LOD
-#' height and the second being the index of the SNP at which the peak LOD occurs
+# Get max LOD score and SNP index for each mapped trait
+# 
+# @param lods A data frame output by the mapping functions to be converted to a
+# @param cross An example cross object from which to extract scanone skeleton
+# @return A list consisting of two vectors, the first being the max peak LOD
+# height and the second being the index of the SNP at which the peak LOD occurs
 
 maxpeaks <- function(lods, cross) {
     
@@ -42,17 +42,17 @@ maxpeaks <- function(lods, cross) {
     return(list(maxpeaklod = maxpeaklod, maxpeakindex=maxpeakindex))
 }
 
-#' Get the FDR value for a particular mapping by phenotype permutation
-#' 
-#' @param lods A data frame output by the mapping functions to be converted to a
-#' \code{scanone} object
-#' @param cross The original cross object used to perform the mapping
-#' @param perms
-#' @param doGPU Boolean, whether to use the gputools package to speed up,
-#' mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
-#' graphics card with the gputools package installed. Defaults to \code{FALSE}.
-#' @return The value of the 5% FDR threshold
-#' @importFrom foreach %do% %dopar%
+# Get the FDR value for a particular mapping by phenotype permutation
+# 
+# @param lods A data frame output by the mapping functions to be converted to a
+# \code{scanone} object
+# @param cross The original cross object used to perform the mapping
+# @param perms
+# @param doGPU Boolean, whether to use the gputools package to speed up,
+# mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
+# graphics card with the gputools package installed. Defaults to \code{FALSE}.
+# @return The value of the 5% FDR threshold
+# @importFrom foreach %do% %dopar%
 
 get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
     
@@ -126,17 +126,17 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
     return(threshold)
 }
 
-#' Get the GWER value for a particular mapping by phenotype permutation
-#' 
-#' @param lods A data frame output by the mapping functions to be converted to a
-#' \code{scanone} object
-#' @param cross The original cross object used to perform the mapping
-#' @param perms
-#' @param doGPU Boolean, whether to use the gputools package to speed up,
-#' mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
-#' graphics card with the gputools package installed. Defaults to \code{FALSE}.
-#' @return The value of the 5% GWER threshold
-#' @importFrom foreach %do% %dopar%
+# Get the GWER value for a particular mapping by phenotype permutation
+# 
+# @param lods A data frame output by the mapping functions to be converted to a
+# \code{scanone} object
+# @param cross The original cross object used to perform the mapping
+# @param perms
+# @param doGPU Boolean, whether to use the gputools package to speed up,
+# mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
+# graphics card with the gputools package installed. Defaults to \code{FALSE}.
+# @return The value of the 5% GWER threshold
+# @importFrom foreach %do% %dopar%
 
 get_peak_gwer <- function(lods, cross, perms=1000, doGPU=F) {
     
@@ -186,15 +186,15 @@ get_peak_gwer <- function(lods, cross, perms=1000, doGPU=F) {
     return(threshold)
 }
 
-#' Regress genotype from phenotype and resturn the residual phenotype values
-#' 
-#' @param lods A data frame output by the mapping functions to be converted to a
-#' \code{scanone} object
-#' @param cross The cross object used for the original mapping
-#' @param threshold The FDR threshold value used to determine significant peaks
-#' @param intercept Boolean stating whether or not to include intercept term in
-#' linear model. Defaults to \code{FALSE}.
-#' @return The residuals of the phenotypes
+# Regress genotype from phenotype and resturn the residual phenotype values
+# 
+# @param lods A data frame output by the mapping functions to be converted to a
+# \code{scanone} object
+# @param cross The cross object used for the original mapping
+# @param threshold The FDR threshold value used to determine significant peaks
+# @param intercept Boolean stating whether or not to include intercept term in
+# linear model. Defaults to \code{FALSE}.
+# @return The residuals of the phenotypes
 
 get_pheno_resids = function(lods, cross, threshold, intercept = FALSE) {
     
@@ -241,16 +241,16 @@ get_pheno_resids = function(lods, cross, threshold, intercept = FALSE) {
 }
 
 
-#' Return entries from a LOD data frame that are above the threshold value
-#' 
-#' If more two or more markers from the same trait share the max LOD score, only
-#' the first marker will be taken to be the peak. 
-#' 
-#' @param lods A data frame output by the mapping functions to be converted to a
-#' \code{scanone} object
-#' @param threshold The FDR threshold value used to determine significant peaks
-#' @return A subset of the \code{lods} data for only markers with a LOD score
-#' above the threshold value
+# Return entries from a LOD data frame that are above the threshold value
+# 
+# If more two or more markers from the same trait share the max LOD score, only
+# the first marker will be taken to be the peak. 
+# 
+# @param lods A data frame output by the mapping functions to be converted to a
+# \code{scanone} object
+# @param threshold The FDR threshold value used to determine significant peaks
+# @return A subset of the \code{lods} data for only markers with a LOD score
+# above the threshold value
 
 get_peaks_above_thresh <- function(lods, threshold) {
     do.call(rbind, lapply(3:ncol(lods), function(x){
@@ -379,15 +379,15 @@ annotate_lods <- function(lods, cross, annotate_all = FALSE) {
     return(finallods)
 }
 
-#' Calculate the variance explained, effect size, and confidence interval bounds
-#' for each peak
-#' 
-#' @param lods A data frame output by the mapping functions to be converted to a
-#' \code{scanone} object
-#' @param chr An example cross object from which to extract scanone skeleton
-#' @param lodcolumn The index of the column containing the lods scores
-#' @param drop The LOD drop for calculating the confidence interval
-#' @return The annotated LOD data frame with added columns for peak information
+# Calculate the variance explained, effect size, and confidence interval bounds
+# for each peak
+# 
+# @param lods A data frame output by the mapping functions to be converted to a
+# \code{scanone} object
+# @param chr An example cross object from which to extract scanone skeleton
+# @param lodcolumn The index of the column containing the lods scores
+# @param drop The LOD drop for calculating the confidence interval
+# @return The annotated LOD data frame with added columns for peak information
 
 cint <- function(lods, chr, lodcolumn=5, drop=1.5){
     
@@ -441,7 +441,6 @@ cint <- function(lods, chr, lodcolumn=5, drop=1.5){
 
 
 findN2fosmids <- function(chrom, left_pos, right_pos) {
-    data("AllN2fosmids")
     region <- AllN2fosmids %>%
         dplyr::filter(chr == chrom) %>%
         dplyr::group_by(clone) %>%
@@ -475,7 +474,6 @@ findN2fosmids <- function(chrom, left_pos, right_pos) {
 #' @export
 
 findCBfosmids <- function(chrom, left_pos, right_pos) {
-    data("AllCBfosmids")
     region <- AllCBfosmids %>%
         dplyr::filter(chr == chrom) %>%
         dplyr::group_by(clone) %>%
@@ -509,13 +507,12 @@ findCBfosmids <- function(chrom, left_pos, right_pos) {
 #' @export
 
 checkeQTLintervals <- function(chrom, left_pos, right_pos){
-    data("eQTLpeaks")
     sigs <- eQTLpeaks %>% 
         dplyr::filter(peakchr == chrom)%>%
         dplyr::filter(peakMarker > left_pos | rightMarker > left_pos)%>%
         dplyr::filter(peakMarker < right_pos | leftMarker < right_pos)%>%
         dplyr::arrange(trait)
-    data("probe_info")
+
     genes <- probe_info %>% 
         dplyr::filter(ProbeID %in% sigs$trait)%>%
         dplyr::select(ProbeID,PrimaryAccession,GeneSymbol,GeneName,GO,Description)%>%
@@ -544,14 +541,6 @@ checkeQTLintervals <- function(chrom, left_pos, right_pos){
 #' @export
 
 FindRIAILsforNILs <- function(CI.L, CI.R, chromosome){
-    data("RIAILgenotypes")
-    data("RIAILmarkerconversion")
-    
-    
-    genos <- data.frame(fread("~/Dropbox/AndersenLab/RCode/GWAS/Ancillary/N2xCB4856_598RIAILs_gen.csv",
-                              header = T))
-    
-    load("~/Dropbox/AndersenLab/RCode/GWAS/Ancillary/marker_pos_conversion.Rda")
     
     test <- do.call(cbind, lapply(RIAILgenotypes[,4:ncol(RIAILgenotypes)], function(x){
         temp <- data.frame(gen = x)
@@ -823,7 +812,6 @@ FindRIAILsforNILs <- function(CI.L, CI.R, chromosome){
 #' 
 
 findindels <- function(left, right, chr) {
-    data("indels")
     
     subset <- indels %>%
         dplyr::filter(Chromosome == chr) %>%
