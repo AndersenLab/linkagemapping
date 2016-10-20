@@ -111,7 +111,7 @@ maxlodplot <- function(map){
                        fill ="red", shape=25, size=3.2, show_guide = FALSE) +
             ggplot2::geom_text(data = cis,
                                ggplot2::aes(x=pos/1e6,
-                          y=(1.2*lod),
+                          y=(1.2*maxlod),
                           label = paste0(100*round(var_exp, digits = 4),"%")),
                       colour = "black", size=3)
     }
