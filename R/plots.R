@@ -360,7 +360,7 @@ pxgplot_par <- function(cross, map, phenoframe, parent="N2xCB4856") {
                                                       ordered = T),
                                            y = plotting[,1], fill = genotype),
                               outlier.shape = NA) +
-        ggplot2::geom_jitter(ggplot2::aes(x = genotype, y = pheno), alpha = .8) +
+        ggplot2::geom_jitter(ggplot2::aes(x = genotype, y = plotting[,1]), alpha = .8) +
         ggplot2::scale_fill_manual(values = c("N2" = "orange", "CB4856" = "blue","N2-RIAIL" = "orange", "CB4856-RIAIL" = "blue", "LSJ2" = "green", "LSJ2-RIAIL" = "green", "AF16" = "indianred", "AF16-RIAIL" = "indianred", "HK104" = "gold", "HK104-RIAIL" = "gold")) +
         ggplot2::facet_wrap(~marker, ncol = 5) +
         ggplot2::theme_bw() +
