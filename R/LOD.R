@@ -75,6 +75,9 @@ map <- function(cross, doGPU = FALSE) {
 fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
                     threshold = "FDR", markerset = c("N2xCB4856", "N2xLSJ2",
                                                      "AF16xHK104", NA)) {
+    saf <- getOption("stringsAsFactors")
+    options(stringsAsFactors = FALSE)
+    
     
     if (threshold != "FDR" & threshold != "GWER") {
         stop("Unknown threshold type. Threshold should be set to either
@@ -187,6 +190,6 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
                 markers[markers$marker == marker, "position"])))
         }, numeric(1))
     }
-    
+    options(stringsAsFactors = saf)
     return(finallods)
 }
