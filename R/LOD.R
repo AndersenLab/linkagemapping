@@ -174,21 +174,20 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
     
    
     # If you need to add possible marker sets, add them here
+    if (!is.na(markerset)) {
     if (markerset == "N2xCB4856") {
         markers <- N2xCB4856markers
     } else if (markerset == "N2xLSJ2") {
         markers <- N2xLSJ2markers
     } else if (markerset == "AF16xHK104") {
         markers <- AF16xHK104markers
-    } else {
-        markers <- NA
     }
-    
-    if (!is.na(markerset)) {
         finallods$pos <- vapply(finallods$marker, function(marker) {
             return(as.numeric(unlist(
                 markers[markers$marker == marker, "position"])))
         }, numeric(1))
+    } else {
+        finallods$pos <- finallods$pos
     }
     options(stringsAsFactors = saf)
     return(finallods)
