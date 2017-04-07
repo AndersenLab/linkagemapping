@@ -98,6 +98,11 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
     # Complete the first mapping with FDR/GWER calculation
     lods <- map(cross)
     
+    #If there are NA values in the LOD calculation, set them to 0 so max peaks can be identified.
+    lods[3:ncol(lods)] <- cbind(lapply(lods[3:ncol(lods)], function(x) {
+        x <- ifelse(is.na(x), 0, x)
+    }))
+    
     if (threshold == "GWER") {
         threshold <- get_peak_gwer(lods, cross, permutations, doGPU)
     } else {
@@ -133,6 +138,11 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
             
             # Repeat the mapping, FDR/GWER calculationa and peak finding
             lods <- map(cross)
+            
+            #If there are NAs in the LOD calculation, set those to 0 so max peaks can be identified.
+            lods[3:ncol(lods)] <- cbind(lapply(lods[3:ncol(lods)], function(x) {
+                x <- ifelse(is.na(x), 0, x)
+            }))
             
             if (threshold == "GWER") {
                 threshold <- get_peak_gwer(lods, cross, permutations, doGPU)
