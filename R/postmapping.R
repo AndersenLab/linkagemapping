@@ -33,7 +33,7 @@ maxpeaks <- function(lods, cross) {
     lods <- data.frame(lods[,3:ncol(lods)])
     
     # Get the maximum LOD score for each trait
-    maxpeaklod <- vapply(lods, max, numeric(1))
+    maxpeaklod <- vapply(lods, function(x) {max(x, na.rm=TRUE)}, numeric(1))
     
     # Get marker index of LOD peak per trait                         
     maxpeakindex <- vapply(lods, which.max, integer(1))
@@ -207,7 +207,7 @@ get_pheno_resids = function(lods, cross, threshold, intercept = FALSE) {
     
     # Get only the traits with a peak above threshold
     traitsabovethresh <- lapply(1:ncol(lods), function(x){
-        if(max(lods[x])>threshold){
+        if(max(lods[x], na.rm = TRUE)>threshold){
             return(colnames(lods)[x])
         }
     })
@@ -258,7 +258,7 @@ get_peaks_above_thresh <- function(lods, threshold) {
         data$trait <- colnames(lods)[x]
         colnames(data)[3] <- "LOD"
         peaks <- data %>%
-            dplyr::filter(LOD==max(LOD)) %>%
+            dplyr::filter(LOD==max(LOD, na.rm = TRUE)) %>%
             
             # If there is more than one marker with the peak LOD value, only
             # take the first one 
@@ -291,7 +291,7 @@ annotate_lods <- function(lods, cross, annotate_all = FALSE) {
         peaks <- lods %>%
             dplyr::filter(lod > threshold) %>%
             dplyr::group_by(trait, iteration) %>%
-            dplyr::filter(lod == max(lod))
+            dplyr::filter(lod == max(lod, na.rm = TRUE))
     }
     
     # Handle a situation in which no peaks are detected 
