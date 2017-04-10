@@ -35,6 +35,7 @@ You will first need a cross object to complete the mapping. Included with this p
 + `N2xCB4856cross` - N2/CB4856(Hawaiian)
 + `N2xLSJ2cross` - N2/LSJ2
 + `AF16xHK104cross` - AF16/HK104 (*C. briggsae*)
++ `N2xCB4856cross_full` -N2/CB4856 QX and ECA strains with SNPs from whole-genome sequencing
 
 The cross objects are included in the data directory of the package. In order to access the objects in a mutable fashion, they should be read in, then assigned to another variable name as below:
 
@@ -52,12 +53,14 @@ Phenotype data in the format outlined above can be merged with the cross object 
 phenocross <- mergepheno(cross, pheno)
 ```
 
-**As of this writing (7/24/2015) the genotypes for the first two sets of RIAILs are unclear and these strains do not contribute to the mapping. Consequently, it is advised to subset to only the third set of RIAILs prior to mapping when using the N2/CB4856 cross object, as below:**
+**As of this writing (7/24/2015) the genotypes for the first two sets of RIAILs are unclear and these strains do not contribute to the mapping. Consequently, it is advised to subset to only the second set of RIAILs prior to mapping when using the N2/CB4856 cross object, as below:**
 
 ```r
 # Assuming the phenotype data is in a data frame named "pheno"
 phenocross <- mergepheno(cross, pheno, set = 2)
 ```
+
+**As of 4/10/2017 the most recent cross object, N2xCB4856cross_full, contains SNPs from whole-genome sequence data from three sets: QX1-239, QX240-598, and ECA1-667. Select the set of strains applicable for your mapping**
 
 ### Completing the Mapping
 
@@ -84,6 +87,12 @@ If you only need to map a subset of a much larger trait set, you can set a value
 
 ```r
 fsearch(cross, phenotype = "bleomycin", permutations = 1000, doGPU = TRUE)
+```
+
+Set the markerset to be used for marker conversion at the end of mapping. **If you use the N2xCB4856cross_full cross object, set the markerset to NA**. Default is "N2xCB4856", other options are "N2xLSJ2" or "AF16xHK104".
+
+```r
+fsearch(cross, phenotype = "bleomycin", permutations = 1000, doGPU = TRUE, markerset = NA)
 ```
 
 #### Choosing a Thresholding Method
