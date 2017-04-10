@@ -1,5 +1,20 @@
 # Andersen Lab Linkage Mapping Pipeline
 
+## Install linkagemapping package
+
+Install git-lfs for loading large files using the command line. ```brew install git-lfs```
+
+```r
+install_linkage_mapping <- function() {
+d <- tempfile(pattern = sample(LETTERS,1))
+comm <- sprintf("mkdir -p %s && cd %s && git lfs clone https://github.com/AndersenLab/linkagemapping",d, d)
+system(comm)
+devtools::install(paste0(d, "/linkagemapping"))
+}
+
+install_linkage_mapping()
+```
+
 ## Batteries Included
 
 This package includes all data and functions necessary to complete a mapping for the phenotype of your choice using the recombinant inbred lines from *Andersen, et al. 2015* (*G3*). Included with this package are the cross and map objects for this strain set as well a `markers.rds` file containing a lookup table for the physical positions of all markers used for mapping.
