@@ -27,7 +27,7 @@ NULL
 #' value while postive effect sizes indicate that CB4856 had a greater phenotype
 #' value.
 #'
-#' @name N2xCB4856cross_fullgenos
+#' @name N2xCB4856cross_full
 #' @format A cross object made with the \code{qtl} package, with genotype and
 #' phenotype subobjects.
 NULL
