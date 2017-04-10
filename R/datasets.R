@@ -13,6 +13,26 @@
 #' phenotype subobjects.
 NULL
 
+
+#' Whole genome cross object for N2xCB4856 RIAILs
+#'
+#' This cross object was created with whole-genome sequence data.
+#' Any position with a breakpoint in any of the RIAIL sets (set 1 = QX1-239,
+#' set 2 = QX240-598, set 3 = ECA1-667) is denoted as a marker. In this object,
+#' N2 genotypes are encoded as 1 and CB4856 genotypes are encoded as 2. This
+#' cross object contains no heterozyous loci. When the
+#' extract genotype function is run on this cross object, N2 genotypes are
+#' converted to -1 and CB4856 genotypes to 1. For mappings with this cross
+#' object, negative effect sizes indicate that N2 had the greater phenotype
+#' value while postive effect sizes indicate that CB4856 had a greater phenotype
+#' value.
+#'
+#' @name N2xCB4856cross_fullgenos
+#' @format A cross object made with the \code{qtl} package, with genotype and
+#' phenotype subobjects.
+NULL
+
+
 #' Cross object for N2xLSJ2 RIAILs
 #'
 #' In this object, N2 genotypes are encoded as 1 and LSJ2 genotypes are
