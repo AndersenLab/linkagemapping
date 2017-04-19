@@ -1,26 +1,3 @@
-#' Load Cross Obj
-#' @name load_cross_obj
-#' Download large cross objects if need be and load or load local cross obj.
-#' @param name Name of cross object
-#' @return A plot with a line for each iteration of the forward search mapping
-#' @export
-load_cross_obj <- function(name) {
-    dir.create(file.path("~/.linkagemapping"), showWarnings = FALSE)
-    if(name == "N2xCB4856cross_full") {
-        fname <- "~/.linkagemapping/N2xCB4856cross_full.rda"
-        if(!file.exists(fname)){
-            url = "https://northwestern.box.com/shared/static/zlk41zg1qu498pkht5ycn849sif21v7w.rda"
-            res <- tryCatch(download.file(url,
-                                          fname,
-                                          method="wget"),
-                            error=function(e) 1)
-        }
-        load(fname, envir = globalenv())
-   } else {
-        data(name)
-    }
-}
-
 #' Cross object for N2xCB4856 RIAILs
 #'
 #' In this object, N2 genotypes are encoded as 1 and CB4856 genotypes are
