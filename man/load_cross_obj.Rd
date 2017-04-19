@@ -7,7 +7,7 @@
 load_cross_obj(name)
 }
 \arguments{
-\item{name}{Name of cross object}
+\item{name}{Name of cross object ("N2xCB4856cross", "N2xLSJ2cross", "AF16xHK104cross", or "N2xCB4856cross_full")}
 }
 \value{
 A cross object

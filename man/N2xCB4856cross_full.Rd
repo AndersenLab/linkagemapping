@@ -6,6 +6,7 @@
 \format{A cross object made with the \code{qtl} package, with genotype and
 phenotype subobjects.}
 \description{
+Must be loaded with load_cross_obj("N2xCB4856cross_full")
 This cross object was created with whole-genome sequence data.
 Any position with a breakpoint in any of the RIAIL sets (set 1 = QX1-239,
 set 2 = QX240-598, set 3 = ECA1-667) is denoted as a marker. In this object,
