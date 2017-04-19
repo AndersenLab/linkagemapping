@@ -45,18 +45,18 @@ The measured quantitative value for the phenotype. For example `175.657` or `18`
 
 #### Cross Object
 
-You will first need a cross object to complete the mapping. Included with this package are three cross objects to choose from:
+You will first need a cross object to complete the mapping. Included with this package are several cross objects to choose from:
 
 + `N2xCB4856cross` - N2/CB4856(Hawaiian)
 + `N2xLSJ2cross` - N2/LSJ2
 + `AF16xHK104cross` - AF16/HK104 (*C. briggsae*)
-+ `N2xCB4856cross_full` -N2/CB4856 QX and ECA strains with SNPs from whole-genome sequencing
++ `N2xCB4856cross_full` - N2/CB4856 QX and ECA strains with SNPs from whole-genome sequencing
 
-The cross objects are included in the data directory of the package. In order to access the objects in a mutable fashion, they should be read in, then assigned to another variable name as below:
+Cross objects are either included or are downloaded from the internet. In order to access the objects in a mutable fashion, they should be read in, then assigned to another variable name as below:
 
 ```r
-data(N2xCB4856cross)
-cross <- N2xCB4856cross
+load_cross_obj("N2xCB4856cross_full")
+cross <- N2xCB4856cross_full
 ```
 
 ### Merging the Phenotype Data Into the Cross Object
