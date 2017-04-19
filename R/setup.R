@@ -10,7 +10,7 @@ load_cross_obj <- function(name) {
     if(name == "N2xCB4856cross_full") {
         fname <- "~/.linkagemapping/N2xCB4856cross_full.rda"
         if(!file.exists(fname)){
-            url = "https://northwestern.box.com/shared/static/zlk41zg1qu498pkht5ycn849sif21v7w.rda"
+            url = "https://storage.googleapis.com/andersen_dist/linkagemapping/N2xCB4856cross_full.rda"
             res <- tryCatch(download.file(url,
                                           fname,
                                           method="wget"),
