@@ -13,7 +13,7 @@ load_cross_obj <- function(name) {
             url = "https://storage.googleapis.com/andersen_dist/linkagemapping/N2xCB4856cross_full.rda"
             res <- tryCatch(download.file(url,
                                           fname,
-                                          method="wget"),
+                                          method="auto"),
                             error=function(e) 1)
         }
         load(fname, envir = globalenv())
