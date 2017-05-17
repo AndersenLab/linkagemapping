@@ -89,6 +89,7 @@ mergepheno <- function(cross, phenotype, set=NULL){
 #' 
 #' @param cross A cross object
 #' @return The genotype matrix, encoded as -1 or 1 for genotype
+#' @export
 
 extract_genotype=function(cross){
     

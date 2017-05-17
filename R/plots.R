@@ -63,8 +63,8 @@ lodplot <- function(map){
         plot <- plot + 
             ggplot2::geom_point(data = cis, ggplot2::aes(x=pos/1e6, y= height1, fill = as.factor(iteration) ),
                        shape=25, size=3.5, alpha=1, show_guide = FALSE) +
-            ggplot2::scale_fill_manual(values = c("#FF66B2", "#00CCCC", "#80FF00", "#9999FF", "FFB266", "0000FF","FFFF66")) +
-            ggplot2::scale_colour_manual(name="Mapping\nIteration", values = c("#FF66B2", "#00CCCC", "#80FF00", "#9999FF", "FFB266", "0000FF","FFFF66")) +
+            ggplot2::scale_fill_manual(values = c("#FF66B2", "#00CCCC", "#80FF00", "#9999FF", "#FFB266", "#0000FF","#FFFF66")) +
+            ggplot2::scale_colour_manual(name="Mapping\nIteration", values = c("#FF66B2", "#00CCCC", "#80FF00", "#9999FF", "#FFB266", "#0000FF","#FFFF66")) +
             ggplot2::geom_text(data = cis,
                       ggplot2::aes(x=pos/1e6, y=height2, label = paste0(100*round(var_exp, digits = 4),"%")),
                       colour = "black", size=5)

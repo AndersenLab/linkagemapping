@@ -100,13 +100,13 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
     
     # Get the obeserved number of peaks 
     obsPcnt <- sapply(seq(2, 10, .01), function(thresh) {
-        sum(peaklods>thresh)
+        sum(peaklods>thresh, na.rm = TRUE)
     })
     names(obsPcnt) <- seq(2, 10, .01)
     
     # Expected number of QTL peaks with LOD greater than threshold
     expPcnt <- sapply(seq(2, 10, .01), function(thresh) {
-            sum(permpeakLODs$lod > thresh)
+            sum(permpeakLODs$lod > thresh, na.rm = TRUE)
         })
     names(expPcnt) <- seq(2, 10, .01)
     
@@ -117,11 +117,11 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
     # peaks is less than .05
     belowalpha <- sapply(pFDR, function(x) x < .05)
     suppressWarnings({
-            threshold <- as.numeric(names(belowalpha)[min(which(belowalpha))])
+            threshold <- as.numeric(names(belowalpha)[min(which(belowalpha), na.rm = T)])
         })
     if (is.na(threshold)) {
         threshold <- as.numeric(
-            names(belowalpha)[min(which(is.na(belowalpha)))])
+            names(belowalpha)[min(which(is.na(belowalpha)), na.rm = T)])
     }
     return(threshold)
 }
