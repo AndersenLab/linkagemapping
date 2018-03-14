@@ -278,11 +278,13 @@ get_peaks_above_thresh <- function(lods, threshold) {
 #' @param annotate_all Boolean whether or not to annotate all markers with
 #' variance explained and effect size. If \code{FALSE} (default), only peak lods
 #' will be annotated.
+#' @param bayes Boolean whether or not to calculate confidence intervals based
+#' on Bayes statistics (LOD drop 1.5 used to find CI by default)
 #' @return The annotated lods data frame with information added for peak markers
 #' of each iteration
 #' @export
 
-annotate_lods <- function(lods, cross, annotate_all = FALSE) {
+annotate_lods <- function(lods, cross, annotate_all = FALSE, bayes = FALSE) {
     
     if (annotate_all) {
         peaks <- lods
@@ -331,6 +333,7 @@ annotate_lods <- function(lods, cross, annotate_all = FALSE) {
         
         # Get the trait and peak marker
         peaktrait <- as.character(peaks$trait[i])
+        cat(peaktrait)
         marker <- gsub('-', '\\.', as.character(peaks$marker[i]))
         
         if (grepl("^[0-9]", marker)) {
@@ -353,7 +356,11 @@ annotate_lods <- function(lods, cross, annotate_all = FALSE) {
             peakchr = as.character(peaks$chr[i])
             peakiteration <- peaks$iteration[i]
             traitlods <- lods %>% dplyr::filter(trait == peaktrait, iteration == peakiteration)
+            if(bayes == FALSE){
             confint <- cint(traitlods, peakchr)
+            } else {
+                confint <- cint_bayes(traitlods, peakchr)
+            }
         }
         
         
@@ -379,21 +386,22 @@ annotate_lods <- function(lods, cross, annotate_all = FALSE) {
     return(finallods)
 }
 
-# Calculate the variance explained, effect size, and confidence interval bounds
-# for each peak
+# Calculate the confidence interval bounds for each peak using a LOD drop cutoff
 # 
 # @param lods A data frame output by the mapping functions to be converted to a
 # \code{scanone} object
-# @param chr An example cross object from which to extract scanone skeleton
+# @param chrom The chromosome on which a peak was found
 # @param lodcolumn The index of the column containing the lods scores
 # @param drop The LOD drop for calculating the confidence interval
-# @return The annotated LOD data frame with added columns for peak information
+# @return The marker, chromosome, position, trait, LOD, threshold and
+# iteration information for the left and right bounds of the confidence interval
 
-cint <- function(lods, chr, lodcolumn=5, drop=1.5){
+cint <- function(lods, chrom, lodcolumn=5, drop=1.5){
     
     # Get only the data for the chromosome containing the peak marker so that CI
     # doesn't overflow chromsome bounds
-    data <- lods[lods$chr==chr,]
+    data <- lods %>%
+        dplyr::filter(chr == chrom)
     
     #Get the peak index and the peak lod score
     peak <- which.max(unlist(data[,lodcolumn]))
@@ -402,24 +410,23 @@ cint <- function(lods, chr, lodcolumn=5, drop=1.5){
     # If the peak is not at the end of a chromsome...
     if(peak > 1){
         
-        # ...keep moving left until you find a LOD drop that equals that
-        # requested
-        left <- peak - 1
-        while(left > 1 & peakLOD - data[left, lodcolumn] < drop){
-            left <- left-1
-        }
-    } else {
+        # find the leftmost peak with a LOD higher than a 1.5 drop
+        left <- data %>%
+            dplyr::filter(lod > (peakLOD-drop)) %>%
+            dplyr::filter(pos == min(pos))
+        left <- which(data[,3] == left$pos)
+    }
+    else {
         # Otherwise, the peak LOD marker, which is at the end of the chromsome
         # is the left bound of the CI
         left <- 1
     }
-    
     # Repeat the same process on the right side of the interval
     if(peak < nrow(data)){
-        right <- peak + 1
-        while(right < nrow(data) & peakLOD - data[right, lodcolumn] < drop){
-            right <- right + 1
-        }
+        right <- data %>%
+            dplyr::filter(lod > (peakLOD-drop))%>%
+            dplyr::filter(pos == max(pos))
+        right <- which(data[,3]==right$pos)
     } else {
         right <- nrow(data)
     }
@@ -427,6 +434,52 @@ cint <- function(lods, chr, lodcolumn=5, drop=1.5){
     # rbind the left and right bounds and return the interval bound data frame
     bounds <- rbind(data[left,], data[right,])
     return(bounds)
+}
+
+# Calculate the confidence interval bounds for each peak using a Bayes statistics
+# 
+# @param lods A data frame output by the mapping functions to be converted to a
+# \code{scanone} object
+# @param chrom The chromosome on which a peak was found
+# @param prob The threshold for the confidence interval, as a decimal
+# @param lodcolumn The index of the column containing the lods scores
+# @return The marker, chromosome, position, trait, LOD, threshold and
+# iteration information for the left and right bounds of the confidence interval
+
+cint_bayes <- function (lods, chrom, prob = 0.95, lodcolumn = 5) {
+    # Get only the data for the chromosome containing the peak marker so that CI
+    # doesn't overflow chromsome bounds
+    data <- lods[lods$chr==chr,] %>%
+        dplyr::arrange(pos)
+    
+    loc <- data[, 3]
+    #format LOD scores so area under the curve is 1
+    width <- (c(loc[-1], loc[length(loc)]) - c(loc[1], loc[-length(loc)]))/2
+    width[c(1, length(width))] <- width[c(1, length(width))] * 
+        2
+    area <- 10^data[, lodcolumn] * width
+    area <- area/sum(area)
+    
+    #order the adjusted LOD scores by decreasing value
+    o <- order(data[, lodcolumn], decreasing = TRUE)
+    #state how much of the total area under the curve is described with each LOD score
+    cs <- cumsum(area[o])
+    #find the closest marker to the peak that explains 95% of the area under the curve
+    wh <- min(which(cs >= prob))
+    #output all markers that have a lod score above that of the 95% CI defining marker.
+    int <- range(o[1:wh])
+    
+    #this was all done with midpoints between positions, expand it to the nearest marker
+    markerpos <- (1:nrow(data))[-grep("^c.+\\.loc-*[0-9]+(\\.[0-9]+)*$", 
+                                      rownames(data))]
+    if (any(markerpos <= int[1])) 
+        int[1] <- max(markerpos[markerpos <= int[1]])
+    if (any(markerpos >= int[2])) 
+        int[2] <- min(markerpos[markerpos >= int[2]])
+    
+    bounds <- rbind(data[int[1],], data[int[2],])
+    return(bounds)
+    
 }
 
 #' Find N2 fosmids that tile across a given interval
