@@ -333,7 +333,7 @@ annotate_lods <- function(lods, cross, annotate_all = FALSE, bayes = FALSE) {
         
         # Get the trait and peak marker
         peaktrait <- as.character(peaks$trait[i])
-        cat(peaktrait)
+        
         marker <- gsub('-', '\\.', as.character(peaks$marker[i]))
         
         if (grepl("^[0-9]", marker)) {
@@ -449,7 +449,7 @@ cint <- function(lods, chrom, lodcolumn=5, drop=1.5){
 cint_bayes <- function (lods, chrom, prob = 0.95, lodcolumn = 5) {
     # Get only the data for the chromosome containing the peak marker so that CI
     # doesn't overflow chromsome bounds
-    data <- lods[lods$chr==chr,] %>%
+    data <- lods[lods$chr==chrom,] %>%
         dplyr::arrange(pos)
     
     loc <- data[, 3]
