@@ -293,7 +293,8 @@ annotate_lods <- function(lods, cross, annotate_all = FALSE, bayes = FALSE) {
         peaks <- lods %>%
             dplyr::filter(lod > threshold) %>%
             dplyr::group_by(trait, iteration) %>%
-            dplyr::filter(lod == max(lod, na.rm = TRUE))
+            dplyr::filter(lod == max(lod, na.rm = TRUE))%>%
+            dplyr::distinct(lod, .keep_all =TRUE)
     }
     
     # Handle a situation in which no peaks are detected 
@@ -450,7 +451,8 @@ cint_bayes <- function (lods, chrom, prob = 0.95, lodcolumn = 5) {
     # Get only the data for the chromosome containing the peak marker so that CI
     # doesn't overflow chromsome bounds
     data <- lods[lods$chr==chrom,] %>%
-        dplyr::arrange(pos)
+        dplyr::arrange(pos) %>%
+        na.omit
     
     loc <- data[, 3]
     #format LOD scores so area under the curve is 1
