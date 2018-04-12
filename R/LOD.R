@@ -74,7 +74,7 @@ map <- function(cross, doGPU = FALSE) {
 
 fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
                     threshold = "FDR", markerset = c("N2xCB4856", "N2xLSJ2",
-                                                     "AF16xHK104", NA)) {
+                                                     "AF16xHK104","full", NA)) {
     saf <- getOption("stringsAsFactors")
     options(stringsAsFactors = FALSE)
     
@@ -178,18 +178,27 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
    
     # If you need to add possible marker sets, add them here
     if (!is.na(markerset)) {
-    if (markerset == "N2xCB4856") {
-        markers <- N2xCB4856markers
-    } else if (markerset == "N2xLSJ2") {
-        markers <- N2xLSJ2markers
-    } else if (markerset == "AF16xHK104") {
-        markers <- AF16xHK104markers
+        if (markerset %in% c("N2xCB4856", "N2xLSJ2", "AF16xHK104")) {
+            if (markerset == "N2xCB4856") {
+                markers <- N2xCB4856markers
+            } else if (markerset == "N2xLSJ2") {
+                markers <- N2xLSJ2markers
+            } else if (markerset == "AF16xHK104") {
+                markers <- AF16xHK104markers
+            }
+            finallods$pos <-
+                vapply(finallods$marker, function(marker) {
+                    return(as.numeric(unlist(markers[markers$marker == marker, "position"])))
+                }, numeric(1))
+        } else if (markerset == "full") {
+            finallods$pos <-
+                as.numeric(stringr::str_split_fixed(finallods$marker, "_", 2)[, 2])
+        } else {
+            finallods$pos <- finallods$pos
+            warning("Markerset unknown, leaving marker positions alone.")
+            }
     }
-        finallods$pos <- vapply(finallods$marker, function(marker) {
-            return(as.numeric(unlist(
-                markers[markers$marker == marker, "position"])))
-        }, numeric(1))
-    } else {
+    else {
         finallods$pos <- finallods$pos
     }
     options(stringsAsFactors = saf)
