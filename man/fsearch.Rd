@@ -6,7 +6,7 @@
 \usage{
 fsearch(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
   threshold = "FDR", markerset = c("N2xCB4856", "N2xLSJ2", "AF16xHK104",
-  NA))
+  "full", NA))
 }
 \arguments{
 \item{cross}{A complete cross object with the phenotype data merged}

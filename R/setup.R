@@ -8,9 +8,9 @@
 load_cross_obj <- function(name) {
     dir.create(file.path("~/.linkagemapping"), showWarnings = FALSE)
     if(name == "N2xCB4856cross_full") {
-        fname <- "~/.linkagemapping/N2xCB4856cross_full.rda"
+        fname <- "~/.linkagemapping/N2xCB4856cross_full2.Rda"
         if(!file.exists(fname)){
-            url = "https://storage.googleapis.com/andersen_dist/linkagemapping/N2xCB4856cross_full.rda"
+            url = "https://storage.googleapis.com/linkagemapping/data/N2xCB4856cross_full2.Rda"
             res <- tryCatch(download.file(url,
                                           fname,
                                           method="auto"),
