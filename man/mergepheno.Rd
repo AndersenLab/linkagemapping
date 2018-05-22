@@ -24,4 +24,3 @@ Incoming phenotype data frame must have the following columns:
 \code{strain}
 \code{phenotype}
 }
-

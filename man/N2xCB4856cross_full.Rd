@@ -18,4 +18,3 @@ object, negative effect sizes indicate that N2 had the greater phenotype
 value while postive effect sizes indicate that CB4856 had a greater phenotype
 value.
 }
-

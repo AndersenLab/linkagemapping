@@ -14,4 +14,3 @@ object, negative effect sizes indicate that Af16 had the greater phenotype
 value while postive effect sizes indicate that HK104 had a greater phenotype
 value.
 }
-

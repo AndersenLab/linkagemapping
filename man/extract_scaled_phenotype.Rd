@@ -25,4 +25,3 @@ A matrix of scaled phenotype values
 Extract phenotype matrix from cross object, mean center and optionally
 standardize variance
 }
-

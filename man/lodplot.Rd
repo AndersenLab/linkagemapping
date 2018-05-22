@@ -15,4 +15,3 @@ A plot with a line for each iteration of the forward search mapping
 \description{
 Plots the linkage mapping for each iteration of scanone
 }
-

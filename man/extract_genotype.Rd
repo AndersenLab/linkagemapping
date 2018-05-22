@@ -15,4 +15,3 @@ The genotype matrix, encoded as -1 or 1 for genotype
 \description{
 Extract genotype matrix from cross structure and recode as -1, 1
 }
-

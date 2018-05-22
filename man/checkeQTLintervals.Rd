@@ -21,4 +21,3 @@ eQTL_GeneDescriptions contains GO terms and other qualitative data.
 \description{
 Find expression QTL from the Rockman dataset within a user-defined interval
 }
-

@@ -15,4 +15,3 @@ This data frame contains a lookup table for the translation of marker
 positions from genetic to physical positions. The physical positions in this
 table come from C. briggsae genome build cb4.
 }
-

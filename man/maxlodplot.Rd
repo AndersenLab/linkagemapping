@@ -16,4 +16,3 @@ from a mapping
 \description{
 Plot max lod scores for a forward search mapping
 }
-

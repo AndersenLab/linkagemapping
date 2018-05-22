@@ -25,4 +25,3 @@ Complete - ggplot object of all RIAILs identified to have a continous genotype s
 \description{
 Find RIAILs for generating NILs to isolate a genomic region
 }
-

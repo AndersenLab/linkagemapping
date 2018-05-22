@@ -16,4 +16,3 @@ measurement
 \description{
 Count number of strains with data for each phenotype from cross structure
 }
-

@@ -28,4 +28,3 @@ of each iteration
 Annotate LOD peaks with variance explained, effect size, and confidence
 interval bounds
 }
-

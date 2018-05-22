@@ -19,4 +19,3 @@ Outputs a dataframe with all known indel information
 \description{
 Find indels to generate primers
 }
-

@@ -64,7 +64,7 @@ map <- function(cross, doGPU = FALSE) {
 #' @param doGPU Boolean, whether to use the gputools package to speed up,
 #' mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
 #' graphics card with the gputools package installed. Defaults to \code{FALSE}.
-#' @param threshold Can be set to either \code{FDR} for false discovery rate or
+#' @param thresh Can be set to either \code{FDR} for false discovery rate or
 #' \code{GWER} for genome-wide error rate. Defaults to \code{FDR}.
 #' @param markerset The set of markers to use for conversion of position to
 #' physical position, if set to \code{NA}, no conversion will be completed.
@@ -73,13 +73,13 @@ map <- function(cross, doGPU = FALSE) {
 #' @export
 
 fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
-                    threshold = "FDR", markerset = c("N2xCB4856", "N2xLSJ2",
+                    thresh = "FDR", markerset = c("N2xCB4856", "N2xLSJ2",
                                                      "AF16xHK104","full", NA)) {
     saf <- getOption("stringsAsFactors")
     options(stringsAsFactors = FALSE)
     
     
-    if (threshold != "FDR" & threshold != "GWER") {
+    if (thresh != "FDR" & thresh != "GWER") {
         stop("Unknown threshold type. Threshold should be set to either
              'FDR' or 'GWER'.")
     }
@@ -100,7 +100,7 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
     
     #If there are NA values in the LOD calculation, set them to 0 so max peaks can be identified.
     
-    if (threshold == "GWER") {
+    if (thresh == "GWER") {
         threshold <- get_peak_gwer(lods, cross, permutations, doGPU)
     } else {
         threshold <- get_peak_fdr(lods, cross, permutations, doGPU)
@@ -137,7 +137,7 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
             lods <- map(cross)
             
             
-            if (threshold == "GWER") {
+            if (thresh == "GWER") {
                 threshold <- get_peak_gwer(lods, cross, permutations, doGPU)
             } else {
                 threshold <- get_peak_fdr(lods, cross, permutations, doGPU)

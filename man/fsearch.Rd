@@ -5,7 +5,7 @@
 \title{Map all of the traits in a given cross object with forward search}
 \usage{
 fsearch(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
-  threshold = "FDR", markerset = c("N2xCB4856", "N2xLSJ2", "AF16xHK104",
+  thresh = "FDR", markerset = c("N2xCB4856", "N2xLSJ2", "AF16xHK104",
   "full", NA))
 }
 \arguments{
@@ -24,7 +24,7 @@ to \code{1000}.}
 mapping. This can only be set to \code{TRUE} on machines with an NVIDEA
 graphics card with the gputools package installed. Defaults to \code{FALSE}.}
 
-\item{threshold}{Can be set to either \code{FDR} for false discovery rate or
+\item{thresh}{Can be set to either \code{FDR} for false discovery rate or
 \code{GWER} for genome-wide error rate. Defaults to \code{FDR}.}
 
 \item{markerset}{The set of markers to use for conversion of position to
@@ -36,4 +36,3 @@ The LOD scores for all markers
 \description{
 Map all of the traits in a given cross object with forward search
 }
-

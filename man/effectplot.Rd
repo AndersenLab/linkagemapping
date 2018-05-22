@@ -20,4 +20,3 @@ A line plot of the effect size at each marker
 \description{
 Plot effect size by marker
 }
-

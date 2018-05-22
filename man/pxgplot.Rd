@@ -21,4 +21,3 @@ mapping
 \description{
 Plot the phenotype by genotype split at each peak marker in a mapping
 }
-

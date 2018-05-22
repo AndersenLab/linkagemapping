@@ -25,4 +25,3 @@ mapping, including parental phenotypes
 Plot the phenotype by genotype split at each peak marker in a mapping
 next to parental phenotype split
 }
-

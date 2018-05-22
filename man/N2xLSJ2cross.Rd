@@ -16,4 +16,3 @@ mappings with this cross object, negative effect sizes indicate that N2 had
 the greater phenotype value while postive effect sizes indicate that LSJ2 had
 a greater phenotype value.
 }
-

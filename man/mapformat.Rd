@@ -16,4 +16,3 @@ cross object
 \description{
 Get the LOD value for each marker based on the correlation between genotype
 }
-
