@@ -280,11 +280,15 @@ get_peaks_above_thresh <- function(lods, threshold) {
 #' will be annotated.
 #' @param bayes Boolean whether or not to calculate confidence intervals based
 #' on Bayes statistics (LOD drop 1.5 used to find CI by default)
+#' @param cutoff Determines strategy for setting CI (not available for Bayes CIs).
+#' Either "chromosomal" (default), including leftmost and rightmost markers 
+#' across peak chromosome with LOD above cutoff or "proximal" that ends the CI at 
+#' the most proximal left and right marker that drop below cutoff.
 #' @return The annotated lods data frame with information added for peak markers
 #' of each iteration
 #' @export
 
-annotate_lods <- function(lods, cross, annotate_all = FALSE, bayes = FALSE) {
+annotate_lods <- function(lods, cross, annotate_all = FALSE, bayes = FALSE, cutoff = "chromosomal") {
     
     if (annotate_all) {
         peaks <- lods
@@ -358,7 +362,7 @@ annotate_lods <- function(lods, cross, annotate_all = FALSE, bayes = FALSE) {
             peakiteration <- peaks$iteration[i]
             traitlods <- lods %>% dplyr::filter(trait == peaktrait, iteration == peakiteration)
             if(bayes == FALSE){
-            confint <- cint(traitlods, peakchr)
+            confint <- cint(traitlods, peakchr, cutoff = cutoff)
             } else {
                 confint <- cint_bayes(traitlods, peakchr)
             }
@@ -394,10 +398,13 @@ annotate_lods <- function(lods, cross, annotate_all = FALSE, bayes = FALSE) {
 # @param chrom The chromosome on which a peak was found
 # @param lodcolumn The index of the column containing the lods scores
 # @param drop The LOD drop for calculating the confidence interval
+# @param cutoff The strategy for setting a threshold - either "chromosomal" (default)
+# to include markers across whole chromosome above LOD drop or "proximal" to include
+# only the nearest markers to the peak that are above the LOD drop
 # @return The marker, chromosome, position, trait, LOD, threshold and
 # iteration information for the left and right bounds of the confidence interval
 
-cint <- function(lods, chrom, lodcolumn=5, drop=1.5){
+cint <- function(lods, chrom, lodcolumn=5, drop=1.5, cutoff = "chromosomal"){
     
     # Get only the data for the chromosome containing the peak marker so that CI
     # doesn't overflow chromsome bounds
@@ -410,12 +417,19 @@ cint <- function(lods, chrom, lodcolumn=5, drop=1.5){
     
     # If the peak is not at the end of a chromsome...
     if(peak > 1){
-        
+        if(cutoff == "chromosomal"){
         # find the leftmost peak with a LOD higher than a 1.5 drop
         left <- data %>%
             dplyr::filter(lod > (peakLOD-drop)) %>%
             dplyr::filter(pos == min(pos))
         left <- which(data[,3] == left$pos)
+        } else if(cutoff == "proximal"){
+            # keep moving left until you find a LOD drop below threshold
+            left <- peak -1
+            while(left > 1 & peakLOD - data[left, lodcolumn] < drop){
+                left <- left -1
+            }
+        } else (stop("Cutoff strategy not recognized"))
     }
     else {
         # Otherwise, the peak LOD marker, which is at the end of the chromsome
@@ -424,10 +438,19 @@ cint <- function(lods, chrom, lodcolumn=5, drop=1.5){
     }
     # Repeat the same process on the right side of the interval
     if(peak < nrow(data)){
+        if(cutoff == "chromosomal"){
+            #select rightmost marker that is below threshold as end of confidence interval
         right <- data %>%
             dplyr::filter(lod > (peakLOD-drop))%>%
             dplyr::filter(pos == max(pos))
         right <- which(data[,3]==right$pos)
+        } else if(cutoff == "proximal"){
+            # keep moving right until you find a LOD drop below threshold
+            right <- peak +1
+            while(right < nrow(data) & peakLOD - data[right, lodcolumn] < drop){
+                right <- right +1
+            }
+        } else (stop("Cutoff strategy not recognized"))
     } else {
         right <- nrow(data)
     }

@@ -5,7 +5,8 @@
 \title{Annotate LOD peaks with variance explained, effect size, and confidence
 interval bounds}
 \usage{
-annotate_lods(lods, cross, annotate_all = FALSE, bayes = FALSE)
+annotate_lods(lods, cross, annotate_all = FALSE, bayes = FALSE,
+  cutoff = "chromosomal")
 }
 \arguments{
 \item{lods}{A data frame output by the mapping functions to be converted to a
@@ -19,6 +20,11 @@ will be annotated.}
 
 \item{bayes}{Boolean whether or not to calculate confidence intervals based
 on Bayes statistics (LOD drop 1.5 used to find CI by default)}
+
+\item{cutoff}{Determines strategy for setting CI (not available for Bayes CIs).
+Either "chromosomal" (default), including leftmost and rightmost markers 
+across peak chromosome with LOD above cutoff or "proximal" that ends the CI at 
+the most proximal left and right marker that drop below cutoff.}
 }
 \value{
 The annotated lods data frame with information added for peak markers
