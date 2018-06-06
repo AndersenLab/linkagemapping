@@ -316,7 +316,7 @@ annotate_lods <- function(lods, cross, annotate_all = FALSE, bayes = FALSE, cuto
     
     # Get the genotype and phenotype information
     geno <- data.frame(extract_genotype(cross))
-    pheno <- data.frame(extract_scaled_phenotype(cross))
+    pheno <- data.frame(linkagemapping:::extract_scaled_phenotype(cross))
     
     # trait chr pos LOD VE scaled_effect_size CI.L CI.R
     peaklist <- lapply(1:nrow(peaks), function(i) {
@@ -329,7 +329,7 @@ annotate_lods <- function(lods, cross, annotate_all = FALSE, bayes = FALSE, cuto
         } else {
             div = 100
         }
-        
+
         if (i %% div == 0) {
             if (!annotate_all) {
                 cat(paste0("Annotating peak ", i, " of ", nrow(peaks), "...\n"))
@@ -362,7 +362,7 @@ annotate_lods <- function(lods, cross, annotate_all = FALSE, bayes = FALSE, cuto
             peakiteration <- peaks$iteration[i]
             traitlods <- lods %>% dplyr::filter(trait == peaktrait, iteration == peakiteration)
             if(bayes == FALSE){
-            confint <- cint(traitlods, peakchr, cutoff = cutoff)
+            confint <- linkagemapping:::cint(traitlods, peakchr, cutoff = cutoff)
             } else {
                 confint <- cint_bayes(traitlods, peakchr)
             }
@@ -409,7 +409,8 @@ cint <- function(lods, chrom, lodcolumn=5, drop=1.5, cutoff = "chromosomal"){
     # Get only the data for the chromosome containing the peak marker so that CI
     # doesn't overflow chromsome bounds
     data <- lods %>%
-        dplyr::filter(chr == chrom)
+        dplyr::filter(chr == chrom) %>%
+        na.omit() #added this in because there was an issue with X chromosome NAs from npr-1 markers.
     
     #Get the peak index and the peak lod score
     peak <- which.max(unlist(data[,lodcolumn]))
