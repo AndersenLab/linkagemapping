@@ -148,3 +148,72 @@ extract_scaled_phenotype=function(cross, set = NULL, setcorrect = FALSE,
         apply(s, 2, scale, scale=scaleVar)
     }
 }
+
+#' Perform principal component analysis on traits
+#' 
+#' @param df A regressed dataframe of HTA traits for PCA
+#' @return pca_obj, a PCA object output from princomp; 
+#' loadings, a vector of loadings for each HTA trait into each PC;
+#' cumsums, a matrix of cumulative sums of variance explained by each PC;
+#' RIAILPCphenos, a dataframe of PC values for each strain;
+#' corr_PC_trait, correlation of each trait to each PC
+
+runPCA <- function(df){
+
+traits_for_PCA <- df %>%
+    dplyr::filter(!strain %in% c("N2","CB4856")) %>% #remove parents from the dataset
+    dplyr::select(trait, strain, phenotype)%>% #select columns for PCA
+    tidyr::spread(trait, phenotype) %>% #spread so each row is a strain
+    na.omit()
+
+row.names(traits_for_PCA) <- traits_for_PCA$strain
+
+pc_traits <- traits_for_PCA %>%
+    dplyr::select(-strain)
+
+#scale the phenotypes before running princomp
+scales_pc_traits <- as.data.frame(scale(pc_traits))
+
+pca_obj <- princomp(scales_pc_traits)
+
+#pull the loadings (amount of each trait in each PC)
+loadings <- loadings(pca_obj)[]
+
+#pull the total variance explained with each PC and call it "drug.cumsum"
+cumsums <- t(as.matrix(cumsum(pca_obj$sdev^2/sum(pca_obj$sdev^2))))
+
+#keep the PCs that explain at least 95% of the variation in phenotype
+keep <- data.frame("Val" = cumsums[1,], "PC" = 1:ncol(cumsums)) %>%
+    dplyr::filter(Val > .95)
+keep <- as.numeric(min(keep$PC))
+
+#make df of all loadings for the first five PCs
+pcaoutput <- as.data.frame(loadings) %>%
+    dplyr::mutate(trait = rownames(.)) %>%
+    tidyr::gather(component, variance, -trait) %>%
+    dplyr::mutate(component = as.numeric(stringr::str_split_fixed(component, "Comp.", 2)[,2])) %>%
+    dplyr::filter(component <= keep) %>%
+    dplyr::mutate(component = paste0("PC", component))
+
+#calculate the phenotypic values of each strain for each of the top five PCs for mapping!
+RIAIL_PCphenos <- as.data.frame(pca_obj$scores) %>%
+    dplyr::mutate(strain = rownames(.), condition = "bleomycin")%>%
+    tidyr::gather(trait, phenotype, -strain, -condition) %>%
+    dplyr::filter(trait %in% c("Comp.1", "Comp.2","Comp.3","Comp.4","Comp.5"))
+
+### Correlation of each PC with each of the HTA traits:
+spread_PCA <- RIAIL_PCphenos %>%
+    tidyr::spread(trait, phenotype) %>%
+    dplyr::select(-condition)
+comparephenos <- merge(spread_PCA, traits_for_PCA, by = "strain")%>%
+    na.omit() %>%
+    ungroup()%>%
+    dplyr::select(-strain)
+
+corr_PC_trait <- cor(comparephenos)
+
+corr_PC_trait <- corr_PC_trait[1:keep,(keep+1):31]
+
+return(list(pca_obj, loadings, RIAIL_PCphenos, corr_PC_trait))
+}
+

@@ -393,3 +393,95 @@ cidefiner <- function(cis, map) {
     map$ci_lod <- ci_lod
     return(map)
 }
+
+#' Test for correlation among traits in a data frame and output a plot
+#' 
+#' @param df A dataframe output by easysorter
+#' @param gropus Number of groups to split the correlation into, usually based on number of significant PCs
+#' @param phenocol When spread, the column number on which traits begin, usually 11 with HTA data.
+#' @return A dendrogram and a correlation plot for the data
+#' @export
+
+corplot <- function(df, groups, phenocol = NA){
+    df <- df %>%
+        spread(trait, phenotype) %>%
+        ungroup() 
+    if(is.na(phenocol)){
+        df2 <- df[,11:ncol(df)]
+    } else {
+        df2 <- df[,phenocolo:ncol(df)]
+    }
+    
+    reorder_cormat <- function(cormat){
+        # Use correlation between variables as distance
+        dd <- as.dist((1-cormat)/2)
+        hc <- hclust(dd) 
+        cormat <-cormat[hc$order, hc$order]
+    }
+    
+    traitcormat <- stats::cor(df2, use = "pairwise.complete.obs")
+    reordered <- reorder_cormat(traitcormat)
+    
+    dd <- stats::as.dist((1-traitcormat)/2)
+    hc <- stats::hclust(dd)
+    
+    dend <- ggdendro::ggdendrogram(hc, labels = FALSE, leaf_labels = FALSE) +
+        ggplot2::theme(axis.title.y = ggplot2::element_blank(),
+                       axis.text.x = ggplot2::element_blank(),
+                       axis.text.y = ggplot2::element_blank(),
+                       plot.title = ggplot2::element_text(size = 14, face = "bold", hjust = .5),
+                       plot.margin = grid::unit(c(0,0,0,0), "cm"))
+    
+    #clusters1 is the Var1 trait and which cluster it is in:
+    #first divide the hc tree into the number of groups you want based on how many significant PCs we have:
+    clusters1 <- data.frame(level1 = stats::cutree(hc, k = groups)) %>%
+        dplyr::mutate(Var1 = rownames(.))
+    #then order the traits based on the way they appear in the dendrogram:
+    #extract dendrogram info
+    hc2 <- ggdendro::dendro_data(hc)$labels
+    #factor so you can order them in the heatmap based on this order
+    hc2$label <- factor(hc2$label)
+    #order the traits based on their order in the dendrogram
+    clusters1$Var1 <- factor(clusters1$Var1, levels = hc2$label)
+    #assign cluster groups based on this order that you want the traits (they were grouped by cutree, but group number is not how we want it)
+    clusters1 <- clusters1 %>%
+        dplyr::arrange(Var1) %>%
+        dplyr::group_by(level1)%>%
+        dplyr::mutate(newlev = 1)
+    for(i in 2:nrow(clusters1)){
+        if(clusters1$level1[i] == clusters1$level1[i-1]){
+            clusters1$newlev[i] <- clusters1$newlev[i-1]
+        } else clusters1$newlev[i] <- clusters1$newlev[i-1]+1
+    }
+    #clusters2 is the same thing, but for clustering the y-axis traits in the heatmap
+    clusters2 <- clusters1 %>%
+        dplyr::rename(newlev2 = newlev, Var2 = Var1) %>%
+        dplyr::ungroup()%>%
+        dplyr::select(-level1)
+    #add correlations and the grouping data altogether
+    melted <- data.table::melt(reordered) %>%
+        dplyr::left_join(clusters1)%>%
+        dplyr::left_join(clusters2)
+    #reorder Var2 so white line goes diagonal across whole heat map, not just within facet
+    melted$Var2 <- factor(melted$Var2, levels = rev(clusters2$Var2))
+    
+    traitcorplot <- ggplot2::ggplot(data = melted, ggplot2::aes(x = Var1, y = Var2, fill=value^2))+
+        ggplot2::geom_tile() +
+        ggplot2::scale_fill_gradientn(colours=terrain.colors(6), name=expression(bold(italic("r")^2)))+
+        ggplot2::scale_x_discrete(position = "top")+
+        ggplot2::facet_grid(newlev2~newlev, scales = "free", space = "free", switch = "x")+
+        ggplot2::theme_bw() +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(size=8, color="black",angle = 90, hjust=0),
+                       axis.text.y = ggplot2::element_text(size=8, color="black"),
+                       panel.background = ggplot2::element_rect(fill = '#E5E8E8'),
+                       strip.text = ggplot2::element_blank(),
+                       strip.text.y = ggplot2::element_blank(),
+                       panel.spacing = grid::unit(1, "pt"),
+                       plot.margin = grid::unit(c(-1,0,0,0),"cm"))+
+        ggplot2::labs(title="", x=NULL, y=NULL) 
+    
+    
+    finaldend <- cowplot::plot_grid(NULL, dend, NULL, nrow = 1, ncol = 3, rel_widths = c(.12, 1, .13))
+    finalplot <- cowplot::plot_grid(finaldend, traitcorplot, nrow = 2, ncol = 1, rel_heights = c(.5, 1))
+    return(finalplot)
+}  
