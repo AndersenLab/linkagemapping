@@ -3,7 +3,6 @@
 export(FindRIAILsforNILs)
 export(annotate_lods)
 export(checkeQTLintervals)
-export(corplot)
 export(effectplot)
 export(extract_genotype)
 export(findCBfosmids)
