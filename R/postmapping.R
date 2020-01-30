@@ -104,9 +104,9 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
     })
     names(obsPcnt) <- seq(2, 10, .01)
     
-    # Expected number of QTL peaks with LOD greater than threshold
+    # Average expected number of QTL peaks with LOD greater than threshold
     expPcnt <- sapply(seq(2, 10, .01), function(thresh) {
-            sum(permpeakLODs$lod > thresh, na.rm = TRUE)
+            sum(permpeakLODs$lod > thresh, na.rm = TRUE)/perms
         })
     names(expPcnt) <- seq(2, 10, .01)
     
