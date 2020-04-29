@@ -33,7 +33,7 @@ get_lod_by_cor <- function(npheno, pheno, gdata, doGPU = FALSE) {
 # graphics card and the gputools package installed. Defaults to \code{FALSE}.
 # @return The LOD scores for all markers
 
-map <- function(cross, doGPU = FALSE) {
+map <- function(cross, doGPU = FALSE, type) {
     # Remove interpolated SNPs
     cross <- qtl::calc.genoprob(cross, step=0)
     
@@ -46,7 +46,7 @@ map <- function(cross, doGPU = FALSE) {
     lods <- get_lod_by_cor(npheno, scaledpheno, geno, doGPU)
     
     # Convert the map result to a scanone object
-    lods <- lodmatrix2scanone(lods, cross)
+    lods <- lodmatrix2scanone(lods, cross, mod = type)
     
     return(lods)
 }
@@ -74,7 +74,7 @@ map <- function(cross, doGPU = FALSE) {
 
 fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
                     thresh = "FDR", markerset = c("N2xCB4856", "N2xLSJ2",
-                                                     "AF16xHK104","full", NA)) {
+                                                     "AF16xHK104","full", NA), model = c("normal", "np")) {
     saf <- getOption("stringsAsFactors")
     options(stringsAsFactors = FALSE)
     
@@ -96,14 +96,14 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
     iteration <- 1
     
     # Complete the first mapping with FDR/GWER calculation
-    lods <- map(cross)
+    lods <- map(cross, type = model)
     
     #If there are NA values in the LOD calculation, set them to 0 so max peaks can be identified.
     
     if (thresh == "GWER") {
-        threshold <- get_peak_gwer(lods, cross, permutations, doGPU)
+        threshold <- get_peak_gwer(lods, cross, permutations, doGPU, model)
     } else {
-        threshold <- get_peak_fdr(lods, cross, permutations, doGPU)
+        threshold <- get_peak_fdr(lods, cross, permutations, doGPU, model)
     }
     
     peaks <- get_peaks_above_thresh(lods, threshold)
@@ -134,13 +134,13 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
             cross$pheno <- data.frame(metapheno, resids)
             
             # Repeat the mapping, FDR/GWER calculationa and peak finding
-            lods <- map(cross)
+            lods <- map(cross, type = model)
             
             
             if (thresh == "GWER") {
-                threshold <- get_peak_gwer(lods, cross, permutations, doGPU)
+                threshold <- get_peak_gwer(lods, cross, permutations, doGPU, model)
             } else {
-                threshold <- get_peak_fdr(lods, cross, permutations, doGPU)
+                threshold <- get_peak_fdr(lods, cross, permutations, doGPU, model)
             }
             
             peaks <- get_peaks_above_thresh(lods, threshold)

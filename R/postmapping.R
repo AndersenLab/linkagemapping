@@ -5,14 +5,14 @@
 # @param cross An example cross object from which to extract scanone skeleton
 # @return A scanone onject with the resultant mapping data in the lod column
 
-lodmatrix2scanone <- function(lods, cross) {
+lodmatrix2scanone <- function(lods, cross, mod) {
 
     # Throws a warning for missing phenotype data that we don't care about
     # because we're only using the fake mapping to get the scanone class object
     suppressWarnings({
         LODSm <- t(as.matrix(lods))
         phenocol <- which(sapply(cross$pheno, class) == "numeric")[1]
-        LODSs <- qtl::scanone(cross, pheno.col = phenocol, method='mr')
+        LODSs <- qtl::scanone(cross, pheno.col = phenocol, method='mr', model = mod)
         LODSso <- data.frame(LODSs, LODSm)
         LODSso <- LODSso[,-3]
         class(LODSso) <- class(LODSs)
@@ -54,7 +54,7 @@ maxpeaks <- function(lods, cross) {
 # @return The value of the 5% FDR threshold
 # @importFrom foreach %do% %dopar%
 
-get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
+get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F, model) {
     library(foreach)
     # Set the appropriate divisor for printing frequency
     if (perms < 100) {
@@ -87,7 +87,8 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
                            pheno[sample(1:nrow(pheno)),],
                            geno,
                            doGPU),
-            cross)
+            cross,
+            mod = model)
         maxpeaks(lods, cross)$maxpeaklod
     }
     
@@ -138,7 +139,7 @@ get_peak_fdr <- function(lods, cross, perms=1000, doGPU=F) {
 # @return The value of the 5% GWER threshold
 # @importFrom foreach %do% %dopar%
 
-get_peak_gwer <- function(lods, cross, perms=1000, doGPU=F) {
+get_peak_gwer <- function(lods, cross, perms=1000, doGPU=F, model) {
     library(foreach)
     # Set the appropriate divisor for printing frequency
     if (perms < 100) {
@@ -171,7 +172,8 @@ get_peak_gwer <- function(lods, cross, perms=1000, doGPU=F) {
                            pheno[sample(1:nrow(pheno)),],
                            geno,
                            doGPU),
-            cross)
+            cross,
+            mod = model)
         maxpeaks(lods, cross)$maxpeaklod
     }
     
