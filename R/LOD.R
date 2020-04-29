@@ -78,6 +78,10 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
     saf <- getOption("stringsAsFactors")
     options(stringsAsFactors = FALSE)
     
+    # if no model is chosen, choose normal
+    if(length(model) > 1) {
+        model <- model[1]
+    }
     
     if (thresh != "FDR" & thresh != "GWER") {
         stop("Unknown threshold type. Threshold should be set to either
