@@ -95,27 +95,21 @@ maxlodplot <- function(map, tsize = 20){
         dplyr::do(head(., n=1))
     
     
-    if(nrow(cis) == 0) {
-        plot <- ggplot2::ggplot(map1, ggplot2::aes(x = genotype, y = pheno)) + ggplot2::geom_blank()
-        return(plot)
-    }
-    
-    map1 <- cidefiner(cis, map1)
-    
-    plot <- ggplot2::ggplot(map1) +
-        ggplot2::aes(x = pos/1e6, y = lod)
-    
-    if(nrow(cis) != 0) {
-        plot <- plot + 
-            ggplot2::geom_ribbon(ggplot2::aes(x = pos/1e6, ymin = 0, ymax = ci_lod),
-                        fill = "blue", alpha = 0.5) +
-            ggplot2::geom_point(data = cis, ggplot2::aes(x=pos/1e6, y=(1.05*maxlod)),
-                       fill ="red", shape=25, size=3.2, show.legend = FALSE) +
-            ggplot2::geom_text(data = cis,
-                               ggplot2::aes(x=pos/1e6,
-                          y=(1.2*maxlod),
-                          label = paste0(100*round(var_exp, digits = 4),"%")),
-                      colour = "black", size=tsize/4, hjust = "inward")
+    # update KSE 20201007 - if no QTL, still show lod plot
+    if (nrow(cis) == 0) {
+        plot <- ggplot2::ggplot(map1) + 
+            ggplot2::aes(x = pos/1e+06, y = lod)
+    } else {
+        map1 <- linkagemapping:::cidefiner(cis, map1)
+        plot <- ggplot2::ggplot(map1) + 
+            ggplot2::aes(x = pos/1e+06, y = lod) + 
+            ggplot2::geom_ribbon(ggplot2::aes(x = pos/1e+06,  ymin = 0, ymax = ci_lod), fill = "blue", alpha = 0.5) + 
+            ggplot2::geom_point(data = cis, ggplot2::aes(x = pos/1e+06, y = (1.05 * maxlod)), fill = "red", shape = 25, 
+                                size = 3.2, show.legend = FALSE) + 
+            ggplot2::geom_text(data = cis, 
+                               ggplot2::aes(x = pos/1e+06, y = (1.2 * maxlod), 
+                                            label = paste0(100 * round(var_exp, digits = 4), "%")), 
+                               colour = "black", size = tsize/4, hjust = "inward")
     }
     
     plot <- plot + ggplot2::geom_line(size = 1, alpha = 0.85) +
