@@ -587,21 +587,20 @@ findCBfosmids <- function(chrom, left_pos, right_pos) {
 #' eQTL_GeneDescriptions contains GO terms and other qualitative data.
 #' @export
 
-checkeQTLintervals <- function(chrom, left_pos, right_pos){
+checkeQTLintervals <- function (chrom, left_pos, right_pos) 
+{
     sigs <- eQTLpeaks %>% 
-        dplyr::filter(peakchr == chrom)%>%
-        dplyr::filter(peakMarker > left_pos | rightMarker > left_pos)%>%
-        dplyr::filter(peakMarker < right_pos | leftMarker < right_pos)%>%
+        dplyr::filter(chr == chrom,
+                      ci_l_pos < right_pos,
+                      ci_r_pos > left_pos) %>% 
         dplyr::arrange(trait)
-
     genes <- probe_info %>% 
-        dplyr::filter(ProbeID %in% sigs$trait)%>%
-        dplyr::select(ProbeID,PrimaryAccession,GeneSymbol,GeneName,GO,Description)%>%
-        dplyr::arrange(ProbeID)
-    
-    if(nrow(sigs) == 0){
-         print("NO eQTL")
-    }else{
+        dplyr::filter(probe %in% sigs$trait) %>% 
+        dplyr::arrange(probe)
+    if (nrow(sigs) == 0) {
+        print("NO eQTL")
+    }
+    else {
         assign("eQTL_PositionInfo", sigs, envir = .GlobalEnv)
         assign("eQTL_GeneDescriptions", genes, envir = .GlobalEnv)
     }
