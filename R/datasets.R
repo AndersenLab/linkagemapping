@@ -114,80 +114,80 @@ NULL
 #' }
 NULL
 
-# Dataframe of all N2 fosmids in the Andersen Lab
-#
-# This data frame contains genomic position and laboratory stock
-# information for all N2 fosmids.
-#
-# @name AllN2fosmids
-# @format A data frame with 12468 rows and 5 variables:
-# \describe{
-#   \item{chr}{the chromosome (in roman numerals) on which the fosmid is found}
-#   \item{clone}{the name of the fosmid}
-#   \item{start}{the genetic position at which the fosmid begins}
-#   \item{end}{the genetic position at which the fosmid ends}
-#   \item{newpos}{the current location of the fosmid in the Andersen Lab}
-# }
+#' Dataframe of all N2 fosmids in the Andersen Lab
+#' 
+#' This data frame contains genomic position and laboratory stock
+#' information for all N2 fosmids.
+#' 
+#' @name AllN2fosmids
+#' @format A data frame with 12468 rows and 5 variables:
+#' \describe{
+#'   \item{chr}{the chromosome (in roman numerals) on which the fosmid is found}
+#'   \item{clone}{the name of the fosmid}
+#'   \item{start}{the genetic position at which the fosmid begins}
+#'   \item{end}{the genetic position at which the fosmid ends}
+#'   \item{newpos}{the current location of the fosmid in the Andersen Lab}
+#' }
 NULL
 
-# Dataframe of all CB4856 fosmids in the Andersen Lab
-#
-# This data frame contains genomic position and laboratory stock
-# information for all CB4856 fosmids.
-#
-# @name AllCBfosmids
-# @format A data frame with 11453 rows and 5 variables:
-# \describe{
-#   \item{chr}{the chromosome (in roman numerals) on which the fosmid is found}
-#   \item{clone}{the name of the fosmid}
-#   \item{start}{the genetic position at which the fosmid begins}
-#   \item{end}{the genetic position at which the fosmid ends}
-#   \item{newpos}{the current location of the fosmid in the Andersen Lab}
-# }
+#' Dataframe of all CB4856 fosmids in the Andersen Lab
+#' 
+#' This data frame contains genomic position and laboratory stock
+#' information for all CB4856 fosmids.
+#' 
+#' @name AllCBfosmids
+#' @format A data frame with 11453 rows and 5 variables:
+#' \describe{
+#'   \item{chr}{the chromosome (in roman numerals) on which the fosmid is found}
+#'   \item{clone}{the name of the fosmid}
+#'   \item{start}{the genetic position at which the fosmid begins}
+#'   \item{end}{the genetic position at which the fosmid ends}
+#'   \item{newpos}{the current location of the fosmid in the Andersen Lab}
+#' }
 NULL
 
-# Dataframe of all eQTL peak location information from Matt Rockman
-#
-# This dataframe contains all position information for eQTL peaks
-#
-# @name eQTLpeaks
-# @format A data frame with 2447 rows and 25 variables
+#' Dataframe of all eQTL peak location information from Matt Rockman - updated from Evans et al. (2020)
+#' 
+#' This dataframe contains all position information for eQTL peaks
+#' 
+#' @name eQTLpeaks
+#' @format A data frame with 2540 rows and 16 variables
 NULL
 
-# Dataframe of GO terms, descriptions, and other information for
-# all genes in the eQTL dataset from Matt Rockman
-#
-# This data frame contains descriptive information for all genes
-# included in the eQTL dataset
-#
-# @name probe_info
-# @format A data frame with 43603 rows and 12 variables
+#' Dataframe of GO terms, descriptions, and other information for
+#' all genes in the eQTL dataset from Matt Rockman - updated with WS273 KSE 11.24.20
+#' 
+#' This data frame contains descriptive information for all genes
+#' included in the eQTL dataset
+#' 
+#' @name probe_info
+#' @format A data frame with 237781 rows and 11 variables
 NULL
 
-# Genotypes of RIAILs at each of the 1454 markers
-#
-# This data frame contains the genotype information for each strain
-# of the RIAIL panel at each of the 1454 markers. "AA" denotes
-# the N2 genotype and "AB" denotes the CB4856 genotype.
-#
-# @name RIAILgenotypes
-# @format A data frame with 1454 rows and 601 variables
+#' Genotypes of RIAILs at each of the 1454 markers
+#' 
+#' This data frame contains the genotype information for each strain
+#' of the RIAIL panel at each of the 1454 markers. "AA" denotes
+#' the N2 genotype and "AB" denotes the CB4856 genotype.
+#' 
+#' @name RIAILgenotypes
+#' @format A data frame with 1454 rows and 601 variables
 NULL
 
-# Marker conversions for each of the 1454 markers used in RIAILgenotypes
-#
-# This data frame contains marker name and position information for
-# each of the 1454 markers used in the RIAILgenotypes data frame
-#
-# @name RIAILmarkerconversion
-# @format A data frame with 1454 rows and 2 variables
+#' Marker conversions for each of the 1454 markers used in RIAILgenotypes
+#' 
+#' This data frame contains marker name and position information for
+#' each of the 1454 markers used in the RIAILgenotypes data frame
+#' 
+#' @name RIAILmarkerconversion
+#' @format A data frame with 1454 rows and 2 variables
 NULL
 
-# Dataframe of indels between N2 and CB4856
-#
-# This data frame contains position information for all indels between
-# N2 and CB4856 greater than 25 bp. Developed by the Kammenga lab.
-#
-# @name indels
-# @format A data frame with 10257 rows and 15 variables
+#' Dataframe of indels between N2 and CB4856
+#' 
+#' This data frame contains position information for all indels between
+#' N2 and CB4856 greater than 25 bp. Developed by the Kammenga lab.
+#' 
+#' @name indels
+#' @format A data frame with 10257 rows and 15 variables
 NULL
