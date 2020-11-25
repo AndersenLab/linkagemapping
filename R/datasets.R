@@ -146,6 +146,26 @@ NULL
 #' }
 NULL
 
+#' Dataframe of all CB4856 fosmids in the Andersen Lab - remapped with PacBio by KSE 09.09.2019
+#' 
+#' This data frame contains genomic position and laboratory stock
+#' information for all CB4856 fosmids.
+#' 
+#' @name AllCBfosmids_pacbio
+#' @format A data frame with 12016 rows and 9 variables:
+#' \describe{
+#'   \item{chr}{the chromosome (in roman numerals) on which the fosmid is found}
+#'   \item{plate}{New plate position in Andersen Lab}
+#'   \item{well}{New well position in Andersen Lab}
+#'   \item{forward}{fasta file read 1}
+#'   \item{reverse}{fasta file read 2}
+#'   \item{start}{the genetic position at which the fosmid begins}
+#'   \item{end}{the genetic position at which the fosmid ends}
+#'   \item{length}{length of fosmid}
+#'   \item{id}{fosmid id}
+#' }
+NULL
+
 #' Dataframe of all eQTL peak location information from Matt Rockman - updated from Evans et al. (2020)
 #' 
 #' This dataframe contains all position information for eQTL peaks
