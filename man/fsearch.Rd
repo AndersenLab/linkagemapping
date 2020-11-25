@@ -4,9 +4,15 @@
 \alias{fsearch}
 \title{Map all of the traits in a given cross object with forward search}
 \usage{
-fsearch(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
-  thresh = "FDR", markerset = c("N2xCB4856", "N2xLSJ2", "AF16xHK104",
-  "full", NA))
+fsearch(
+  cross,
+  phenotype = NULL,
+  permutations = 1000,
+  doGPU = FALSE,
+  thresh = "FDR",
+  markerset = c("N2xCB4856", "N2xLSJ2", "AF16xHK104", "full", NA),
+  model = c("normal", "np")
+)
 }
 \arguments{
 \item{cross}{A complete cross object with the phenotype data merged}

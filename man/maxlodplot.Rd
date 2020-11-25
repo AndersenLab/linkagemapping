@@ -4,10 +4,12 @@
 \alias{maxlodplot}
 \title{Plot max lod scores for a forward search mapping}
 \usage{
-maxlodplot(map)
+maxlodplot(map, tsize = 20)
 }
 \arguments{
 \item{map}{The mapping output for a single trait}
+
+\item{tsize}{The theme size of the text for the plot, default is 20.}
 }
 \value{
 A plot with single line with the maximum LOD score at each marker

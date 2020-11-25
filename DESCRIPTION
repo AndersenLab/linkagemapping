@@ -17,4 +17,4 @@ Suggests:
     gputools
 License: MIT
 LazyData: false
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2

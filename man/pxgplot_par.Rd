@@ -5,10 +5,10 @@
 \title{Plot the phenotype by genotype split at each peak marker in a mapping
 next to parental phenotype split}
 \usage{
-pxgplot_par(cross, map, phenoframe, parent = "N2xCB4856")
+pxgplot_par(cross, map, phenoframe, parent = "N2xCB4856", tsize = 20)
 }
 \arguments{
-\item{cross}{The cross object used for the mapping}
+\item{cross}{The cross object used for the mapping (output of mergepheno() function)}
 
 \item{map}{The mapping output for a single trait}
 
@@ -16,6 +16,8 @@ pxgplot_par(cross, map, phenoframe, parent = "N2xCB4856")
 
 \item{parent}{The parental cross, either "N2xCB4856" (default), "N2xLSJ2",
 or "AF16xHK104"}
+
+\item{tsize}{The theme size of the text for the plot, default is 20}
 }
 \value{
 A boxplot of the phenotype by genotype split at each peak marker in a

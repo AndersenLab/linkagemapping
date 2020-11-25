@@ -4,15 +4,32 @@
 \alias{effectplot}
 \title{Plot effect size by marker}
 \usage{
-effectplot(cross, map, parental = "N2xCB4856")
+effectplot(
+  cross,
+  map,
+  parental = "N2xCB4856",
+  bayes_param = F,
+  cutoff_param = "chromosomal",
+  tsize = 20
+)
 }
 \arguments{
-\item{cross}{The cross object used for the mapping}
+\item{cross}{The cross object used for the mapping (output of mergepheno() function)}
 
 \item{map}{The mapping output for a single trait}
 
 \item{parental}{The parental strains used to generate RIAILs. Either
 "N2xCB4856" (default), "N2xLSJ2", or "AF16xHK104}
+
+\item{bayes_param}{Boolean whether or not to calculate confidence intervals based
+on Bayes statistics (LOD drop 1.5 used to find CI by default). Default is FALSE}
+
+\item{cutoff_param}{Determines strategy for setting CI (not available for Bayes CIs).
+Either "chromosomal" (default), including leftmost and rightmost markers 
+across peak chromosome with LOD above cutoff or "proximal" that ends the CI at 
+the most proximal left and right marker that drop below cutoff.}
+
+\item{tsize}{The theme size of the text for the plot, default is 20}
 }
 \value{
 A line plot of the effect size at each marker

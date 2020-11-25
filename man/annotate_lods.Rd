@@ -5,8 +5,13 @@
 \title{Annotate LOD peaks with variance explained, effect size, and confidence
 interval bounds}
 \usage{
-annotate_lods(lods, cross, annotate_all = FALSE, bayes = FALSE,
-  cutoff = "chromosomal")
+annotate_lods(
+  lods,
+  cross,
+  annotate_all = FALSE,
+  bayes = FALSE,
+  cutoff = "chromosomal"
+)
 }
 \arguments{
 \item{lods}{A data frame output by the mapping functions to be converted to a

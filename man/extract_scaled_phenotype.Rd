@@ -5,8 +5,12 @@
 \title{Extract phenotype matrix from cross object, mean center and optionally
 standardize variance}
 \usage{
-extract_scaled_phenotype(cross, set = NULL, setcorrect = FALSE,
-  scalevar = TRUE)
+extract_scaled_phenotype(
+  cross,
+  set = NULL,
+  setcorrect = FALSE,
+  scalevar = TRUE
+)
 }
 \arguments{
 \item{cross}{A cross object}

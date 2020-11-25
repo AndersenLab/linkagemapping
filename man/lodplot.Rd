@@ -4,10 +4,12 @@
 \alias{lodplot}
 \title{Plot all lod scores for a forward search mapping by iteration}
 \usage{
-lodplot(map)
+lodplot(map, tsize = 20)
 }
 \arguments{
 \item{map}{The mapping output for a single trait}
+
+\item{tsize}{The theme size of the text for the plot, default is 20.}
 }
 \value{
 A plot with a line for each iteration of the forward search mapping
