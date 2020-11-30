@@ -908,7 +908,7 @@ findindels <- function(left, right, chr) {
 #' @param cross Empty cross object, used to gather genotype information (does not need to be merged with phenotype, but can be)
 #' @param scaled Boolean noting if the phenotype should be scaled for a mean of 0 and standard devitaiton of 1. Default is TRUE
 #' @param lm Boolean argument. If TRUE, a set of linear models will be used to calculate mediation. If FALSE, mediation will be calculated from the R package "mediation"
-#'
+#' @export
 
 calc_mediation <- function(peak, expression_probe, phenodf, cross, scaled = T, lm = FALSE) {
     

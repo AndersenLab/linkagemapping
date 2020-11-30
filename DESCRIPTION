@@ -12,7 +12,8 @@ Imports:
     gtools,
     qtl,
     tidyr,
-    Hmisc
+    Hmisc,
+    mediation
 Suggests:
     gputools
 License: MIT

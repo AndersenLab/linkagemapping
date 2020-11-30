@@ -2,6 +2,7 @@
 
 export(FindRIAILsforNILs)
 export(annotate_lods)
+export(calc_mediation)
 export(checkeQTLintervals)
 export(effectplot)
 export(extract_genotype)
