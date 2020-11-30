@@ -211,3 +211,9 @@ NULL
 #' @name indels
 #' @format A data frame with 10257 rows and 15 variables
 NULL
+
+#' Expression phenotypes from Rockman 2010 paper, reanalyzed for Evans and Andersen 2020
+#' 
+#' @name eqtlpheno
+#' @format A data frame with 4 columns and 2948363 rows
+NULL

@@ -899,3 +899,115 @@ findindels <- function(left, right, chr) {
     
     return(subset)
 }
+
+#' Calculate mediation scores between phenotype and gene expression
+#' 
+#' @param peak peak marker of phenotype QTL in format chr:pos
+#' @param probe probeID from expression data
+#' @param phenodf Dataframe for phenotype in the form of strain, trait, phenotype with the strain matching RIL from set1 (where we have expression data)
+#' @param cross Empty cross object, used to gather genotype information (does not need to be merged with phenotype, but can be)
+#' @param scaled Boolean noting if the phenotype should be scaled for a mean of 0 and standard devitaiton of 1. Default is TRUE
+#' @param lm Boolean argument. If TRUE, a set of linear models will be used to calculate mediation. If FALSE, mediation will be calculated from the R package "mediation"
+#'
+
+calc_mediation <- function(peak, expression_probe, phenodf, cross, scaled = T, lm = FALSE) {
+    
+    # load data
+    data("eqtlpheno")
+    
+    # get the genotype at the peak marker
+    newpeak <- gsub(":", "_", peak)
+    chrom <- stringr::str_split_fixed(newpeak, "_", 2)[,1]
+    geno <- data.frame(cross$geno[[chrom]]$data)[,newpeak]
+    strains <- cross$pheno
+    geno <- cbind(strains, geno)
+    
+    # get the expression pheno for that probe
+    probepheno <- eqtlpheno %>%
+        dplyr::filter(expression_probe == probe) %>%
+        dplyr::select(strain, expression)
+    
+    # if scaled = T, scale the phenotype (mean = 0, var = 1)
+    if(scaled == T) {
+        probepheno <- probepheno %>%
+            dplyr::mutate(newpheno = (expression - mean(expression, na.rm = T)) / sd(expression, na.rm = T)) %>%
+            dplyr::select(strain, expression = newpheno)
+    }
+    
+    # merge drug phenotype and expression phenotype
+    pheno <- phenodf %>%
+        dplyr::left_join(probepheno, by = "strain") %>%
+        dplyr::left_join(geno, by = "strain") %>%
+        na.omit()
+    
+    if(lm) {
+        ### LINEAR MODELS ###
+        
+        # total effect = geno estimate
+        model.g <- lm(phenotype ~ geno, data = pheno)
+        total <- data.frame(var = "total",
+                            estimate = summary(model.g)$coef[2,1],
+                            pval = summary(model.g)$coef[2,4])
+        
+        # direct effect = geno estimate
+        model.y <- lm(phenotype ~ expression + geno, data = pheno)
+        direct <- data.frame(var = "direct",
+                             estimate = summary(model.y)$coef[3,1],
+                             pval = summary(model.y)$coef[3,4])
+        
+        # mediation effect = expression estimate
+        med <- data.frame(var = "med",
+                          estimate = summary(model.y)$coef[2,1],
+                          pval = summary(model.y)$coef[2,4])
+        
+        # mediation proportion = total - direct / total
+        out <- rbind(total, direct, med)
+    } else {
+        model.m <- lm(expression ~ geno, data = pheno)
+        model.y <- lm(phenotype ~ expression + geno, data = pheno)
+        out <- mediation::mediate(model.m, model.y, sims = 1000, boot = T, treat = "geno", mediator = "expression")
+        
+        # Summarize model into data frame
+        
+        # causal mediation effect
+        acme <- data.frame(var = "ACME", 
+                           estimate = out$d0, 
+                           ci_lower = out$d0.ci[[1]], 
+                           ci_upper = out$d0.ci[[2]],
+                           prob = out$d0.p)
+        
+        # direct effect
+        ade <- data.frame(var = "ADE", 
+                          estimate = out$z0, 
+                          ci_lower = out$z0.ci[[1]], 
+                          ci_upper = out$z0.ci[[2]],
+                          prob = out$z0.p)
+        
+        # total effect
+        total <- data.frame(var = "total", 
+                            estimate = out$tau.coef, 
+                            ci_lower = out$tau.ci[[1]], 
+                            ci_upper = out$tau.ci[[2]],
+                            prob = out$tau.p)
+        
+        # prop. mediated
+        med <- data.frame(var = "MED", 
+                          estimate = out$n0, 
+                          ci_lower = out$n0.ci[[1]], 
+                          ci_upper = out$n0.ci[[2]],
+                          prob = out$n0.p)
+        
+        # make a dataframe
+        df <- rbind(acme, ade, total, med) %>%
+              dplyr::mutate(var = dplyr::case_when(var == "ADE" ~ "direct",
+                                                 var == "MED" ~ "prop_med",
+                                                 var == "ACME" ~ "med",
+                                                 var == "total" ~ "total",
+                                                 TRUE ~ "NA"),
+                            trait = unique(phenodf$trait),
+                            probe = expression_probe)
+    }
+    
+    return(df)
+} 
+
