@@ -408,5 +408,3 @@ cidefiner <- function(cis, map) {
     map$ci_lod <- ci_lod
     return(map)
 }
-
-

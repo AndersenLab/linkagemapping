@@ -914,10 +914,12 @@ calc_mediation <- function(peak, expression_probe, phenodf, cross, scaled = T, l
     
     # load data
     data("eqtlpheno")
-    
+    data("eQTLpeaks")
+
     # get the genotype at the peak marker
     newpeak <- gsub(":", "_", peak)
     chrom <- stringr::str_split_fixed(newpeak, "_", 2)[,1]
+    position <- as.numeric(stringr::str_split_fixed(newpeak, "_", 2)[,2])
     geno <- data.frame(cross$geno[[chrom]]$data)[,newpeak]
     strains <- cross$pheno
     geno <- cbind(strains, geno)
@@ -926,6 +928,13 @@ calc_mediation <- function(peak, expression_probe, phenodf, cross, scaled = T, l
     probepheno <- eqtlpheno %>%
         dplyr::filter(expression_probe == probe) %>%
         dplyr::select(strain, expression)
+    
+    # # get the eQTL peak for that probe
+    # eqtl_peak <- eQTLpeaks %>%
+    #     dplyr::filter(trait == expression_probe,
+    #                   chr == chrom,
+    #                   ci_l_pos < position | ci_r_pos > position,
+    #                   var_exp > 0.01)
     
     # if scaled = T, scale the phenotype (mean = 0, var = 1)
     if(scaled == T) {
@@ -1005,7 +1014,9 @@ calc_mediation <- function(peak, expression_probe, phenodf, cross, scaled = T, l
                                                  var == "total" ~ "total",
                                                  TRUE ~ "NA"),
                             trait = unique(phenodf$trait),
-                            probe = expression_probe)
+                            probe = expression_probe,
+                            pheno_marker = peak)
+                            # eqtl_marker = unique(eqtl_peak$marker))
     }
     
     return(df)
