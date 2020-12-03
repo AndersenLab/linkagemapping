@@ -910,7 +910,7 @@ findindels <- function(left, right, chr) {
 #' @param lm Boolean argument. If TRUE, a set of linear models will be used to calculate mediation. If FALSE, mediation will be calculated from the R package "mediation"
 #' @export
 
-calc_mediation <- function(peak, expression_probe, phenodf, cross, scaled = T, lm = FALSE) {
+calc_mediation <- function(peak, expression_probe, phenodf, cross, scaled = T, lm = FALSE, boots = TRUE) {
     
     # load data
     data("eqtlpheno")
@@ -970,11 +970,18 @@ calc_mediation <- function(peak, expression_probe, phenodf, cross, scaled = T, l
                           pval = summary(model.y)$coef[2,4])
         
         # mediation proportion = total - direct / total
-        out <- rbind(total, direct, med)
+        prop <- data.frame(var = "prop_med",
+                           estimate = med$estimate / total$estimate,
+                           pval = NA)
+        
+        df <- rbind(total, direct, med, prop) %>%
+            dplyr::mutate(trait = unique(phenodf$trait),
+                          probe = expression_probe,
+                          pheno_marker = peak)
     } else {
         model.m <- lm(expression ~ geno, data = pheno)
         model.y <- lm(phenotype ~ expression + geno, data = pheno)
-        out <- mediation::mediate(model.m, model.y, sims = 1000, boot = T, treat = "geno", mediator = "expression")
+        out <- mediation::mediate(model.m, model.y, sims = 1000, boot = boots, treat = "geno", mediator = "expression")
         
         # Summarize model into data frame
         
@@ -1015,7 +1022,8 @@ calc_mediation <- function(peak, expression_probe, phenodf, cross, scaled = T, l
                                                  TRUE ~ "NA"),
                             trait = unique(phenodf$trait),
                             probe = expression_probe,
-                            pheno_marker = peak)
+                            pheno_marker = peak) %>%
+            dplyr::rename(pval = prob)
                             # eqtl_marker = unique(eqtl_peak$marker))
     }
     
