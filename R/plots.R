@@ -145,7 +145,8 @@ pxgplot <- function(cross, map, parent="N2xCB4856", tsize = 20) {
     peaks <- map %>% 
         dplyr::group_by(iteration) %>%
         dplyr::filter(!is.na(var_exp)) %>%
-        dplyr::do(head(., n=1))
+        dplyr::do(head(., n=1)) %>%
+        dplyr::mutate(chr = as.character(chr))
     
     if(nrow(peaks) == 0) {
         stop("No QTL identified")
