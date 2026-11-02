@@ -3,8 +3,10 @@
 \name{N2xLSJ2cross}
 \alias{N2xLSJ2cross}
 \title{Cross object for N2xLSJ2 RIAILs}
-\format{A cross object made with the \code{qtl} package, with genotype and
-phenotype subobjects.}
+\format{
+A cross object made with the \code{qtl} package, with genotype and
+phenotype subobjects.
+}
 \description{
 In this object, N2 genotypes are encoded as 1 and LSJ2 genotypes are
 encoded as 3. This cross object had heterozyous loci removed (set to NA). If

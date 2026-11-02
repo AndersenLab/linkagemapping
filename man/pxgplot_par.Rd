@@ -14,7 +14,7 @@ pxgplot_par(cross, map, phenoframe, parent = "N2xCB4856", tsize = 20)
 
 \item{phenoframe}{The dataframe used to make the cross object}
 
-\item{parent}{The parental cross, either "N2xCB4856" (default), "N2xLSJ2",
+\item{parent}{The parental cross, either "N2xCB4856" (default), "N2xLSJ2", "N2xCX11314"
 or "AF16xHK104"}
 
 \item{tsize}{The theme size of the text for the plot, default is 20}

@@ -4,7 +4,15 @@
 \alias{calc_mediation}
 \title{Calculate mediation scores between phenotype and gene expression}
 \usage{
-calc_mediation(peak, expression_probe, phenodf, cross, scaled = T, lm = FALSE)
+calc_mediation(
+  peak,
+  expression_probe,
+  phenodf,
+  cross,
+  scaled = T,
+  lm = FALSE,
+  boots = TRUE
+)
 }
 \arguments{
 \item{peak}{peak marker of phenotype QTL in format chr:pos}

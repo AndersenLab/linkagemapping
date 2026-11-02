@@ -3,7 +3,9 @@
 \name{eQTLpeaks}
 \alias{eQTLpeaks}
 \title{Dataframe of all eQTL peak location information from Matt Rockman - updated from Evans et al. (2020)}
-\format{A data frame with 2540 rows and 16 variables}
+\format{
+A data frame with 2540 rows and 16 variables
+}
 \description{
 This dataframe contains all position information for eQTL peaks
 }

@@ -3,13 +3,15 @@
 \name{N2xCB4856markers}
 \alias{N2xCB4856markers}
 \title{Marker/position lookup table for N2xCB4856 RIAILs}
-\format{A data frame with 1460 rows and 4 variables:
+\format{
+A data frame with 1460 rows and 4 variables:
 \describe{
   \item{marker}{the name of the marker used for genotyping}
   \item{chr.num}{the chromosome number in arabic numerals}
   \item{chr.roman}{the chromosome number in roman numerals}
   \item{chr.roman}{the position of the marker in genome build WS244}
-}}
+}
+}
 \description{
 This data frame contains a lookup table for the translation of marker
 positions from genetic to physical positions. The physical positions in this

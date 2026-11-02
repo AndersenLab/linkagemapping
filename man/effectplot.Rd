@@ -19,7 +19,7 @@ effectplot(
 \item{map}{The mapping output for a single trait}
 
 \item{parental}{The parental strains used to generate RIAILs. Either
-"N2xCB4856" (default), "N2xLSJ2", or "AF16xHK104}
+"N2xCB4856" (default), "N2xLSJ2", "N2xCX11314" or "AF16xHK104}
 
 \item{bayes_param}{Boolean whether or not to calculate confidence intervals based
 on Bayes statistics (LOD drop 1.5 used to find CI by default). Default is FALSE}

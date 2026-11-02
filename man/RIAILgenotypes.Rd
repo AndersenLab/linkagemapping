@@ -3,7 +3,9 @@
 \name{RIAILgenotypes}
 \alias{RIAILgenotypes}
 \title{Genotypes of RIAILs at each of the 1454 markers}
-\format{A data frame with 1454 rows and 601 variables}
+\format{
+A data frame with 1454 rows and 601 variables
+}
 \description{
 This data frame contains the genotype information for each strain
 of the RIAIL panel at each of the 1454 markers. "AA" denotes

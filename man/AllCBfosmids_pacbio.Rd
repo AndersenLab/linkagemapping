@@ -3,7 +3,8 @@
 \name{AllCBfosmids_pacbio}
 \alias{AllCBfosmids_pacbio}
 \title{Dataframe of all CB4856 fosmids in the Andersen Lab - remapped with PacBio by KSE 09.09.2019}
-\format{A data frame with 12016 rows and 9 variables:
+\format{
+A data frame with 12016 rows and 9 variables:
 \describe{
   \item{chr}{the chromosome (in roman numerals) on which the fosmid is found}
   \item{plate}{New plate position in Andersen Lab}
@@ -14,7 +15,8 @@
   \item{end}{the genetic position at which the fosmid ends}
   \item{length}{length of fosmid}
   \item{id}{fosmid id}
-}}
+}
+}
 \description{
 This data frame contains genomic position and laboratory stock
 information for all CB4856 fosmids.

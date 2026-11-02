@@ -74,7 +74,7 @@ map <- function(cross, doGPU = FALSE, type) {
 
 fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
                     thresh = "FDR", markerset = c("N2xCB4856", "N2xLSJ2",
-                                                     "AF16xHK104","full", NA), model = c("normal", "np")) {
+                                                     "AF16xHK104","full", "N2xCX11314", NA), model = c("normal", "np")) {
     saf <- getOption("stringsAsFactors")
     options(stringsAsFactors = FALSE)
     
@@ -182,13 +182,15 @@ fsearch <- function(cross, phenotype = NULL, permutations = 1000, doGPU = FALSE,
    
     # If you need to add possible marker sets, add them here
     if (!is.na(markerset)) {
-        if (markerset %in% c("N2xCB4856", "N2xLSJ2", "AF16xHK104")) {
+        if (markerset %in% c("N2xCB4856", "N2xLSJ2", "AF16xHK104", "N2xCX11314")) {
             if (markerset == "N2xCB4856") {
                 markers <- N2xCB4856markers
             } else if (markerset == "N2xLSJ2") {
                 markers <- N2xLSJ2markers
             } else if (markerset == "AF16xHK104") {
                 markers <- AF16xHK104markers
+            } else if (markerset == "N2xCX11314") {
+                markers <- N2xCX11314markers
             }
             finallods$pos <-
                 vapply(finallods$marker, function(marker) {

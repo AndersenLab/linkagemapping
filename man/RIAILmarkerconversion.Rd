@@ -3,7 +3,9 @@
 \name{RIAILmarkerconversion}
 \alias{RIAILmarkerconversion}
 \title{Marker conversions for each of the 1454 markers used in RIAILgenotypes}
-\format{A data frame with 1454 rows and 2 variables}
+\format{
+A data frame with 1454 rows and 2 variables
+}
 \description{
 This data frame contains marker name and position information for
 each of the 1454 markers used in the RIAILgenotypes data frame

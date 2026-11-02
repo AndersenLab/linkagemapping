@@ -3,8 +3,10 @@
 \name{AF16xHK104cross}
 \alias{AF16xHK104cross}
 \title{Cross object for AF16xHK104 C. brggsae RIAILs}
-\format{A cross object made with the \code{qtl} package, with genotype and
-phenotype subobjects.}
+\format{
+A cross object made with the \code{qtl} package, with genotype and
+phenotype subobjects.
+}
 \description{
 In this object, AF16 genotypes are encoded as 1 and HK104 genotypes are
 encoded as 2. This cross object contains no heterozyous loci. When the

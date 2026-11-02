@@ -18,7 +18,7 @@ The strain name for each individual row.
 
 ##### `condition`
 
-The name of the condition to which that strain was exposed during the particular experiment. For example `bleomycin` or `etoposide`. This column is optional, but plot names will be affected by an absence of a `condition` column (e.g. ".mean.TOF" vs "amsacrine.mean.TOF").
+The name of the condition to which that strain was exposed during the particular experiment. For example `bleomycin` or `etoposide`. This column is optional, but plot names will be affected by an absence of a `condition` column (e.g. ".mean.TOF" vs "amsacrine.mean.TOF"). Values in this column must begin with a letter.
 
 ##### `trait`
 
@@ -36,6 +36,7 @@ You will first need a cross object to complete the mapping. Included with this p
 + `N2xLSJ2cross` - N2/LSJ2
 + `AF16xHK104cross` - AF16/HK104 (*C. briggsae*)
 + `N2xCB4856cross_full` - N2/CB4856 QX and ECA strains with SNPs from whole-genome sequencing
++ `N2xCX11314cross` - N2/CX11314
 
 Cross objects are either included or are downloaded from the internet. In order to access the objects in a mutable fashion, they should be read in, then assigned to another variable name as below:
 

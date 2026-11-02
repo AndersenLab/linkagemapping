@@ -136,7 +136,7 @@ maxlodplot <- function(map, tsize = 20){
 #' @param map The mapping output for a single trait
 #' @param parent The parental strains used to generate RIAILs. Either "N2xCB4856"
 #' @param tsize The theme size of the text for the plot, default is 20.
-#' (default), "N2xLSJ2", or "AF16xHK104"
+#' (default), "N2xLSJ2", "N2xCX11314" or "AF16xHK104"
 #' @return A boxplot of the phenotype by genotype split at each peak marker in a
 #' mapping
 #' @export
@@ -200,10 +200,16 @@ pxgplot <- function(cross, map, parent="N2xCB4856", tsize = 20) {
             } else {
                 "HK104"
             }
+        } else if(parent=="N2xCX11314") {
+          if(x==-1) {
+            "N2"
+          } else {
+            "CX11314"
+          }
         }
     })
     
-    split$genotype <- factor(split$genotype, levels = c("N2","CB4856","LSJ2","AF16","HK104"))
+    split$genotype <- factor(split$genotype, levels = c("N2","CB4856","LSJ2","AF16","HK104","CX11314"))
     
     # make sure plots are in chromosomal order
     split <- split %>%
@@ -214,7 +220,7 @@ pxgplot <- function(cross, map, parent="N2xCB4856", tsize = 20) {
     split$marker <- factor(split$marker, levels = unique(split$marker))
         
     ggplot2::ggplot(split) +
-        ggplot2::scale_fill_manual(values = c("N2" = "orange", "CB4856" = "blue", "LSJ2" = "green", "AF16" = "indianred", "HK104"= "gold")) +
+        ggplot2::scale_fill_manual(values = c("N2" = "orange", "CB4856" = "blue", "LSJ2" = "green", "AF16" = "indianred", "HK104"= "gold", "CX11314" = "green")) +
         ggplot2::geom_jitter(ggplot2::aes(x = genotype, y = pheno), alpha = .8, size = 0.5, width = 0.1) +
         ggplot2::geom_boxplot(ggplot2::aes(x = genotype, y = pheno, fill = genotype), outlier.shape = NA, alpha = 0.8) +
         ggplot2::facet_wrap(~ marker, ncol = 5) +
@@ -237,7 +243,7 @@ pxgplot <- function(cross, map, parent="N2xCB4856", tsize = 20) {
 #' @param cross The cross object used for the mapping (output of mergepheno() function)
 #' @param map The mapping output for a single trait
 #' @param parental The parental strains used to generate RIAILs. Either
-#' "N2xCB4856" (default), "N2xLSJ2", or "AF16xHK104
+#' "N2xCB4856" (default), "N2xLSJ2", "N2xCX11314" or "AF16xHK104
 #' @param bayes_param Boolean whether or not to calculate confidence intervals based
 #' on Bayes statistics (LOD drop 1.5 used to find CI by default). Default is FALSE
 #' @param cutoff_param Determines strategy for setting CI (not available for Bayes CIs).
@@ -292,7 +298,7 @@ effectplot <- function(cross, map, parental = "N2xCB4856", bayes_param = F, cuto
 #' @param cross The cross object used for the mapping (output of mergepheno() function)
 #' @param map The mapping output for a single trait
 #' @param phenoframe The dataframe used to make the cross object
-#' @param parent The parental cross, either "N2xCB4856" (default), "N2xLSJ2",
+#' @param parent The parental cross, either "N2xCB4856" (default), "N2xLSJ2", "N2xCX11314"
 #' or "AF16xHK104"
 #' @param tsize The theme size of the text for the plot, default is 20
 #' @return A boxplot of the phenotype by genotype split at each peak marker in a
@@ -341,13 +347,16 @@ pxgplot_par <- function(cross, map, phenoframe, parent="N2xCB4856", tsize = 20) 
                                               ifelse(geno[j,i] == 1, "LSJ2", NA)),
                                        ifelse(parent == "AF16xHK104",
                                               ifelse(geno[j,i] == -1, "AF16", 
-                                                     ifelse(geno[j,i] == 1, "HK104", NA)))))
+                                                     ifelse(geno[j,i] == 1, "HK104", NA)),
+                                              ifelse(parent == "N2xCX11314",
+                                                     ifelse(geno[j,i] == -1, "N2",
+                                                            ifelse(geno[j,i] == 1, "CX11314", NA))))))
         }
     }
     
     colnames(geno)[ncol(geno)] <- "strain"
     
-    parentphe <- subset(phenoframe, strain %in% c("N2","CB4856","LSJ2","AF16","HK104")) %>%
+    parentphe <- subset(phenoframe, strain %in% c("N2","CB4856","LSJ2","AF16","HK104","CX11314")) %>%
         dplyr::filter(condition %in% conditions, trait %in% traits) %>%
         dplyr::ungroup()%>%
         dplyr::select(strain, phenotype)
@@ -358,7 +367,7 @@ pxgplot_par <- function(cross, map, phenoframe, parent="N2xCB4856", tsize = 20) 
     
     for (i in 1:nrow(new)) {
         for (j in 1:(ncol(new)-2)) {
-            new[i,j] <- ifelse(new$strain[i] %in% c("N2","CB4856","LSJ2","AF16","HK104"), new$strain[i], new[i,j])
+            new[i,j] <- ifelse(new$strain[i] %in% c("N2","CB4856","LSJ2","AF16","HK104","CX11314"), new$strain[i], new[i,j])
         }
     }
     
@@ -371,13 +380,13 @@ pxgplot_par <- function(cross, map, phenoframe, parent="N2xCB4856", tsize = 20) 
                       pos = as.numeric(as.character(stringr::str_split_fixed(marker, "_", 2)[,2]))) %>%
         dplyr::arrange(chr, pos)
     plotting$marker <- factor(plotting$marker, levels = unique(plotting$marker))
-    plotting$genotype <- factor(plotting$genotype, levels = c("N2" , "CB4856" , "LSJ2", "AF16", "HK104"))
+    plotting$genotype <- factor(plotting$genotype, levels = c("N2" , "CB4856" , "LSJ2", "AF16", "HK104", "CX11314"))
     
     ggplot2::ggplot(plotting) +
         ggplot2::geom_jitter(ggplot2::aes(x = genotype, y = plotting[,1]), alpha = .8, size = 0.5, width = 0.1) +
         ggplot2::geom_boxplot(ggplot2::aes(x = genotype, y = plotting[,1], fill = genotype, alpha = 0.8),
                               outlier.shape = NA) +
-        ggplot2::scale_fill_manual(values = c("N2" = "orange", "CB4856" = "blue","N2-RIAIL" = "orange", "CB4856-RIAIL" = "blue", "LSJ2" = "green", "LSJ2-RIAIL" = "green", "AF16" = "indianred", "AF16-RIAIL" = "indianred", "HK104" = "gold", "HK104-RIAIL" = "gold")) +
+        ggplot2::scale_fill_manual(values = c("N2" = "orange", "CB4856" = "blue","N2-RIAIL" = "orange", "CB4856-RIAIL" = "blue", "LSJ2" = "green", "LSJ2-RIAIL" = "green", "AF16" = "indianred", "AF16-RIAIL" = "indianred", "HK104" = "gold", "HK104-RIAIL" = "gold", "CX11314" = "green", "CX11314-RIAIL" = "green")) +
         ggplot2::facet_wrap(~marker, ncol = 5, scales = "free_x") +
         ggplot2::theme_bw(tsize) +
         ggplot2::theme(axis.text.x = ggplot2::element_text(size = 14, face = "bold", color = "black"),

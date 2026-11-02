@@ -1,3 +1,19 @@
+#' Cross object for N2xCX11314 RILs
+#'
+#' In this object, N2 genotypes are encoded as 1 and CX11314 genotypes are
+#' encoded as 2. This cross object contains no heterozyous loci. When the
+#' extract genotype function is run on this cross object, N2 genotypes are
+#' converted to -1 and CX11314 genotypes to 1. For mappings with this cross
+#' object, negative effect sizes indicate that N2 had the greater phenotype
+#' value while postive effect sizes indicate that CX11314 had a greater phenotype
+#' value.
+#'
+#' @name N2xCX11314cross
+#' @format A cross object made with the \code{qtl} package, with genotype and
+#' phenotype subobjects.
+NULL
+
+
 #' Cross object for N2xCB4856 RIAILs
 #'
 #' In this object, N2 genotypes are encoded as 1 and CB4856 genotypes are
@@ -64,6 +80,23 @@ NULL
 #' @name AF16xHK104cross
 #' @format A cross object made with the \code{qtl} package, with genotype and
 #' phenotype subobjects.
+NULL
+
+
+#' Marker/position lookup table for N2xCX11314 RILs
+#'
+#' This data frame contains a lookup table for the translation of marker
+#' positions from genetic to physical positions. The physical positions in this
+#' table come from C. elegans genome build WS283.
+#'
+#' @name N2xCX11314markers
+#' @format A data frame with 1381 rows and 4 variables:
+#' \describe{
+#'   \item{marker}{the name of the marker used for genotyping}
+#'   \item{chr.num}{the chromosome number in arabic numerals}
+#'   \item{chr.roman}{the chromosome number in roman numerals}
+#'   \item{position}{the position of the marker in genome build WS283}
+#' }
 NULL
 
 #' Marker/position lookup table for N2xCB4856 RIAILs

@@ -14,7 +14,7 @@ pxgplot(cross, map, parent = "N2xCB4856", tsize = 20)
 \item{parent}{The parental strains used to generate RIAILs. Either "N2xCB4856"}
 
 \item{tsize}{The theme size of the text for the plot, default is 20.
-(default), "N2xLSJ2", or "AF16xHK104"}
+(default), "N2xLSJ2", "N2xCX11314" or "AF16xHK104"}
 }
 \value{
 A boxplot of the phenotype by genotype split at each peak marker in a

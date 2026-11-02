@@ -3,8 +3,10 @@
 \name{N2xCB4856cross_full}
 \alias{N2xCB4856cross_full}
 \title{Whole genome cross object for N2xCB4856 RIAILs}
-\format{A cross object made with the \code{qtl} package, with genotype and
-phenotype subobjects.}
+\format{
+A cross object made with the \code{qtl} package, with genotype and
+phenotype subobjects.
+}
 \description{
 Must be loaded with load_cross_obj("N2xCB4856cross_full")
 This cross object was created with whole-genome sequence data.

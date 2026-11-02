@@ -1,7 +1,7 @@
 #' Load Cross Obj
 #' 
 #' Download large cross objects if need be and load or load local cross obj.
-#' @param name Name of cross object ("N2xCB4856cross", "N2xLSJ2cross", "AF16xHK104cross", or "N2xCB4856cross_full")
+#' @param name Name of cross object ("N2xCB4856cross", "N2xLSJ2cross", "AF16xHK104cross", "N2xCB4856cross_full", or "N2xCX11314cross")
 #' @return A cross object
 #' @export
 

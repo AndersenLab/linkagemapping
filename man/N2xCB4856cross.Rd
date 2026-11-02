@@ -3,8 +3,10 @@
 \name{N2xCB4856cross}
 \alias{N2xCB4856cross}
 \title{Cross object for N2xCB4856 RIAILs}
-\format{A cross object made with the \code{qtl} package, with genotype and
-phenotype subobjects.}
+\format{
+A cross object made with the \code{qtl} package, with genotype and
+phenotype subobjects.
+}
 \description{
 In this object, N2 genotypes are encoded as 1 and CB4856 genotypes are
 encoded as 2. This cross object contains no heterozyous loci. When the
