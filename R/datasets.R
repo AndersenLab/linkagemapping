@@ -142,7 +142,7 @@ NULL
 #'   \item{marker}{the name of the marker used for genotyping}
 #'   \item{chr.num}{the chromosome number in arabic numerals}
 #'   \item{chr.roman}{the chromosome number in roman numerals}
-#'   \item{chr.roman}{the position of the marker in genome build WS244}
+#'   \item{position}{the position of the marker in genome build WS244}
 #' }
 NULL
 
@@ -158,7 +158,7 @@ NULL
 #'   \item{marker}{the name of the marker used for genotyping}
 #'   \item{chr.num}{the chromosome number in arabic numerals}
 #'   \item{chr.roman}{the chromosome number in roman numerals}
-#'   \item{chr.roman}{the position of the marker in genome build WS245}
+#'   \item{position}{the position of the marker in genome build WS245}
 #' }
 NULL
 
@@ -174,7 +174,7 @@ NULL
 #'   \item{marker}{the name of the marker used for genotyping}
 #'   \item{chr.num}{the chromosome number in arabic numerals}
 #'   \item{chr.roman}{the chromosome number in roman numerals}
-#'   \item{chr.roman}{the position of the marker in genome build cb4}
+#'   \item{position}{the position of the marker in genome build cb4}
 #' }
 NULL
 
