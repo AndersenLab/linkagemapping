@@ -37,6 +37,7 @@ You will first need a cross object to complete the mapping. Included with this p
 + `AF16xHK104cross` - AF16/HK104 (*C. briggsae*)
 + `N2xCB4856cross_full` - N2/CB4856 QX and ECA strains with SNPs from whole-genome sequencing
 + `N2xCX11314cross` - N2/CX11314
++ `CB4856xECA36cross` - CB4856/ECA36
 
 Cross objects are either included or are downloaded from the internet. In order to access the objects in a mutable fashion, they should be read in, then assigned to another variable name as below:
 
