@@ -10,7 +10,8 @@ fsearch(
   permutations = 1000,
   doGPU = FALSE,
   thresh = "FDR",
-  markerset = c("N2xCB4856", "N2xLSJ2", "AF16xHK104", "full", "N2xCX11314", NA),
+  markerset = c("N2xCB4856", "N2xLSJ2", "AF16xHK104", "full", "N2xCX11314",
+    "CB4856xECA36", NA),
   model = c("normal", "np")
 )
 }
