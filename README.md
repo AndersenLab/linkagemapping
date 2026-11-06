@@ -110,13 +110,13 @@ Without overwhelming you with the details, you should generally choose false dis
 Traits > 100
 
 ```r
-fsearch(cross, threshold = "FDR")
+fsearch(cross, thresh = "FDR")
 ```
 
 Traits < 100
 
 ```r
-fsearch(cross, phenotype = "bleomycin", threshold = "GWER")
+fsearch(cross, phenotype = "bleomycin", thresh = "GWER")
 ```
 
 ### Annotating LOD scores
